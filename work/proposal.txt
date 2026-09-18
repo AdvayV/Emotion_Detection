@@ -1,0 +1,72 @@
+﻿Proposed Improvements to the English-Hinglish Emotion Detection Model
+Focused changes to the existing BERT/RoBERTa + Emoji2Vec approach
+The existing paper performs strongly on English data but drops to about 58–60% accuracy on Hinglish. The changes below keep the original idea intact while addressing the areas where the current system is weakest. The diagrams are built using normal Word tables and text, so their labels can be edited directly.
+1. Use a Hinglish-aware multilingual encoder
+The current implementation fine-tunes bert-base-uncased and roberta-base even for Romanized Hindi. That works well for English, but it is a poor linguistic starting point for sentences that switch repeatedly between English and Hindi. A better experiment is to retain BERT and RoBERTa as baselines and compare them with mBERT, MuRIL and XLM-R. MuRIL is especially relevant because it was designed around Indian languages and transliterated text, while XLM-R provides a strong general multilingual baseline.
+Existing paper
+Proposed change
+Hinglish → bert-base-uncased / roberta-base → classifier
+Hinglish → mBERT / MuRIL / XLM-R → classifier
+Correlation to the paper: this directly targets the large English-to-Hinglish performance drop reported in the results, rather than changing a part of the system that already performs well.
+2. Strengthen Hinglish normalization instead of simple word replacement
+The paper describes normalization such as “acha → good”. Real Hinglish is much less regular: the same word may appear as acha, accha, achha or achaaa, and negation can completely reverse the meaning. The revised preprocessing stage should normalize spelling and repeated characters, identify English versus Romanized-Hindi tokens, preserve negation, and avoid translating away useful code-switching context.
+Raw Hinglish: “movie bohottt achhiii nahi thi 😭”
+↓
+Noise cleaning + spelling/repetition normalization
+↓
+Token-level language identification + negation preservation
+↓
+Multilingual tokenizer / encoder
+Correlation to the paper: this is an improved version of its preprocessing and Hinglish transliteration module, not a replacement for the overall architecture.
+3. Make emoji fusion contextual rather than simple concatenation
+The proposed architecture in the paper concatenates a text embedding with an Emoji2Vec embedding. That assumes the emoji has a fairly stable contribution. In practice, the meaning of an emoji depends on the sentence. For example, 😭 is negative in “I failed again 😭” but can express overwhelming happiness in “I finally got the job 😭❤️”. A cross-attention or gated-fusion layer can learn how much weight to give the emoji for each input.
+Text
+Multilingual text encoder
+Text representation
+
+↘
+
+Emoji(s)
+Emoji encoder → Contextual attention / gated fusion
+Fused representation
+
+↓
+Sentiment classifier
+Correlation to the paper: this preserves its central lexical + emoji idea, but makes the fusion itself learnable and context-sensitive.
+4. Add explicit sarcasm detection
+Sarcasm is a natural extension because the current system mainly predicts surface sentiment. Hinglish social-media text frequently contains cases where positive lexical cues actually express negative intent, especially when punctuation, emojis and context conflict. Example: “wah, kya service hai, 2 ghante late 😂”. A standard sentiment classifier may focus on “wah” and “kya service hai”; a sarcasm-aware branch can detect the contradiction between the literal wording and the broader context.
+Input: “wah, kya service hai, 2 ghante late 😂”
+↓
+Text/context representation
+Emoji + punctuation cues
+Lexical–context incongruity
+↓
+Sarcasm head: sarcastic / non-sarcastic
+↓
+Sarcasm-aware sentiment prediction: Negative
+A practical implementation is multi-task learning: one shared multilingual encoder feeds both a sentiment head and a sarcasm head. The sarcasm prediction then becomes an additional signal for the final sentiment decision. This is more useful than simply adding a rule such as “😂 means sarcasm”.
+Correlation to the paper: sarcasm detection builds directly on the paper’s stated goal of combining lexical and emoji context. It specifically handles cases where those two signals disagree, which the current concatenation-based pipeline does not model explicitly.
+5. Fix class imbalance, overfitting and evaluation
+The current Hinglish results show the most serious evaluation problem: the reported RoBERTa confusion matrix has zero correctly predicted negative samples. The BERT Hinglish experiment also shows training loss falling while validation loss rises, indicating poor generalization. The revised training setup should therefore use class-weighted cross-entropy or focal loss, early stopping and balanced sampling where necessary.
+Existing paper
+Proposed change
+Accuracy emphasized; ordinary CrossEntropyLoss; 3 training epochs
+Macro-F1 + per-class recall; weighted/focal loss; early stopping; repeated seeds / validation
+For the revised paper, Macro-F1 and negative-class recall should be primary metrics alongside accuracy. An ablation table should then compare: original BERT/RoBERTa → multilingual encoder → improved preprocessing → emoji attention → sarcasm branch → full model. This shows which change actually contributes to the improvement.
+Recommended final architecture
+English-Hinglish + Emoji Input
+↓
+Hinglish-aware normalization + token-level language cues
+↓
+MuRIL / XLM-R / mBERT multilingual encoder
+↓
+Contextual emoji attention / gated fusion
+↓
+Shared representation
+↓
+Sentiment head  +  Sarcasm head
+↓
+Class-balanced training + early stopping
+↓
+Final sentiment + sarcasm-aware interpretation
+Implementation order: first reproduce the existing BERT/RoBERTa Hinglish baseline; then introduce the multilingual encoder and improved preprocessing; next add contextual emoji fusion; finally add sarcasm as the additional research feature. This keeps every improvement measurable rather than changing the whole system at once.

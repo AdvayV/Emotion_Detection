@@ -1,0 +1,109 @@
+HINGLISH EMOTION DETECTION PROJECT – REVISION SUMMARY
+
+CURRENT PROJECT
+
+The existing project detects positive, neutral and negative sentiment in English and Hinglish text. It uses BERT or RoBERTa to understand the text and describes Emoji2Vec as a separate representation for emojis. The text and emoji features are combined before classification. Confidence scores are later used to describe sentiment as strong or weak, so the five intensity labels are post-processing outputs rather than five separately trained classes.
+
+The English experiments report 95.7% accuracy for both BERT and RoBERTa. Performance falls considerably on Hinglish: BERT reports 59.5% and RoBERTa reports 57.9%. Negative sentiment is the weakest area. The reported Hinglish RoBERTa confusion matrix contains no correctly identified negative samples, while the Hinglish BERT results show signs of overfitting.
+
+The paper describes Hinglish transliteration, Emoji2Vec fusion and feature whitening, but these components are not clearly visible in the displayed training code. The revised implementation will make every component explicit and evaluate its individual contribution.
+
+PROPOSED SYSTEM
+
+The revised project will remain connected to the original idea of combining lexical context and emojis. It introduces five focused changes.
+
+1. HINGLISH-AWARE LANGUAGE ENCODER
+
+BERT and RoBERTa will remain as the original baselines. They will be compared with mBERT, MuRIL and XLM-R using the same data split and evaluation procedure. MuRIL is the main candidate because it was pretrained on Indian languages and transliterated text, while XLM-R and mBERT provide multilingual comparisons.
+
+2. HINGLISH SPELLING NORMALIZATION
+
+The normalizer will recognise variations such as acha, accha, achha and acchaaa. It will combine a local Hinglish variant dictionary, repeated-character detection, phonetic similarity and sentence context.
+
+The system will preserve the original and normalized forms:
+
+Raw token: acchaaa
+Normalized token: accha
+Elongation feature: yes
+
+This reduces spelling noise without losing emotional emphasis. For example, acchaaa and bekaaaar may express stronger emotion than their ordinary forms. Negation words such as nahi and nhi will be preserved because they can reverse sentiment.
+
+Meaning-preserving spelling variations will also be used during training so that acha, accha and achha receive consistent predictions. Meaning-changing versions, such as achhi and achhi nahi, will be treated separately.
+
+3. CONTEXTUAL EMOJI FUSION AND SARCASM DETECTION
+
+Instead of only concatenating a fixed emoji vector with the text vector, the revised system will use gated fusion or contextual attention. This will allow an emoji to contribute differently depending on the sentence.
+
+The same emoji can have different meanings:
+
+I failed again 😭                  -> sadness
+I finally got the job 😭❤️        -> overwhelming happiness
+
+Sarcasm will be predicted through a separate branch connected to the shared text-and-emoji representation. This is useful for examples such as:
+
+wah, kya service hai, 2 ghante late 😂
+
+The positive-looking wording conflicts with the negative situation. The system will predict both sentiment and whether the message is sarcastic. A manually reviewed or suitable public sarcasm dataset will be required for this part.
+
+4. FREE LOCAL SMALL-LANGUAGE-MODEL REVIEWER
+
+The complete system will run locally without a paid cloud API. MuRIL or XLM-R will perform the main classification. A quantized Qwen3 4B model will review only difficult examples through a local runtime such as Ollama or llama.cpp.
+
+An example will be sent to Qwen when:
+
+- the main classifier has low confidence;
+- the text and emoji appear to conflict;
+- sarcasm probability is high;
+- negation or contradictory context makes the result uncertain.
+
+Qwen will return a restricted result containing:
+
+- sentiment label;
+- sarcasm flag;
+- text–emoji relationship;
+- short supporting evidence.
+
+Clear examples will use the main classifier result directly. This keeps the system efficient and gives the language model a specific, measurable role. After the models are downloaded, predictions remain on the local computer.
+
+5. STRONGER TRAINING AND EVALUATION
+
+The class distribution will be examined before selecting a balancing method. Class-weighted loss, focal loss or balanced sampling may be tested if the data supports their use. Early stopping and validation macro-F1 will help reduce overfitting.
+
+The revised evaluation will include:
+
+- accuracy;
+- macro-F1;
+- recall for each sentiment class;
+- sarcasm F1;
+- spelling-variation consistency;
+- sentiment-flip accuracy for negation and contradictory context;
+- confidence calibration;
+- percentage of examples routed to Qwen;
+- local inference time.
+
+IMPLEMENTATION FLOW
+
+Raw English–Hinglish text and emoji
+        ↓
+Local spelling normalization and elongation detection
+        ↓
+MuRIL, mBERT or XLM-R text representation
+        +
+Contextual emoji representation
+        ↓
+Sentiment prediction and sarcasm prediction
+        ↓
+Confidence and conflict check
+        ↓
+Clear result                 Uncertain result
+     ↓                              ↓
+Use main classifier          Review with local Qwen3 4B
+        \                         /
+         \                       /
+          Final sentiment, sarcasm and evidence
+
+RESEARCH CONTRIBUTION
+
+The revised project can be presented as a fully local, Hinglish-aware sentiment system that normalizes unstable Romanized spellings while preserving emphasis, interprets emojis in context, detects sarcasm and uses a compact open model selectively for ambiguous input.
+
+The contribution must be supported through controlled comparisons. The project will first reproduce BERT and RoBERTa, then add the multilingual encoder, normalization, contextual emoji and sarcasm modelling, and finally the local Qwen reviewer. This ablation sequence will show which component actually improves performance.

@@ -1,0 +1,8 @@
+text,label,sarcasm,pair_id
+movie acchaaa thi 😊,positive,false,spelling-positive
+movie achha thi 😊,positive,false,spelling-positive
+service acchi nahi thi 😒,negative,false,negation-flip
+service acchi thi 😊,positive,false,negation-flip
+wah kya service hai 2 ghante late 😂,negative,true,sarcasm-example
+theek tha,neutral,false,neutral-example
+
