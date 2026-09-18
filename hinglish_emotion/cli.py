@@ -7,7 +7,7 @@ import sys
 from .data_validation import validate_csv
 from .intensity import IntensityEstimator
 from .normalization import HinglishNormalizer
-from .ollama_reviewer import OllamaReviewer
+from .ollama_reviewer import DEFAULT_OLLAMA_MODEL, OllamaReviewer
 from .pipeline import EmotionPipeline
 from .transformer_classifier import LocalTransformerClassifier
 
@@ -25,7 +25,7 @@ def build_parser() -> argparse.ArgumentParser:
     analyze = subparsers.add_parser("analyze", help="Run the local pipeline")
     analyze.add_argument("text")
     analyze.add_argument("--reviewer", choices=("none", "ollama"), default="none")
-    analyze.add_argument("--ollama-model", default="qwen3:4b")
+    analyze.add_argument("--ollama-model", default=DEFAULT_OLLAMA_MODEL)
     analyze.add_argument("--model-path", help="Local fine-tuned transformer directory")
 
     validate = subparsers.add_parser("validate-data", help="Validate a training CSV")

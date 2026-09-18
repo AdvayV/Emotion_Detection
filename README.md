@@ -29,7 +29,7 @@ python -m hinglish_emotion analyze "wah kya service hai, 2 ghante late 😂"
 To use a locally running Qwen model through Ollama:
 
 ```powershell
-ollama run qwen3:4b
+ollama pull qwen3:0.6b
 python -m hinglish_emotion analyze "wah kya service hai, 2 ghante late 😂" --reviewer ollama
 ```
 
@@ -47,7 +47,7 @@ streamlit run dashboard/app.py
 The dashboard opens with three views: an overview of the five research
 improvements, an interactive single-message analysis page, and a dataset
 explorer. It starts with the transparent rule baseline and can optionally use
-a locally saved transformer checkpoint or local Qwen through Ollama. Analysis
+a locally saved transformer checkpoint or local Qwen3 0.6B through Ollama. Analysis
 history remains in the current browser session and can be downloaded as CSV.
 
 ## Dataset format

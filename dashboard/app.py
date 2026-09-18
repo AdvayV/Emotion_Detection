@@ -9,7 +9,7 @@ import streamlit as st
 
 from dashboard.data import dataframe_report, report_dict, sarcasm_rate
 from hinglish_emotion.intensity import IntensityEstimator
-from hinglish_emotion.ollama_reviewer import OllamaReviewer
+from hinglish_emotion.ollama_reviewer import DEFAULT_OLLAMA_MODEL, OllamaReviewer
 from hinglish_emotion.pipeline import EmotionPipeline
 from hinglish_emotion.transformer_classifier import LocalTransformerClassifier
 
@@ -276,7 +276,10 @@ def main() -> None:
         st.header("Local model settings")
         model_path = st.text_input("Local transformer folder", placeholder="models/muril_sentiment")
         use_reviewer = st.toggle("Use local Qwen reviewer", value=False)
-        ollama_model = st.text_input("Ollama model", value="qwen3:4b", disabled=not use_reviewer)
+        ollama_model = st.text_input("Ollama model", value=DEFAULT_OLLAMA_MODEL, disabled=not use_reviewer)
+        if use_reviewer:
+            ready, message = OllamaReviewer(model=ollama_model).availability()
+            (st.success if ready else st.warning)(message)
         st.caption("Leave the model folder blank to use the transparent rule baseline.")
 
     overview, analysis, dataset = st.tabs(["Overview", "Analyze text", "Dataset explorer"])
