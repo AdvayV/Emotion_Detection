@@ -35,6 +35,21 @@ python -m hinglish_emotion analyze "wah kya service hai, 2 ghante late 😂" --r
 
 No cloud API is used. The Ollama integration calls `http://localhost:11434`.
 
+## Run the research dashboard
+
+Install the optional dashboard dependencies once, then start the local interface:
+
+```powershell
+python -m pip install -e ".[dashboard]"
+streamlit run dashboard/app.py
+```
+
+The dashboard opens with three views: an overview of the five research
+improvements, an interactive single-message analysis page, and a dataset
+explorer. It starts with the transparent rule baseline and can optionally use
+a locally saved transformer checkpoint or local Qwen through Ollama. Analysis
+history remains in the current browser session and can be downloaded as CSV.
+
 ## Dataset format
 
 The minimum CSV schema is:
