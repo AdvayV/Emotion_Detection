@@ -44,11 +44,18 @@ python -m pip install -e ".[dashboard]"
 streamlit run dashboard/app.py
 ```
 
-The dashboard opens with three views: an overview of the five research
-improvements, an interactive single-message analysis page, and a dataset
-explorer. It starts with the transparent rule baseline and can optionally use
-a locally saved transformer checkpoint or local Qwen3 0.6B through Ollama. Analysis
-history remains in the current browser session and can be downloaded as CSV.
+The dashboard opens with four views: an overview, interactive single-message
+analysis, live model-effectiveness evaluation, and a dataset explorer. It starts
+with the transparent rule baseline and can optionally use a locally saved
+transformer checkpoint or local Qwen3 0.6B through Ollama. Analysis history
+remains in the current browser session and can be downloaded as CSV.
+
+The effectiveness view evaluates only models that are actually available on
+the machine. It always measures the rule baseline, adds the configured local
+transformer when its folder exists, and adds the routed Qwen variant when
+Ollama and the selected model are ready. Comparison scores, per-class metrics,
+confusion matrices, and reliability graphs are calculated from live predictions
+rather than placeholder benchmark values.
 
 ## Dataset format
 
@@ -67,6 +74,18 @@ sarcasm,valence,arousal,conversation_id,speaker_id,turn_id,evidence
 ```
 
 Conversation experiments must keep complete conversations in one dataset split. Counterfactual variants must also remain in the same split as their source example.
+
+The dashboard accepts both CSV and XLSX. The bundled
+`data/hinglish_emotion_phrases.xlsx` workbook contains 75 common phrases, balanced
+across positive, neutral, and negative labels, with spelling, negation, emoji,
+and sarcasm examples. Regenerate it deterministically with:
+
+```powershell
+python data/build_phrase_workbook.py
+```
+
+The workbook is an implementation smoke-test set, not a published benchmark.
+Use a separately held-out, independently annotated dataset for research claims.
 
 ## Planned build sequence
 

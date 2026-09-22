@@ -1,4 +1,5 @@
 import importlib.util
+from pathlib import Path
 import unittest
 
 
@@ -23,3 +24,19 @@ class DashboardDataTests(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             dataframe_report(pd.DataFrame({"message": ["accha"]}))
+
+    def test_bundled_xlsx_is_read_with_balanced_labels(self):
+        from dashboard.data import dataframe_report, read_dataset
+
+        path = Path(__file__).resolve().parents[1] / "data" / "hinglish_emotion_phrases.xlsx"
+        frame = read_dataset(path)
+        report = dataframe_report(frame)
+        self.assertEqual(report.rows, 75)
+        self.assertEqual(report.label_counts, {"negative": 25, "neutral": 25, "positive": 25})
+        self.assertTrue(report.valid)
+
+    def test_unsupported_dataset_extension_is_rejected(self):
+        from dashboard.data import read_dataset
+
+        with self.assertRaises(ValueError):
+            read_dataset("dataset.json")

@@ -5,17 +5,19 @@ from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 
-from dashboard.data import dataframe_report, report_dict, sarcasm_rate
+from dashboard.data import dataframe_report, read_dataset, report_dict, sarcasm_rate
+from dashboard.evaluation import ModelEvaluation, evaluate_pipeline
 from hinglish_emotion.intensity import IntensityEstimator
 from hinglish_emotion.ollama_reviewer import DEFAULT_OLLAMA_MODEL, OllamaReviewer
-from hinglish_emotion.pipeline import EmotionPipeline
+from hinglish_emotion.pipeline import EmotionPipeline, RuleBasedClassifier
 from hinglish_emotion.transformer_classifier import LocalTransformerClassifier
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-SAMPLE_DATA = PROJECT_ROOT / "data" / "sample_messages.csv"
+SAMPLE_DATA = PROJECT_ROOT / "data" / "hinglish_emotion_phrases.xlsx"
 EXAMPLES = {
     "Positive with emphasis": "movie acchaaa thi 😊",
     "Negation": "service acchi nahi thi 😞",
@@ -204,16 +206,20 @@ def render_analysis(model_path: str, use_reviewer: bool, ollama_model: str) -> N
         )
 
 
-def load_dataset(uploaded_file: object | None) -> tuple[pd.DataFrame | None, str]:
+def load_dataset(uploaded_file: object | None) -> tuple[pd.DataFrame, str]:
     if uploaded_file is not None:
-        return pd.read_csv(uploaded_file), "Uploaded dataset"
-    return pd.read_csv(SAMPLE_DATA), "Bundled sample dataset"
+        return read_dataset(uploaded_file), f"Uploaded dataset: {uploaded_file.name}"
+    return read_dataset(SAMPLE_DATA), "Bundled 75-phrase workbook"
 
 
 def render_dataset() -> None:
     st.title("Dataset explorer")
     st.markdown('<p class="research-note">Review dataset balance and annotations before training a model.</p>', unsafe_allow_html=True)
-    uploaded = st.file_uploader("Upload a compatible CSV", type=["csv"], help="Required columns: text and label")
+    uploaded = st.file_uploader(
+        "Upload a compatible CSV or XLSX",
+        type=["csv", "xlsx"],
+        help="Required columns: text and label. XLSX files must contain a 'phrases' sheet.",
+    )
     try:
         frame, source = load_dataset(uploaded)
         report = dataframe_report(frame)
@@ -227,6 +233,14 @@ def render_dataset() -> None:
         st.json(report_dict(report))
         return
     st.success("Dataset passed the required text and label checks.")
+
+    if uploaded is None:
+        st.download_button(
+            "Download the 75-phrase XLSX",
+            data=SAMPLE_DATA.read_bytes(),
+            file_name=SAMPLE_DATA.name,
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
 
     sarcasm = sarcasm_rate(frame)
     metrics = st.columns(4)
@@ -266,6 +280,199 @@ def render_dataset() -> None:
     st.dataframe(visible, width="stretch", hide_index=True)
 
 
+def evaluation_models(
+    model_path: str, use_reviewer: bool, ollama_model: str
+) -> tuple[list[tuple[str, EmotionPipeline]], list[str]]:
+    """Build only model variants that are genuinely available on this machine."""
+    models: list[tuple[str, EmotionPipeline]] = [
+        ("Rule-based baseline", EmotionPipeline(classifier=RuleBasedClassifier()))
+    ]
+    notices: list[str] = []
+    transformer = None
+    transformer_name = ""
+    if model_path.strip():
+        path = Path(model_path.strip())
+        if not path.is_dir():
+            notices.append("The configured transformer folder was not found, so it was skipped.")
+        else:
+            transformer = LocalTransformerClassifier(path)
+            transformer_name = f"Local transformer · {path.name}"
+            models.append((transformer_name, EmotionPipeline(classifier=transformer)))
+
+    if use_reviewer:
+        reviewer = OllamaReviewer(model=ollama_model)
+        ready, message = reviewer.availability()
+        if ready:
+            primary = transformer or RuleBasedClassifier()
+            primary_name = transformer_name or "Rule baseline"
+            models.append(
+                (
+                    f"{primary_name} + Qwen review",
+                    EmotionPipeline(classifier=primary, reviewer=reviewer),
+                )
+            )
+        else:
+            notices.append(f"Qwen evaluation was skipped: {message}")
+    return models, notices
+
+
+def render_model_panel(evaluation: ModelEvaluation) -> None:
+    summary = evaluation.summary
+    metrics = st.columns(5)
+    metrics[0].metric("Accuracy", f"{float(summary['accuracy']):.1%}")
+    metrics[1].metric("Macro-F1", f"{float(summary['macro_f1']):.1%}")
+    metrics[2].metric("Calibration error", f"{float(summary['calibration_error']):.3f}")
+    metrics[3].metric("Avg confidence", f"{float(summary['average_confidence']):.1%}")
+    metrics[4].metric("Review routed", f"{float(summary['review_route_rate']):.1%}")
+
+    left, right = st.columns(2)
+    with left:
+        class_frame = evaluation.per_class.melt(
+            id_vars=["sentiment", "support"],
+            value_vars=["precision", "recall", "f1"],
+            var_name="Metric",
+            value_name="Score",
+        )
+        class_chart = px.bar(
+            class_frame,
+            x="sentiment",
+            y="Score",
+            color="Metric",
+            barmode="group",
+            range_y=[0, 1],
+            title=f"{evaluation.model}: per-class effectiveness",
+            labels={"sentiment": "Actual sentiment"},
+        )
+        class_chart.update_layout(margin=dict(l=0, r=0, t=55, b=0), yaxis_tickformat=".0%")
+        st.plotly_chart(class_chart, width="stretch")
+    with right:
+        confusion_chart = px.imshow(
+            evaluation.confusion,
+            text_auto=True,
+            aspect="auto",
+            color_continuous_scale="Blues",
+            title=f"{evaluation.model}: confusion matrix",
+            labels={"x": "Predicted", "y": "Actual", "color": "Rows"},
+        )
+        confusion_chart.update_layout(margin=dict(l=0, r=0, t=55, b=0))
+        st.plotly_chart(confusion_chart, width="stretch")
+
+    calibration = go.Figure()
+    calibration.add_trace(
+        go.Scatter(
+            x=[0, 1], y=[0, 1], mode="lines", name="Perfect calibration",
+            line={"dash": "dash", "color": "#6B7280"},
+        )
+    )
+    if not evaluation.calibration.empty:
+        calibration.add_trace(
+            go.Scatter(
+                x=evaluation.calibration["mean_confidence"],
+                y=evaluation.calibration["empirical_accuracy"],
+                mode="lines+markers+text",
+                text=evaluation.calibration["count"].map(lambda value: f"n={value}"),
+                textposition="top center",
+                name=evaluation.model,
+                marker={"size": 9},
+            )
+        )
+    calibration.update_layout(
+        title=f"{evaluation.model}: reliability by confidence bin",
+        xaxis={"title": "Mean confidence", "range": [0, 1], "tickformat": ".0%"},
+        yaxis={"title": "Observed accuracy", "range": [0, 1], "tickformat": ".0%"},
+        margin=dict(l=0, r=0, t=55, b=0),
+    )
+    st.plotly_chart(calibration, width="stretch")
+
+    errors = evaluation.predictions[~evaluation.predictions["correct"]]
+    with st.expander(f"Misclassified phrases ({len(errors)})"):
+        st.dataframe(errors, width="stretch", hide_index=True)
+
+
+def render_evaluation(model_path: str, use_reviewer: bool, ollama_model: str) -> None:
+    st.title("Model effectiveness")
+    st.markdown(
+        '<p class="research-note">Run every available model variant on the same labelled phrases. '
+        "All scores shown here are measured live; unavailable checkpoints are never assigned placeholder scores.</p>",
+        unsafe_allow_html=True,
+    )
+    uploaded = st.file_uploader(
+        "Evaluation dataset (CSV or XLSX)",
+        type=["csv", "xlsx"],
+        key="evaluation_dataset",
+        help="Leave empty to use the balanced 75-phrase workbook.",
+    )
+    try:
+        frame, source = load_dataset(uploaded)
+        report = dataframe_report(frame)
+    except Exception as exc:
+        st.error(f"Could not read this evaluation dataset: {exc}")
+        return
+    if not report.valid:
+        st.error("The evaluation dataset has empty text or invalid labels.")
+        st.json(report_dict(report))
+        return
+
+    st.caption(f"Source: {source} · {report.rows} labelled rows")
+    st.info(
+        "The bundled workbook is an illustrative smoke-test set. Its results verify this implementation, "
+        "but they are not a substitute for a held-out research benchmark."
+    )
+    evaluation_signature = (source, model_path.strip(), use_reviewer, ollama_model)
+    if st.button("Run model evaluation", type="primary"):
+        try:
+            models, notices = evaluation_models(model_path, use_reviewer, ollama_model)
+            for notice in notices:
+                st.warning(notice)
+            progress = st.progress(0, text="Preparing evaluation…")
+            evaluations = []
+            for index, (name, pipeline) in enumerate(models, start=1):
+                progress.progress((index - 1) / len(models), text=f"Evaluating {name}…")
+                evaluations.append(evaluate_pipeline(frame, pipeline, name))
+            progress.progress(1.0, text="Evaluation complete")
+            st.session_state.model_evaluations = evaluations
+            st.session_state.model_evaluation_signature = evaluation_signature
+        except Exception as exc:
+            st.error(f"Evaluation could not be completed: {exc}")
+            return
+
+    evaluations = st.session_state.get("model_evaluations", [])
+    if not evaluations:
+        st.caption("Run the evaluation to generate comparison and per-model graphs.")
+        return
+    if st.session_state.get("model_evaluation_signature") != evaluation_signature:
+        st.warning("The graphs below use previous data or model settings. Run evaluation again to refresh them.")
+
+    summary = pd.DataFrame([item.summary for item in evaluations])
+    comparison = summary.melt(
+        id_vars=["model"],
+        value_vars=["accuracy", "macro_f1"],
+        var_name="Metric",
+        value_name="Score",
+    )
+    comparison["Metric"] = comparison["Metric"].map(
+        {"accuracy": "Accuracy", "macro_f1": "Macro-F1"}
+    )
+    comparison_chart = px.bar(
+        comparison,
+        x="model",
+        y="Score",
+        color="Metric",
+        barmode="group",
+        text_auto=".1%",
+        range_y=[0, 1],
+        title="Available model comparison on the selected dataset",
+        labels={"model": "Model"},
+    )
+    comparison_chart.update_layout(margin=dict(l=0, r=0, t=55, b=0), yaxis_tickformat=".0%")
+    st.plotly_chart(comparison_chart, width="stretch")
+
+    tabs = st.tabs([item.model for item in evaluations])
+    for tab, evaluation in zip(tabs, evaluations):
+        with tab:
+            render_model_panel(evaluation)
+
+
 def main() -> None:
     st.set_page_config(page_title="Hinglish Emotion Research", page_icon="💬", layout="wide")
     inject_theme()
@@ -282,11 +489,15 @@ def main() -> None:
             (st.success if ready else st.warning)(message)
         st.caption("Leave the model folder blank to use the transparent rule baseline.")
 
-    overview, analysis, dataset = st.tabs(["Overview", "Analyze text", "Dataset explorer"])
+    overview, analysis, evaluation, dataset = st.tabs(
+        ["Overview", "Analyze text", "Model effectiveness", "Dataset explorer"]
+    )
     with overview:
         render_overview()
     with analysis:
         render_analysis(model_path, use_reviewer, ollama_model)
+    with evaluation:
+        render_evaluation(model_path, use_reviewer, ollama_model)
     with dataset:
         render_dataset()
 

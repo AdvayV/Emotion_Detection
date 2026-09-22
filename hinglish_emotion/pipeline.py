@@ -17,8 +17,16 @@ class LocalReviewer(Protocol):
     def review(self, raw_text: str, normalized_text: str, primary: ClassifierResult) -> ReviewerResult: ...
 
 
-POSITIVE_WORDS = {"accha", "acchi", "good", "happy", "love", "mast", "great", "best", "finally", "wah"}
-NEGATIVE_WORDS = {"bad", "sad", "hate", "bakwaas", "bekaar", "late", "fail", "failed", "worst"}
+POSITIVE_WORDS = {
+    "accha", "acchi", "amazing", "best", "better", "clearly", "easy", "fast", "finally",
+    "good", "great", "happy", "help", "helpful", "jeet", "love", "mast", "maza", "pasand",
+    "perfect", "productive", "pyari", "sukoon", "tasty", "thanks", "wah", "zabardast",
+}
+NEGATIVE_WORDS = {
+    "bad", "bakwaas", "bekaar", "boring", "cancel", "crash", "delay", "drop", "dukhi", "fail",
+    "failed", "ghatiya", "hang", "hate", "kharab", "late", "mushkil", "pareshan", "problem",
+    "rude", "sad", "slow", "thanda", "waste", "worst",
+}
 POSITIVE_SYMBOLS = {"❤", "❤️", "😊", "😍", "🔥", "👍", "🎉"}
 NEGATIVE_SYMBOLS = {"😡", "😒", "😞", "😢", "👎"}
 AMBIGUOUS_SYMBOLS = {"😭", "😂"}
