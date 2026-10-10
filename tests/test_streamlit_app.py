@@ -8,6 +8,16 @@ STREAMLIT_AVAILABLE = importlib.util.find_spec("streamlit") is not None
 
 @unittest.skipUnless(STREAMLIT_AVAILABLE, "Dashboard dependencies are optional")
 class StreamlitAppTests(unittest.TestCase):
+    def test_untrained_encoder_is_shown_as_unavailable(self):
+        from streamlit.testing.v1 import AppTest
+
+        app_path = Path(__file__).resolve().parents[1] / "dashboard" / "app.py"
+        app = AppTest.from_file(str(app_path), default_timeout=30).run()
+        selector = next(item for item in app.selectbox if item.label == "Primary classifier")
+        selector.set_value("mBERT").run()
+        self.assertEqual(len(app.exception), 0)
+        self.assertTrue(any("not trained here yet" in item.value for item in app.warning))
+
     def test_dashboard_and_effectiveness_graphs_render(self):
         from streamlit.testing.v1 import AppTest
 

@@ -61,6 +61,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--class-weights", choices=("none", "balanced"), default="balanced")
     parser.add_argument(
+        "--freeze-encoder",
+        action="store_true",
+        help="Train only the classification head to reduce RAM and CPU cost",
+    )
+    parser.add_argument(
         "--local-files-only",
         action="store_true",
         help="Refuse network access and load an already downloaded base model",
@@ -120,8 +125,8 @@ def main() -> None:
     report = validate_csv(args.data)
     if not report.valid:
         raise ValueError(f"Dataset validation failed: {report.to_dict()}")
-    if min(report.label_counts.values()) < 4:
-        raise ValueError("Each sentiment class needs at least four examples for a stratified 70/15/15 split")
+    if min(report.label_counts.values()) < 6:
+        raise ValueError("Each sentiment class needs at least six examples for a stratified 70/15/15 split")
 
     frame = pd.read_csv(args.data)
     frame["label"] = frame["label"].str.strip().str.lower()
@@ -151,6 +156,9 @@ def main() -> None:
         label2id=LABEL2ID,
         local_files_only=args.local_files_only,
     )
+    if args.freeze_encoder:
+        for parameter in model.base_model.parameters():
+            parameter.requires_grad = False
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model.to(device)
 
@@ -167,7 +175,8 @@ def main() -> None:
     train_labels = train_frame["label"].map(LABEL2ID).tolist()
     weights = class_weight_tensor(train_labels, device) if args.class_weights == "balanced" else None
     loss_function = nn.CrossEntropyLoss(weight=weights)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate)
+    trainable_parameters = [parameter for parameter in model.parameters() if parameter.requires_grad]
+    optimizer = torch.optim.AdamW(trainable_parameters, lr=args.learning_rate)
 
     best_f1 = -1.0
     epochs_without_improvement = 0
@@ -182,7 +191,7 @@ def main() -> None:
             logits = model(**batch).logits
             loss = loss_function(logits, labels)
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+            torch.nn.utils.clip_grad_norm_(trainable_parameters, max_norm=1.0)
             optimizer.step()
             total_loss += float(loss.item())
 
@@ -214,6 +223,7 @@ def main() -> None:
         "base_model": args.model,
         "device": device,
         "seed": args.seed,
+        "training_mode": "frozen_encoder" if args.freeze_encoder else "full_fine_tuning",
         "split_sizes": {
             "train": len(train_frame),
             "validation": len(validation_frame),
@@ -231,4 +241,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

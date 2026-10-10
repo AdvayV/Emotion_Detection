@@ -11,6 +11,7 @@ import streamlit as st
 from dashboard.data import dataframe_report, read_dataset, report_dict, sarcasm_rate
 from dashboard.evaluation import ModelEvaluation, evaluate_pipeline
 from hinglish_emotion.intensity import IntensityEstimator
+from hinglish_emotion.model_catalog import ENCODERS, checkpoint_path, checkpoint_ready
 from hinglish_emotion.ollama_reviewer import DEFAULT_OLLAMA_MODEL, OllamaReviewer
 from hinglish_emotion.pipeline import EmotionPipeline, RuleBasedClassifier
 from hinglish_emotion.transformer_classifier import LocalTransformerClassifier
@@ -58,8 +59,8 @@ def build_pipeline(model_path: str, use_reviewer: bool, ollama_model: str) -> tu
     mode = "Rule-based baseline"
     if model_path.strip():
         path = Path(model_path.strip())
-        if not path.is_dir():
-            raise RuntimeError("The local model folder was not found. Leave this empty to use the baseline.")
+        if not checkpoint_ready(path):
+            raise RuntimeError("This folder does not contain a complete trained classifier checkpoint. Train the selected encoder first.")
         classifier = LocalTransformerClassifier(path)
         mode = f"Local transformer: {path.name}"
     reviewer = OllamaReviewer(model=ollama_model) if use_reviewer else None
@@ -82,7 +83,7 @@ def render_overview() -> None:
         )
     with right:
         st.subheader("Current local workflow")
-        st.markdown("Use **Analyze text** for a single message, then open **Dataset explorer** to review labels and data quality. The baseline is always available; local MuRIL and Qwen can be switched on when installed.")
+        st.markdown("Use **Analyze text** for a single message, then open **Dataset explorer** to review labels and data quality. The baseline is always available; trained mBERT, MuRIL, or XLM-R checkpoints and local Qwen can be selected when present.")
         st.info("The bundled dataset is illustrative. Report research results only after running experiments on the full labelled dataset.")
 
     st.subheader("Five proposed improvements")
@@ -292,8 +293,8 @@ def evaluation_models(
     transformer_name = ""
     if model_path.strip():
         path = Path(model_path.strip())
-        if not path.is_dir():
-            notices.append("The configured transformer folder was not found, so it was skipped.")
+        if not checkpoint_ready(path):
+            notices.append("The selected transformer has no complete trained checkpoint, so it was skipped.")
         else:
             transformer = LocalTransformerClassifier(path)
             transformer_name = f"Local transformer · {path.name}"
@@ -481,13 +482,26 @@ def main() -> None:
 
     with st.sidebar:
         st.header("Local model settings")
-        model_path = st.text_input("Local transformer folder", placeholder="models/muril_sentiment")
+        encoder_choice = st.selectbox(
+            "Primary classifier",
+            ["Rule-based baseline", *(encoder.name for encoder in ENCODERS), "Custom checkpoint"],
+        )
+        model_path = ""
+        if encoder_choice == "Custom checkpoint":
+            model_path = st.text_input("Local transformer folder", placeholder="models/my_checkpoint")
+        elif encoder_choice != "Rule-based baseline":
+            encoder = next(item for item in ENCODERS if item.name == encoder_choice)
+            model_path = str(checkpoint_path(encoder, PROJECT_ROOT / "models"))
+            if checkpoint_ready(model_path):
+                st.success(f"{encoder.name} checkpoint ready")
+            else:
+                st.warning(f"{encoder.name} is not trained here yet. Run training.compare_encoders first.")
         use_reviewer = st.toggle("Use local Qwen reviewer", value=False)
         ollama_model = st.text_input("Ollama model", value=DEFAULT_OLLAMA_MODEL, disabled=not use_reviewer)
         if use_reviewer:
             ready, message = OllamaReviewer(model=ollama_model).availability()
             (st.success if ready else st.warning)(message)
-        st.caption("Leave the model folder blank to use the transparent rule baseline.")
+        st.caption("The baseline needs no download. Transformer choices use only trained local checkpoints.")
 
     overview, analysis, evaluation, dataset = st.tabs(
         ["Overview", "Analyze text", "Model effectiveness", "Dataset explorer"]

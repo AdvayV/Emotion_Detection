@@ -119,7 +119,39 @@ These are deliberately separate ablations. They can be reported as added
 capabilities only after the real dataset contains the corresponding
 conversation, intensity, or evidence annotations.
 
-## Fine-tune MuRIL
+## Train and compare mBERT, MuRIL, and XLM-R
+
+Install the optional training dependencies from the project root:
+
+```powershell
+python -m pip install -e ".[model,dashboard]"
+```
+
+The three encoder IDs are `google-bert/bert-base-multilingual-cased`,
+`google/muril-base-cased`, and `FacebookAI/xlm-roberta-base`. Supply a real
+labelled CSV with `text,label` columns and at least six examples per class.
+Preview the sequential training jobs first:
+
+```powershell
+python -m training.compare_encoders --data data/your_dataset.csv --freeze-encoder --dry-run
+```
+
+Remove `--dry-run` to train. `--freeze-encoder` trains only the classification
+head and uses less memory on an 8 GB CPU laptop; omit it for full fine-tuning
+when adequate hardware is available. Use `--models muril` for one model, or
+`--local-files-only` once the base weights are cached. The first download needs
+internet access, and CPU training may take a long time.
+
+The runner uses the same normalization, seed, split, epochs, batch size, and
+token limit for all three models. It verifies that the saved split manifests
+match and writes `models/encoder_comparison.csv` with held-out accuracy,
+macro-F1, and negative recall. Individual checkpoints and metrics are saved in
+`models/mbert_sentiment`, `models/muril_sentiment`, and `models/xlmr_sentiment`.
+Select a trained checkpoint from the dashboard sidebar to use it for analysis.
+Untrained choices are marked as unavailable. The bundled workbook is an
+implementation smoke test, not a research benchmark.
+
+## Fine-tune MuRIL directly
 
 Once the real labelled CSV is available, the first research model can be trained with:
 
