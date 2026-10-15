@@ -1,0 +1,94 @@
+{
+  "source_url": "https://github.com/LCS2-IIITD/EDiReF-SemEval2024",
+  "source_revision": "b28a3673b2561ffc7d5b11149266bf8b63cba5ab",
+  "source_sha256": {
+    "MaSaC_train_erc.json": "706389108fb623d38be766ffa8f2bec9717c4c0e2e7d25424a2a7b1b43ff830d",
+    "MaSaC_val_erc.json": "0a72eb6f85ca8444d59ceb6f9c4bcde7e9048a75baeda43ae10c37d8d84d8d3a",
+    "MaSaC_test_erc.json": "d175388bf47088afb6f7625e57b35cc9dabe12219b5ec14a525f220895cbab41"
+  },
+  "original_class_counts": {
+    "train": {
+      "disgust": 127,
+      "contempt": 542,
+      "anger": 819,
+      "neutral": 3909,
+      "joy": 1596,
+      "sadness": 558,
+      "fear": 514,
+      "surprise": 441
+    },
+    "validation": {
+      "neutral": 633,
+      "contempt": 74,
+      "sadness": 126,
+      "fear": 88,
+      "joy": 228,
+      "surprise": 66,
+      "anger": 118,
+      "disgust": 21
+    },
+    "test": {
+      "sadness": 155,
+      "neutral": 656,
+      "anger": 142,
+      "contempt": 82,
+      "fear": 122,
+      "joy": 349,
+      "surprise": 57,
+      "disgust": 17
+    }
+  },
+  "excluded_classes": {
+    "train": {
+      "contempt": 542
+    },
+    "validation": {
+      "contempt": 74
+    },
+    "test": {
+      "contempt": 82
+    }
+  },
+  "quarantined_cross_split_duplicate_rows": 765,
+  "cross_split_conversation_groups": 0,
+  "prepared_class_counts": {
+    "train": {
+      "joy": 1509,
+      "sadness": 537,
+      "anger": 795,
+      "fear": 489,
+      "surprise": 356,
+      "disgust": 125,
+      "neutral": 3658
+    },
+    "validation": {
+      "joy": 209,
+      "sadness": 117,
+      "anger": 112,
+      "fear": 85,
+      "surprise": 53,
+      "disgust": 19,
+      "neutral": 568
+    },
+    "test": {
+      "joy": 317,
+      "sadness": 144,
+      "anger": 137,
+      "fear": 107,
+      "surprise": 41,
+      "disgust": 16,
+      "neutral": 583
+    }
+  },
+  "shared_episode_counts": {
+    "train/validation": 44,
+    "test/train": 46,
+    "test/validation": 42
+  },
+  "scope_note": "Official conversation-segment partitions; episodes recur across splits. This is not episode-disjoint evaluation.",
+  "reuse_files_found": [],
+  "reuse_conditions_verified": false,
+  "ready_for_export": false,
+  "data_integrity_ready": true,
+  "export_blockers": []
+}

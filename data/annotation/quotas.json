@@ -1,0 +1,29 @@
+{
+  "train": {
+    "joy": 20,
+    "sadness": 20,
+    "anger": 20,
+    "fear": 20,
+    "surprise": 20,
+    "disgust": 20,
+    "neutral": 20
+  },
+  "validation": {
+    "joy": 10,
+    "sadness": 10,
+    "anger": 10,
+    "fear": 10,
+    "surprise": 10,
+    "disgust": 10,
+    "neutral": 10
+  },
+  "test": {
+    "joy": 20,
+    "sadness": 20,
+    "anger": 20,
+    "fear": 20,
+    "surprise": 20,
+    "disgust": 20,
+    "neutral": 20
+  }
+}

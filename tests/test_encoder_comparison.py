@@ -14,6 +14,18 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 class EncoderComparisonTests(unittest.TestCase):
+    def test_emotion_dry_run_uses_separate_checkpoints_and_multilingual_defaults(self):
+        result = subprocess.run(
+            [sys.executable, "-m", "training.compare_encoders", "--task", "emotion",
+             "--data", "data/mixed_emotions_demo.csv", "--freeze-encoder", "--dry-run"],
+            cwd=PROJECT_ROOT, capture_output=True, text=True, check=True,
+        )
+        self.assertIn("muril_emotion", result.stdout)
+        self.assertIn("xlmr_emotion", result.stdout)
+        self.assertIn("muril-base-cased", result.stdout)
+        self.assertIn("--language-pair hi-en", result.stdout)
+        self.assertNotIn("mbert_sentiment", result.stdout)
+
     def test_dry_run_lists_all_encoders_without_creating_checkpoints(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
