@@ -6,3 +6,13 @@ __pycache__/
 models/
 runs/
 *.log
+data/raw/
+data/prepared/
+*.pt
+data/annotation/*.csv
+colab_ready_8000/
+colab_ready_8000.zip
+
+# Local browser downloads and downloaded training archives
+*.crdownload
+HinglishEmotionSynthetic8000*.zip
