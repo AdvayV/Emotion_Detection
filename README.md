@@ -1,170 +1,216 @@
-# Local Hinglish Emotion Detection
+# Hinglish Emotion Detection
 
-This repository is the implementation workspace for the revised English–Hinglish emotion-detection project. The first milestone is intentionally runnable without downloading any model weights. It establishes the preprocessing, output contracts, local-review routing, dataset checks, and evaluation functions that every later model must use.
+A local Streamlit application for exploring sentiment and seven emotions in
+mixed-language phrases, with optional transformer checkpoints and local Qwen
+review. Training runs separately in a GPU notebook; the dashboard loads the
+resulting checkpoint for prediction.
 
-## Current milestone
+## What works today
 
-- Conservative Hinglish spelling normalization.
-- Expressive elongation detection (`acchaaa → accha` while retaining an emphasis feature).
-- Negation preservation.
-- A transparent rule baseline for end-to-end smoke testing.
-- A confidence router for difficult, sarcastic, or text–emoji-conflicting examples.
-- Optional local Qwen review through Ollama.
-- Accuracy, macro-F1, per-class metrics, calibration, spelling consistency, and sentiment-flip evaluation.
-- Dataset-schema validation for sentence and conversation experiments.
-- Optional conversation memory for speaker-specific emotion shifts.
-- A transparent valence/arousal intensity baseline.
-- Evidence masking checks for faithful explanations and counterfactual tests.
+| Capability | Implementation and current limits |
+| --- | --- |
+| Three-class sentiment | Positive, neutral and negative; always-available rule baseline and optional local transformer |
+| Seven-emotion detection | Joy (happy), sadness, anger, fear, surprise, disgust and neutral; demo rules or a trained seven-class checkpoint |
+| Language mixes | Hindi-English and experimental French-English; the matched XLM-R/MuRIL training experiment uses Hindi-English |
+| Expressive spelling | Conservative normalization, negation preservation and elongation cues such as `acchaaa` |
+| Emoji and sarcasm | Rule-based conflict/sarcasm cues and review routing in the sentiment pipeline; not a trained sarcasm classifier |
+| Local Qwen | Optional Ollama `qwen3:0.6b` review of routed three-class sentiment cases; not a seven-emotion reviewer |
+| Research utilities | Dataset validation, class/per-language metrics, confusion matrices, calibration diagnostics, intensity, conversation memory and evidence-masking baselines |
+| Model training | mBERT, MuRIL and XLM-R runners, fixed group-aware splits, checkpoint recovery and inference export |
 
-The rule baseline is not the proposed research model. It exists so that the complete software path can be tested before MuRIL is trained.
+The repository contains software, illustrative data and a synthetic-data
+experiment. It does not ship trained model weights or claim verified research
+accuracy. Base encoders are not finished emotion classifiers. Synthetic and demo
+scores do not establish performance on real user messages. French-English
+remains experimental until independently reviewed test coverage is available.
 
-## Run locally
+## Install and run
+
+Use Python 3.10 or newer and run commands from the repository root, where
+`pyproject.toml` is located, rather than from the `hinglish_emotion` subfolder.
+For Windows PowerShell:
 
 ```powershell
-python -m unittest discover -s tests -v
-python -m hinglish_emotion normalize "movie acchaaa thi 😭"
-python -m hinglish_emotion analyze "wah kya service hai, 2 ghante late 😂"
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -e ".[dashboard]"
+python -m streamlit run dashboard/app.py
 ```
 
-To use a locally running Qwen model through Ollama:
+Open the local address printed by Streamlit. Install `.[model,dashboard]` instead
+if this machine will load transformer checkpoints or run training utilities.
+The default demo requires no model download or cloud API. Downloading base
+encoders for training does require internet access.
+
+## Dashboard pages
+
+- **Analyze text:** three-class sentiment, cue explanations, sarcasm/conflict
+  flags, review status, normalization and baseline valence/arousal intensity.
+- **Emotion lab:** seven emotion scores, a representative emotion icon,
+  Hindi-English/French-English examples, checkpoint selection and dataset
+  evaluation. It warns about missing language validation, synthetic evaluation
+  and truncated inputs. Confidence scores are not calibrated correctness odds.
+- **Model effectiveness:** live sentiment comparisons, class metrics, confusion
+  matrices and reliability charts for models actually available on the machine.
+- **Dataset explorer:** validated CSV/XLSX uploads, filters, source table, class
+  balance, sarcasm rate and message-length distributions.
+- **Overview:** current pipeline, proposed improvements and the distinction
+  between implemented baselines and experiments requiring training.
+
+Recent live analyses stay in Streamlit session state and can be downloaded as
+CSV. They are not automatically written to the dataset. The app starts with
+rules; selecting an unavailable checkpoint does not train or download it.
+
+For optional sentiment review, install Ollama separately and run:
 
 ```powershell
 ollama pull qwen3:0.6b
 python -m hinglish_emotion analyze "wah kya service hai, 2 ghante late 😂" --reviewer ollama
 ```
 
-No cloud API is used. The Ollama integration calls `http://localhost:11434`.
+The reviewer calls `http://localhost:11434` and requires Ollama to be running.
 
-## Run the research dashboard
+## Start the 8,000-phrase Colab experiment
 
-Install the optional dashboard dependencies once, then start the local interface:
+This is the self-contained experimental route. It generates original synthetic
+Hindi-English template combinations, includes current training source and
+creates an upload notebook. It does not need the unfinished MaSaC review files.
 
 ```powershell
-python -m pip install -e ".[dashboard]"
-streamlit run dashboard/app.py
+python -m training.package_synthetic --output-dir colab_ready_8000
 ```
 
-The dashboard opens with four views: an overview, interactive single-message
-analysis, live model-effectiveness evaluation, and a dataset explorer. It starts
-with the transparent rule baseline and can optionally use a locally saved
-transformer checkpoint or local Qwen3 0.6B through Ollama. Analysis history
-remains in the current browser session and can be downloaded as CSV.
+If that output already exists, add `--overwrite` to refresh its known package
+files. The generated dataset is reproducible with seed 42.
 
-The effectiveness view evaluates only models that are actually available on
-the machine. It always measures the rule baseline, adds the configured local
-transformer when its folder exists, and adds the routed Qwen variant when
-Ollama and the selected model are ready. Comparison scores, per-class metrics,
-confusion matrices, and reliability graphs are calculated from live predictions
-rather than placeholder benchmark values.
+| Partition | Distinct phrases | Purpose |
+| --- | ---: | --- |
+| Training | 8,000 | Update model parameters |
+| Validation | 1,000 | Select the best checkpoint |
+| Synthetic test | 1,000 | Evaluate after model selection |
 
-## Dataset format
+All seven emotions are approximately balanced. Exact duplicate phrases and
+cross-split scenario groups are checked, and scenario/reaction template families
+are separated across partitions. The phrases are compositional synthetic
+variants, not 10,000 independent human-authored messages. Some contain contextual
+emoji; emoji are not assigned from emotion labels. Sarcasm and mixed emotions
+are not adequately represented by this set.
 
-The minimum CSV schema is:
+1. Open [Google Colab](https://colab.research.google.com/).
+2. Upload `colab_ready_8000/TRAIN_ON_COLAB.ipynb` through **File > Upload notebook**.
+3. Select a GPU runtime (T4 if offered) before running the notebook.
+4. Click **Run all** and upload `colab_ready_8000.zip` at the first cell's prompt.
+5. Approve mounting your own Google Drive when prompted.
+6. Leave `MODELS = ["xlmr"]` for the first run, or choose `["xlmr", "muril"]`
+   for a sequential matched comparison.
+7. Download the exported inference ZIP and extract its model folder under this
+   repository's `models/` directory. Select it in **Emotion lab**.
+
+The default Drive location is `MyDrive/HinglishEmotionSynthetic8000`. The recipe
+uses up to three epochs, batch size 2, gradient accumulation 8, maximum length
+128 and learning rate 2e-5. Three epochs mean 24,000 training phrase exposures
+per model, still only 8,000 distinct training rows.
+
+Each completed epoch saves recovery state to Drive. After a runtime reset,
+rerun setup from the first cell with the same package and training settings;
+`--resume` restores the latest completed epoch. An interrupted partial epoch is
+repeated. Runtime storage is temporary and GPU allocation is not guaranteed.
+If `PACKAGE` is undefined, the upload/extraction cell has not been run in the
+current runtime. If the GPU check fails, fix the runtime before training.
+
+The generated folder includes `START_HERE.md`, a dataset card, an audit, file
+hashes and the notebook. The folder and ZIP are intentionally ignored by Git:
+regenerate them from the committed generator rather than uploading weights,
+optimizer state or browser downloads. Synthetic training requires an explicit
+`--allow-synthetic` opt-in, and its checkpoint retains an experimental scope.
+
+## Human-reviewed research workflow
+
+Use [training/WORKFLOW.md](training/WORKFLOW.md) and
+[notebooks/train_emotion_pilot.ipynb](notebooks/train_emotion_pilot.ipynb) for the
+separate research-data route. It requires a reviewed dataset and matching audit,
+not the synthetic experiment above.
+
+The recorded [MaSaC audit](data/audits/masac.json) has unverified reuse conditions;
+export remains blocked pending applicable publisher terms. It excludes contempt
+rather than relabelling it and quarantines normalized phrases appearing across
+partitions. Follow [the independent annotation guide](data/annotation/README.md)
+to collect and reconcile the 350-phrase supplement. Raw source data and annotation
+working CSVs are kept out of Git.
+
+Emotion training preserves case, accents, negation, expressive spelling and emoji
+by default. Checkpoints record preprocessing and token limits so inference uses
+the same settings. Legacy checkpoints retain their older normalized input path
+and report unknown provenance. Related groups remain in one split, both models
+share a frozen manifest, and changed data/settings are rejected during recovery.
+
+Each run saves validation history, test metrics, per-class support, per-language
+and per-source results, test predictions, a model card and lexical-baseline
+comparisons. Inference exports omit optimizer state and raw phrases.
+
+## Dataset formats and command-line examples
+
+Sentiment CSVs require `text,label` with positive, neutral or negative labels.
+Optional annotations include `sarcasm`, `valence`, `arousal`, `conversation_id`,
+`speaker_id`, `turn_id` and `evidence`.
+
+Emotion CSVs require `text,emotion,language_pair`. Use `hi-en` or `fr-en` and the
+seven labels above. Optional `group_id`, `source`, `split`, `annotation_status`
+and `human_reviewed` fields support provenance and split checks. Related
+translations, paraphrases and conversations must stay in the same partition.
+See [data/MIXED_EMOTIONS.md](data/MIXED_EMOTIONS.md) for label definitions.
+
+```powershell
+python -m hinglish_emotion normalize "movie acchaaa thi 😭"
+python -m hinglish_emotion emotions "aaj main bahut khush hoon 😊" --language-pair hi-en
+python -m hinglish_emotion evaluate-emotions data/mixed_emotions_demo.csv
+python -m hinglish_emotion emotions "aaj main bahut khush hoon" --model-path models/xlmr_emotion
+```
+
+The bundled sentiment workbook has 75 illustrative phrases. The mixed-emotion
+CSV has 84 illustrative phrases across both language mixes. Neither is an
+independent benchmark, and the emotion demo is blocked from transformer training.
+
+For reviewed emotion data, preview the matched experiment before starting it:
+
+```powershell
+python -m training.compare_encoders --task emotion --data data/prepared/pilot_hi.csv --data-audit data/audits/pilot_hi.json --dry-run
+```
+
+Remove `--dry-run` to train after the data checks pass. Emotion comparison
+normally selects XLM-R and MuRIL on Hindi-English. mBERT is optional; use
+`--models mbert xlmr muril` for all three. MuRIL is excluded from French-English
+experiments. Full fine-tuning should use a GPU; CPU execution needs explicit
+`--allow-cpu` or `--freeze-encoder`, and may still be slow or memory-constrained.
+
+Sentiment comparison uses the same runner with `--task sentiment` and a
+sentiment CSV. The base IDs are `google-bert/bert-base-multilingual-cased`,
+`google/muril-base-cased` and `FacebookAI/xlm-roberta-base`. Model folders are
+separate for each task, such as `models/xlmr_sentiment` and `models/xlmr_emotion`.
+
+## Project layout and validation
 
 ```text
-text,label
-movie acchi thi,positive
-service acchi nahi thi,negative
+dashboard/          Streamlit pages, upload handling and live evaluation
+hinglish_emotion/   Normalization, inference, routing and metrics
+training/           Training, data audits, annotation and Colab packaging
+notebooks/          Human-reviewed pilot notebook
+data/               Illustrative datasets, annotation instructions and audit
+outputs/            Project proposal and revision documents
+tests/              Core, dashboard, data, packaging and recovery checks
 ```
-
-Supported optional columns are:
-
-```text
-sarcasm,valence,arousal,conversation_id,speaker_id,turn_id,evidence
-```
-
-Conversation experiments must keep complete conversations in one dataset split. Counterfactual variants must also remain in the same split as their source example.
-
-The dashboard accepts both CSV and XLSX. The bundled
-`data/hinglish_emotion_phrases.xlsx` workbook contains 75 common phrases, balanced
-across positive, neutral, and negative labels, with spelling, negation, emoji,
-and sarcasm examples. Regenerate it deterministically with:
 
 ```powershell
-python data/build_phrase_workbook.py
+python -m unittest discover -s tests -v
 ```
 
-The workbook is an implementation smoke-test set, not a published benchmark.
-Use a separately held-out, independently annotated dataset for research claims.
+The full suite exercises the UI, seven-class validation, leakage checks,
+synthetic counts/provenance, notebook syntax, exports and a tiny offline
+transformer training/resume experiment. These software checks do not validate
+the accuracy of a trained research model.
 
-## Planned build sequence
-
-1. Validate and profile the real project dataset.
-2. Reproduce BERT and RoBERTa baselines.
-3. Fine-tune MuRIL, mBERT, and XLM-R under the same split.
-4. Add contextual emoji fusion and sarcasm supervision.
-5. Calibrate the primary classifier and tune the local-Qwen routing threshold.
-6. Add supervised intensity, faithful evidence, and conversation-memory experiments as separate ablations.
-
-## Follow-up research modules
-
-The next three ideas are implemented as small, testable baselines so they can
-be evaluated without changing the main classifier:
-
-```python
-from hinglish_emotion.context import ConversationMemory, TurnRecord
-from hinglish_emotion.intensity import IntensityEstimator
-from hinglish_emotion.evidence import check_evidence
-```
-
-`ConversationMemory` compares a speaker's current prediction with their earlier
-turns and marks interpretable shifts such as positive-to-negative. It keeps a
-bounded history and does not mix speakers. `IntensityEstimator` exposes
-valence, arousal, and cues such as elongation, punctuation, and emotional emoji;
-it is a baseline for a later supervised valence/arousal head. `check_evidence`
-masks the highlighted words and checks whether the prediction responds, which
-provides a simple faithfulness test for model explanations.
-
-These are deliberately separate ablations. They can be reported as added
-capabilities only after the real dataset contains the corresponding
-conversation, intensity, or evidence annotations.
-
-## Train and compare mBERT, MuRIL, and XLM-R
-
-Install the optional training dependencies from the project root:
-
-```powershell
-python -m pip install -e ".[model,dashboard]"
-```
-
-The three encoder IDs are `google-bert/bert-base-multilingual-cased`,
-`google/muril-base-cased`, and `FacebookAI/xlm-roberta-base`. Supply a real
-labelled CSV with `text,label` columns and at least six examples per class.
-Preview the sequential training jobs first:
-
-```powershell
-python -m training.compare_encoders --data data/your_dataset.csv --freeze-encoder --dry-run
-```
-
-Remove `--dry-run` to train. `--freeze-encoder` trains only the classification
-head and uses less memory on an 8 GB CPU laptop; omit it for full fine-tuning
-when adequate hardware is available. Use `--models muril` for one model, or
-`--local-files-only` once the base weights are cached. The first download needs
-internet access, and CPU training may take a long time.
-
-The runner uses the same normalization, seed, split, epochs, batch size, and
-token limit for all three models. It verifies that the saved split manifests
-match and writes `models/encoder_comparison.csv` with held-out accuracy,
-macro-F1, and negative recall. Individual checkpoints and metrics are saved in
-`models/mbert_sentiment`, `models/muril_sentiment`, and `models/xlmr_sentiment`.
-Select a trained checkpoint from the dashboard sidebar to use it for analysis.
-Untrained choices are marked as unavailable. The bundled workbook is an
-implementation smoke test, not a research benchmark.
-
-## Fine-tune MuRIL directly
-
-Once the real labelled CSV is available, the first research model can be trained with:
-
-```powershell
-python -m training.train_transformer --data data/your_dataset.csv --model google/muril-base-cased --output models/muril_sentiment
-```
-
-To guarantee that training remains offline after the checkpoint has been downloaded, add `--local-files-only`.
-
-Use the saved model locally with:
-
-```powershell
-python -m hinglish_emotion analyze "movie acchaaa thi 😊" --model-path models/muril_sentiment
-```
-
-The training command creates a fixed split manifest, saves the best validation checkpoint, stops early when macro-F1 no longer improves, and writes test metrics to `metrics.json`.
+The next research steps are independent real-data evaluation, matched encoder
+comparisons and controlled emoji/normalization ablations. Learned sarcasm,
+calibrated seven-emotion Qwen review, supervised intensity and conversation
+context still need suitable annotations and experiments.
