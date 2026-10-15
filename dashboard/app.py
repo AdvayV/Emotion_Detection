@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+import hashlib
 from pathlib import Path
 
 import pandas as pd
@@ -19,192 +20,369 @@ from hinglish_emotion.transformer_classifier import LocalTransformerClassifier
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SAMPLE_DATA = PROJECT_ROOT / "data" / "hinglish_emotion_phrases.xlsx"
+PAGES = ["Analyze text", "Emotion lab", "Model effectiveness", "Dataset explorer", "Overview"]
 EXAMPLES = {
     "Positive with emphasis": "movie acchaaa thi 😊",
     "Negation": "service acchi nahi thi 😞",
     "Possible sarcasm": "wah kya service hai, 2 ghante late 😂",
     "Neutral": "theek tha",
 }
-LABEL_COLORS = {"positive": "#1B7F5A", "neutral": "#49627A", "negative": "#B5475A"}
+LABEL_COLORS = {"positive": "#27856D", "neutral": "#7B849B", "negative": "#C35C6D"}
+SENTIMENT_ICONS = {"positive": "🙂", "neutral": "😐", "negative": "🙁"}
+SENTIMENT_EXPLANATIONS = {
+    "positive": "The message expresses a positive opinion or feeling.",
+    "neutral": "The message does not lean clearly positive or negative.",
+    "negative": "The message expresses a complaint or negative feeling.",
+}
+REVIEW_REASONS = {
+    "low_confidence": "The classifier is not confident enough to decide on its own.",
+    "possible_sarcasm": "Praise and a negative situation may be used sarcastically.",
+    "text_emoji_conflict": "The words and emoji may point to different meanings.",
+    "classifier_disagreement": "The classifiers disagree about the sentiment.",
+    "uncertain_negation": "A negation such as 'nahi' makes this message harder to judge.",
+}
+MODEL_DESCRIPTIONS = {
+    "Rule-based baseline": "Uses sentiment words, negation and emoji rules. Ready to try immediately.",
+    "mBERT": "A multilingual BERT encoder. Needs a trained Hinglish sentiment checkpoint.",
+    "MuRIL": "An encoder for Indian languages and transliterated text. Needs a trained checkpoint.",
+    "XLM-R": "A multilingual RoBERTa encoder. Needs a trained Hinglish sentiment checkpoint.",
+    "Custom checkpoint": "Use another locally saved three-class sentiment model.",
+}
 
 
-def inject_theme() -> None:
-    st.markdown(
-        """
-        <style>
-          .stApp { background: #F6F8FC; }
-          .block-container { max-width: 1180px; padding-top: 2.1rem; padding-bottom: 3rem; }
-          h1, h2, h3 { color: #14233B; letter-spacing: -0.02em; }
-          [data-testid="stMetric"] { background: #FFFFFF; border: 1px solid #DCE4F0; border-radius: 12px; padding: 0.8rem 1rem; }
-          [data-testid="stMetricLabel"] { color: #52657D; }
-          div[data-testid="stExpander"] { background: #FFFFFF; border: 1px solid #DCE4F0; border-radius: 12px; }
-          .research-note { color: #52657D; font-size: 0.96rem; margin-bottom: 1.4rem; }
-          .status-chip { display: inline-block; padding: 0.28rem 0.62rem; border-radius: 999px; font-size: 0.82rem; font-weight: 600; margin-right: 0.35rem; }
-          .chip-positive { background: #DDF4E9; color: #126143; }
-          .chip-neutral { background: #E8EFF7; color: #36516F; }
-          .chip-negative { background: #FBE4E7; color: #8B2639; }
-          .chip-warning { background: #FFF1D7; color: #8C5A00; }
-        </style>
-        """,
-        unsafe_allow_html=True,
+def page_header(title: str, description: str) -> None:
+    st.caption("HINGLISH LAB  /  LOCAL RESEARCH WORKSPACE")
+    st.title(title)
+    st.write(description)
+
+
+def style_chart(figure, height: int = 320):
+    figure.update_layout(
+        template="plotly_white", height=height,
+        font={"family": "Arial, sans-serif", "color": "#4A5269", "size": 13},
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        margin={"l": 5, "r": 10, "t": 30, "b": 5}, legend_title_text="",
     )
+    figure.update_xaxes(gridcolor="#E9ECF3")
+    figure.update_yaxes(gridcolor="#E9ECF3")
+    return figure
 
 
-def status_chip(label: str, kind: str) -> str:
-    return f'<span class="status-chip chip-{kind}">{label}</span>'
+def classifier_name(model_path: str) -> str:
+    if not model_path:
+        return "Rule-based baseline"
+    for encoder in ENCODERS:
+        if Path(model_path).name == encoder.folder:
+            return encoder.name
+    return "Custom checkpoint"
+
+
+def navigate_to(page: str) -> None:
+    st.session_state.workspace = page
+
+
+def select_baseline() -> None:
+    st.session_state.encoder_choice = "Rule-based baseline"
+
+
+def load_example() -> None:
+    st.session_state.message_input = EXAMPLES.get(st.session_state.analysis_example, "")
+
+
+@st.cache_resource(max_entries=1, show_spinner=False)
+def local_classifier(path: str, checkpoint_version: int) -> LocalTransformerClassifier:
+    return LocalTransformerClassifier(path)
 
 
 def build_pipeline(model_path: str, use_reviewer: bool, ollama_model: str) -> tuple[EmotionPipeline, str]:
     classifier = None
-    mode = "Rule-based baseline"
+    mode = classifier_name(model_path)
     if model_path.strip():
         path = Path(model_path.strip())
         if not checkpoint_ready(path):
-            raise RuntimeError("This folder does not contain a complete trained classifier checkpoint. Train the selected encoder first.")
-        classifier = LocalTransformerClassifier(path)
-        mode = f"Local transformer: {path.name}"
+            raise RuntimeError("This model needs a trained checkpoint. Choose the rule-based baseline to try analysis now.")
+        classifier = local_classifier(str(path), (path / "config.json").stat().st_mtime_ns)
     reviewer = OllamaReviewer(model=ollama_model) if use_reviewer else None
     return EmotionPipeline(classifier=classifier, reviewer=reviewer), mode
 
 
-def render_overview() -> None:
-    st.title("Hinglish Emotion Research Dashboard")
-    st.markdown('<p class="research-note">A local workspace for transparent Hinglish sentiment analysis, sarcasm review, and dataset inspection.</p>', unsafe_allow_html=True)
-
-    left, right = st.columns([1.25, 1])
-    with left:
-        st.subheader("Research flow")
-        st.graphviz_chart(
-            """digraph { graph [bgcolor=transparent, rankdir=LR, nodesep=0.45];
-            node [shape=box, style=rounded, color=\"#9DB2CE\", fontcolor=\"#14233B\"];
-            input [label=\"Hinglish message\"]; normalize [label=\"Normalize\nspelling + emphasis\"]; classify [label=\"Sentiment classifier\"]; route [label=\"Uncertainty + sarcasm router\"]; review [label=\"Optional local Qwen review\"]; result [label=\"Interpretable result\"];
-            input -> normalize -> classify -> route -> review -> result; }""",
-            width="stretch",
+def render_sidebar() -> tuple[str, str, bool, str]:
+    with st.sidebar:
+        st.title("💬 Hinglish Lab")
+        st.caption("Explore sentiment. Understand the decision.")
+        page = st.radio("Workspace", PAGES, key="workspace")
+        if page == "Emotion lab":
+            st.divider()
+            st.info("Emotion lab predicts seven feelings in Hindi–English and French–English phrases.")
+            st.caption("Choose its emotion classifier on the page. The sentiment checkpoint and Qwen reviewer use a different label set.")
+            return page, "", False, DEFAULT_OLLAMA_MODEL
+        st.divider()
+        st.subheader("Analysis settings")
+        encoder_choice = st.selectbox(
+            "Primary classifier",
+            ["Rule-based baseline", *(encoder.name for encoder in ENCODERS), "Custom checkpoint"],
+            key="encoder_choice",
+            help="This model predicts positive, neutral or negative sentiment.",
         )
-    with right:
-        st.subheader("Current local workflow")
-        st.markdown("Use **Analyze text** for a single message, then open **Dataset explorer** to review labels and data quality. The baseline is always available; trained mBERT, MuRIL, or XLM-R checkpoints and local Qwen can be selected when present.")
-        st.info("The bundled dataset is illustrative. Report research results only after running experiments on the full labelled dataset.")
+        st.caption(MODEL_DESCRIPTIONS[encoder_choice])
+        model_path = ""
+        if encoder_choice == "Custom checkpoint":
+            custom = st.text_input("Local transformer folder", placeholder="models/my_checkpoint")
+            if custom.strip():
+                path = Path(custom.strip())
+                model_path = str(path if path.is_absolute() else PROJECT_ROOT / path)
+        elif encoder_choice != "Rule-based baseline":
+            encoder = next(item for item in ENCODERS if item.name == encoder_choice)
+            model_path = str(checkpoint_path(encoder, PROJECT_ROOT / "models"))
+        if encoder_choice == "Custom checkpoint" and not model_path:
+            st.info("Enter your checkpoint folder to use a custom model.")
+        elif not model_path or checkpoint_ready(model_path):
+            st.success("Ready to analyze", icon="✅")
+        else:
+            st.warning(f"{encoder_choice} is not trained here yet.", icon="⚠️")
+            st.button("Use rule-based baseline", on_click=select_baseline, width="stretch")
 
-    st.subheader("Five proposed improvements")
-    improvements = [
-        ("1", "Hinglish-aware encoder", "Compare MuRIL, mBERT, and XLM-R with the original English-oriented baselines."),
-        ("2", "Spelling and emphasis", "Normalise variants such as acchaaa while retaining expressive elongation."),
-        ("3", "Emoji + sarcasm", "Use emoji context and route literal-positive, context-negative messages for review."),
-        ("4", "Local Qwen reviewer", "Ask Qwen3 locally only for uncertain or conflicting cases."),
-        ("5", "Stronger evaluation", "Use macro-F1, calibration, class recall, and targeted ablation studies."),
-    ]
-    for row in (improvements[:3], improvements[3:]):
-        columns = st.columns(len(row))
-        for column, (number, title, detail) in zip(columns, row):
-            with column:
-                st.markdown(f"### {number}. {title}")
-                st.write(detail)
+        st.divider()
+        use_reviewer = st.toggle(
+            "Ask Qwen for a second opinion", value=False,
+            help="Only uncertain or conflicting messages are sent to your local Ollama model.",
+        )
+        st.caption("Optional · runs locally through Ollama. CPU review may take a little longer.")
+        with st.expander("Advanced model settings"):
+            ollama_model = st.text_input("Ollama model", value=DEFAULT_OLLAMA_MODEL)
+            if model_path:
+                st.caption("Selected checkpoint")
+                st.code(model_path, language=None)
+        if use_reviewer:
+            ready, message = OllamaReviewer(model=ollama_model).availability()
+            (st.success if ready else st.warning)(message)
+        st.divider()
+        st.caption("Private by default · live analysis stays in this browser session.")
+    return page, model_path, use_reviewer, ollama_model
+
+
+def render_result(saved: dict) -> None:
+    prediction = saved["prediction"]
+    intensity = saved["intensity"]
+    st.caption("02  /  YOUR RESULT")
+    st.caption(f"Analyzed with {saved['mode']}")
+    label = prediction.final_label
+    st.subheader(f"{SENTIMENT_ICONS[label]} {label.title()}")
+    st.write(SENTIMENT_EXPLANATIONS[label])
+    st.caption("Analyzed message")
+    st.write(saved["text"])
+    score_col, emoji_col = st.columns(2)
+    score_col.metric(
+        "Primary confidence", f"{prediction.primary.confidence:.0%}",
+        help="The primary classifier's score for its own prediction. Qwen may change the final sentiment without changing this score.",
+    )
+    emoji_col.metric(
+        "Emoji check",
+        "Needs context" if prediction.text_emoji_conflict else "No conflict" if prediction.normalized.emojis else "No emoji",
+        help="Checks whether the emoji and predicted sentiment may conflict.",
+    )
+    if not saved["model_path"]:
+        st.caption("Confidence is a rule-based estimate, not a measured probability of being correct.")
+
+    st.divider()
+    st.markdown("**How the classifier scored the message**")
+    probability_frame = pd.DataFrame({
+        "Sentiment": list(prediction.primary.probabilities),
+        "Score": list(prediction.primary.probabilities.values()),
+    })
+    chart = px.bar(
+        probability_frame, x="Score", y="Sentiment", orientation="h",
+        color="Sentiment", color_discrete_map=LABEL_COLORS, range_x=[0, 1],
+        text=probability_frame["Score"].map(lambda score: f"{score:.0%}"),
+    )
+    chart.update_traces(textposition="outside", cliponaxis=False)
+    chart.update_layout(showlegend=False)
+    chart.update_xaxes(title=None, tickformat=".0%", range=[0, 1.12])
+    chart.update_yaxes(title=None, categoryorder="array", categoryarray=["negative", "neutral", "positive"])
+    st.plotly_chart(style_chart(chart, 215), width="stretch", config={"displayModeBar": False})
+
+    st.markdown("**Does it need a second look?**")
+    if prediction.reviewer is not None:
+        reviewer = prediction.reviewer
+        st.success("Qwen reviewed this message locally.")
+        if reviewer.sentiment != prediction.primary.label:
+            st.write(f"Qwen changed **{prediction.primary.label} → {reviewer.sentiment}**.")
+        else:
+            st.write("Qwen agreed with the primary sentiment.")
+        st.write(f"**Sarcasm according to Qwen:** {'Yes' if reviewer.sarcasm else 'No'}")
+    elif prediction.review_decision.should_review:
+        st.warning("This message has signals that deserve a second look.")
+        for reason in prediction.review_decision.reasons:
+            st.write("• " + REVIEW_REASONS.get(reason, reason.replace("_", " ")))
+        if saved["use_reviewer"]:
+            st.caption("Qwen was requested but no review was returned. Check the Ollama status in the sidebar.")
+        else:
+            st.caption("Switch on the Qwen second opinion in the sidebar to review difficult messages.")
+    else:
+        st.success("No additional review was requested.")
+        st.caption("The primary classifier did not trigger the uncertainty checks.")
+
+    with st.expander("Evidence, spelling changes and research details"):
+        evidence = prediction.reviewer.evidence if prediction.reviewer is not None else prediction.primary.evidence
+        st.markdown("**Words and emoji picked up by the model**")
+        if evidence:
+            st.write(", ".join(evidence))
+        else:
+            st.caption("This classifier does not provide word-level evidence.")
+        st.markdown("**Text after normalization**")
+        st.code(prediction.normalized.normalized_text, language=None)
+        changes = [token for token in prediction.normalized.tokens if token.raw != token.normalized]
+        st.caption(f"{len(changes)} token(s) changed. Emphasis and negation are kept as separate features.")
+        token_rows = [{
+            "Original": token.raw, "Normalized": token.normalized,
+            "Language": token.language,
+            "Emphasis retained": "Yes" if token.elongated else "",
+            "Negation": "Yes" if token.is_negation else "",
+        } for token in prediction.normalized.tokens]
+        st.dataframe(pd.DataFrame(token_rows), width="stretch", hide_index=True)
+        st.divider()
+        st.markdown("**Sarcasm signal**")
+        if saved["model_path"]:
+            st.caption("The transformer checkpoint predicts sentiment only; it has no trained sarcasm head.")
+        else:
+            st.write("Possible sarcasm flagged" if prediction.primary.sarcasm_probability >= 0.60 else "No strong sarcasm signal")
+            st.caption(f"Rule-based signal: {prediction.primary.sarcasm_probability:.0%}. This uses praise, a negative situation and laughter cues.")
+        st.markdown("**Emotion intensity · heuristic estimate**")
+        valence_col, arousal_col = st.columns(2)
+        valence_col.metric("Valence", f"{intensity.valence:+.2f}", help="Negative to positive tone, from -1 to +1.")
+        arousal_col.metric("Arousal", f"{intensity.arousal:.2f}", help="Estimated emotional energy, from 0 to 1.")
+        st.caption("These lexical estimates are independent of the sentiment classifier and may disagree with it.")
+        if intensity.cues:
+            st.write("Intensity cues: " + ", ".join(cue.replace("_", " ") for cue in intensity.cues))
+
+
+def render_history() -> None:
+    history = pd.DataFrame(st.session_state.get("history", []))
+    if history.empty:
+        return
+    with st.expander(f"Recent analyses · {len(history)} in this session"):
+        st.caption("Kept in memory for this browser session. Download a copy before closing it.")
+        st.dataframe(history.iloc[::-1], width="stretch", hide_index=True)
+        st.download_button(
+            "Download analysis history", data=history.to_csv(index=False).encode("utf-8"),
+            file_name="hinglish_emotion_session_history.csv", mime="text/csv",
+        )
 
 
 def render_analysis(model_path: str, use_reviewer: bool, ollama_model: str) -> None:
-    st.title("Analyze text")
-    st.markdown('<p class="research-note">Inspect the final prediction and the signals that influenced it. All analysis remains on this computer.</p>', unsafe_allow_html=True)
+    page_header("Analyze text", "Understand the sentiment of a Hinglish message and see what influenced the prediction.")
+    input_col, result_col = st.columns([1, 1.15], gap="large")
+    selected = st.session_state.get("encoder_choice", "Rule-based baseline")
+    signature = (selected, model_path, use_reviewer, ollama_model)
+    ready = (not model_path and selected == "Rule-based baseline") or bool(model_path and checkpoint_ready(model_path))
+    with input_col:
+        with st.container(border=True):
+            st.caption("01  /  YOUR MESSAGE")
+            st.subheader("What would you like to analyze?")
+            st.selectbox("Try an example", ["Custom text", *EXAMPLES], key="analysis_example", on_change=load_example)
+            if "message_input" not in st.session_state:
+                st.session_state.message_input = ""
+            text = st.text_area(
+                "Hinglish message", key="message_input", height=170,
+                placeholder="movie acchaaa thi 😊",
+                help="Keep the original spelling and emoji. The pipeline handles normalization.",
+            )
+            st.caption(f"Classifier: {selected} · Qwen second opinion: {'on' if use_reviewer else 'off'}")
+            analyze = st.button("Analyze message", type="primary", width="stretch", disabled=not ready)
+            if not ready:
+                st.info("Choose the ready rule-based baseline in the sidebar, or train this encoder first.")
+        with st.container(border=True):
+            st.markdown("**Three things to try**")
+            st.write("**Spelling:** accha and acchaaa")
+            st.write("**Negation:** acchi thi and acchi nahi thi")
+            st.write("**Sarcasm:** wah kya service hai, 2 ghante late 😂")
+            st.caption("The default baseline uses rules. A trained encoder can later be compared on the same examples.")
 
-    selected_example = st.selectbox("Load an example", ["Custom text", *EXAMPLES], label_visibility="collapsed")
-    default_text = EXAMPLES.get(selected_example, "")
-    text = st.text_area("Hinglish message", value=default_text, placeholder="Type a Hinglish message, for example: movie acchaaa thi 😊", height=120)
-    analyze = st.button("Analyze message", type="primary", width="content")
+        if analyze:
+            if not text.strip():
+                st.warning("Write a message or choose an example before analyzing.")
+            else:
+                try:
+                    with st.spinner("Reading your message…"):
+                        pipeline, mode = build_pipeline(model_path, use_reviewer, ollama_model)
+                        prediction = pipeline.predict(text)
+                    st.session_state.last_analysis = {
+                        "prediction": prediction, "intensity": IntensityEstimator().estimate(text),
+                        "text": text, "mode": mode, "model_path": model_path,
+                        "use_reviewer": use_reviewer, "signature": signature,
+                    }
+                    st.session_state.history.append({
+                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "text": text, "classifier": mode, "sentiment": prediction.final_label,
+                        "confidence": round(prediction.primary.confidence, 3),
+                        "sarcasm_probability": round(prediction.primary.sarcasm_probability, 3) if not model_path else None,
+                        "routed_for_review": prediction.review_decision.should_review,
+                    })
+                except (RuntimeError, ValueError, OSError) as exc:
+                    st.error(f"Analysis could not finish: {exc}")
 
-    if not analyze:
-        st.caption("Try an example or enter your own message to see the analysis.")
-        return
-    if not text.strip():
-        st.warning("Enter a message before running analysis.")
-        return
+    with result_col:
+        with st.container(border=True):
+            saved = st.session_state.get("last_analysis")
+            if saved:
+                if saved["text"] != text or saved["signature"] != signature:
+                    st.info("Showing your previous result. Analyze again to use the current message and settings.")
+                render_result(saved)
+            else:
+                st.caption("02  /  YOUR RESULT")
+                st.subheader("Your result will appear here")
+                st.write("Choose an example or write a message, then select **Analyze message**.")
+                st.divider()
+                st.markdown("**You will see**")
+                st.write("A sentiment label: positive, neutral or negative.")
+                st.write("The classifier's scores and any emoji conflict.")
+                st.write("Why a second review may be useful.")
+                st.caption("No prediction has been run yet.")
+    render_history()
 
-    try:
-        pipeline, mode = build_pipeline(model_path, use_reviewer, ollama_model)
-        prediction = pipeline.predict(text)
-    except RuntimeError as exc:
-        st.error(str(exc))
-        return
 
-    intensity = IntensityEstimator().estimate(text)
-    if "history" not in st.session_state:
-        st.session_state.history = []
-    st.session_state.history.append(
-        {
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "text": text,
-            "sentiment": prediction.final_label,
-            "confidence": round(prediction.primary.confidence, 3),
-            "sarcasm_probability": round(prediction.primary.sarcasm_probability, 3),
-            "routed_for_review": prediction.review_decision.should_review,
-        }
-    )
-
-    st.caption(f"Active mode: {mode}")
-    result_kind = prediction.final_label
-    st.markdown(status_chip(f"Final sentiment: {prediction.final_label.title()}", result_kind), unsafe_allow_html=True)
-    if prediction.review_decision.should_review:
-        st.markdown(status_chip("Review route triggered", "warning"), unsafe_allow_html=True)
+def render_overview() -> None:
+    page_header("How the project works", "A local workflow for Hinglish sentiment, spelling variation, emoji and difficult messages.")
+    ready_encoders = sum(checkpoint_ready(checkpoint_path(encoder, PROJECT_ROOT / "models")) for encoder in ENCODERS)
+    columns = st.columns(3)
+    columns[0].metric("Default classifier", "Ready", help="The rule-based baseline runs without downloading model weights.", border=True)
+    columns[1].metric("Trained encoders", f"{ready_encoders} / 3", help="mBERT, MuRIL and XLM-R checkpoints found locally.", border=True)
+    columns[2].metric("Review option", "Local Qwen", help="An optional second opinion for uncertain messages through Ollama.", border=True)
     st.write("")
-
-    metric_columns = st.columns(4)
-    metric_columns[0].metric("Confidence", f"{prediction.primary.confidence:.0%}")
-    metric_columns[1].metric("Sarcasm likelihood", f"{prediction.primary.sarcasm_probability:.0%}")
-    metric_columns[2].metric("Valence", f"{intensity.valence:+.2f}")
-    metric_columns[3].metric("Arousal", f"{intensity.arousal:.2f}")
-
-    chart_col, details_col = st.columns([1.05, 1])
-    with chart_col:
-        probability_frame = pd.DataFrame(
-            {"Sentiment": list(prediction.primary.probabilities), "Probability": list(prediction.primary.probabilities.values())}
+    first, second = st.columns(2)
+    with first, st.container(border=True):
+        st.subheader("Try one message")
+        st.write("Start with an example. Inspect sentiment, spelling changes and review signals.")
+        st.button("Open text analysis", on_click=navigate_to, args=("Analyze text",), width="stretch", type="primary")
+    with second, st.container(border=True):
+        st.subheader("Check the model's performance")
+        st.write("Compare predictions with labelled phrases and inspect the mistakes.")
+        st.button("Open model evaluation", on_click=navigate_to, args=("Model effectiveness",), width="stretch")
+    with st.container(border=True):
+        st.subheader("From message to result")
+        st.graphviz_chart(
+            r"""digraph { graph [bgcolor=transparent, rankdir=LR, nodesep=0.45, pad=0.2];
+            node [shape=box, style="rounded,filled", fillcolor="#F1F2FC", color="#CBCDE9", fontname="Arial", fontcolor="#313651"];
+            edge [color="#8A91B5", fontname="Arial", fontsize=10];
+            input [label="Your message"]; normalize [label="Clean spelling\nkeep emphasis + negation"];
+            classify [label="Predict sentiment"]; route [label="Check uncertainty\nemoji + sarcasm"];
+            review [label="Qwen second opinion"]; result [label="Final result"];
+            input -> normalize -> classify -> route;
+            route -> review [label="Needs review + Qwen on"]; review -> result;
+            route -> result [label="No review / Qwen off"]; }""",
+            width="stretch",
         )
-        chart = px.bar(
-            probability_frame,
-            x="Sentiment",
-            y="Probability",
-            color="Sentiment",
-            color_discrete_map=LABEL_COLORS,
-            range_y=[0, 1],
-            text_auto=".0%",
-            title="Primary classifier probabilities",
-        )
-        chart.update_layout(showlegend=False, margin=dict(l=0, r=0, t=45, b=0), yaxis_tickformat=".0%")
-        st.plotly_chart(chart, width="stretch")
-    with details_col:
-        st.subheader("Decision signals")
-        reasons = prediction.review_decision.reasons or ("No review route triggered",)
-        st.write("**Router:** " + ", ".join(reason.replace("_", " ") for reason in reasons))
-        st.write("**Emoji relation:** " + ("possible conflict" if prediction.text_emoji_conflict else "no conflict detected"))
-        st.write("**Intensity cues:** " + (", ".join(intensity.cues) if intensity.cues else "none detected"))
-        reviewer = prediction.reviewer
-        if reviewer is not None:
-            st.success(f"Local Qwen review: {reviewer.sentiment.title()} | sarcasm: {'yes' if reviewer.sarcasm else 'no'}")
-        elif use_reviewer and prediction.review_decision.should_review:
-            st.warning("Qwen was selected but did not return a review. Confirm Ollama is running with the selected model.")
-
-    with st.expander("Normalization and evidence", expanded=True):
-        token_rows = [
-            {
-                "Original": token.raw,
-                "Normalized": token.normalized,
-                "Language": token.language,
-                "Emphasis retained": "Yes" if token.elongated else "",
-                "Negation": "Yes" if token.is_negation else "",
-            }
-            for token in prediction.normalized.tokens
-        ]
-        st.write(f"**Normalized message:** {prediction.normalized.normalized_text}")
-        st.write("**Evidence:** " + (", ".join(prediction.primary.evidence) if prediction.primary.evidence else "No lexical evidence was identified by the baseline."))
-        st.dataframe(pd.DataFrame(token_rows), width="stretch", hide_index=True)
-
-    history = pd.DataFrame(st.session_state.history)
-    with st.expander(f"Session history ({len(history)})"):
-        st.dataframe(history.iloc[::-1], width="stretch", hide_index=True)
-        st.download_button(
-            "Download session history as CSV",
-            data=history.to_csv(index=False).encode("utf-8"),
-            file_name="hinglish_emotion_session_history.csv",
-            mime="text/csv",
-        )
+        st.caption("Qwen is consulted only when a review is triggered and the reviewer is enabled.")
+    st.subheader("The five improvements")
+    features = [
+        ("Hinglish-aware encoders", "mBERT, MuRIL and XLM-R training and checkpoint selection", "Train on the real labelled dataset"),
+        ("Spelling and emphasis", "Normalize variants while retaining elongation and negation", "Measure consistency across spelling variants"),
+        ("Emoji and sarcasm", "Rule-based conflict and sarcasm signals", "Train contextual emoji and sarcasm components"),
+        ("Local Qwen review", "Optional review of uncertain messages", "Measure when the second opinion helps"),
+        ("Stronger evaluation", "Live metrics, error analysis and shared training splits", "Evaluate on an independent held-out benchmark"),
+    ]
+    st.dataframe(pd.DataFrame(features, columns=["Improvement", "Available in the code", "Next research step"]), width="stretch", hide_index=True)
+    st.info("The bundled 75 phrases are demo data. Research accuracy requires an independently labelled, held-out dataset.")
 
 
 def load_dataset(uploaded_file: object | None) -> tuple[pd.DataFrame, str]:
@@ -213,78 +391,80 @@ def load_dataset(uploaded_file: object | None) -> tuple[pd.DataFrame, str]:
     return read_dataset(SAMPLE_DATA), "Bundled 75-phrase workbook"
 
 
+def show_invalid_dataset(report) -> None:
+    st.error("Fix the dataset before continuing.")
+    if report.empty_text_rows:
+        st.write(f"• {report.empty_text_rows} row(s) have no message text.")
+    if report.invalid_label_rows:
+        st.write(f"• {report.invalid_label_rows} row(s) need a positive, neutral or negative label.")
+    if not report.rows:
+        st.write("• This file contains no data rows.")
+    with st.expander("Detailed validation report"):
+        st.json(report_dict(report))
+
+
 def render_dataset() -> None:
-    st.title("Dataset explorer")
-    st.markdown('<p class="research-note">Review dataset balance and annotations before training a model.</p>', unsafe_allow_html=True)
-    uploaded = st.file_uploader(
-        "Upload a compatible CSV or XLSX",
-        type=["csv", "xlsx"],
-        help="Required columns: text and label. XLSX files must contain a 'phrases' sheet.",
-    )
+    page_header("Dataset explorer", "Inspect the messages, labels and annotations before using them for training or evaluation.")
+    with st.container(border=True):
+        uploaded = st.file_uploader(
+            "Choose a dataset", type=["csv", "xlsx"], key="explorer_dataset",
+            help="CSV needs text and label columns. XLSX needs those columns in a phrases sheet.",
+        )
+        st.caption("Leave this empty to explore the demo workbook. Labels must be positive, neutral or negative.")
     try:
         frame, source = load_dataset(uploaded)
         report = dataframe_report(frame)
     except Exception as exc:
-        st.error(f"Could not read this dataset: {exc}")
+        st.error(f"Could not read the dataset: {exc}")
         return
-
-    st.caption(f"Source: {source}")
     if not report.valid:
-        st.error("This dataset needs attention before training.")
-        st.json(report_dict(report))
+        show_invalid_dataset(report)
         return
-    st.success("Dataset passed the required text and label checks.")
-
+    st.caption(f"Source: {source}")
     if uploaded is None:
-        st.download_button(
-            "Download the 75-phrase XLSX",
-            data=SAMPLE_DATA.read_bytes(),
-            file_name=SAMPLE_DATA.name,
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
-
+        st.info("Demo dataset · 75 illustrative phrases. Use an independent dataset for research results.")
+    if report.duplicate_text_rows:
+        st.warning(f"{report.duplicate_text_rows} repeated message(s) found. Keep duplicates in the same training split.")
     sarcasm = sarcasm_rate(frame)
-    metrics = st.columns(4)
-    metrics[0].metric("Rows", report.rows)
-    metrics[1].metric("Unique messages", report.rows - report.duplicate_text_rows)
-    metrics[2].metric("Sarcasm rate", "Not labelled" if sarcasm is None else f"{sarcasm:.0%}")
-    metrics[3].metric("Optional fields", len(report.optional_columns))
-
-    first_col, second_col = st.columns(2)
-    with first_col:
+    columns = st.columns(4)
+    columns[0].metric("Messages", report.rows, border=True)
+    columns[1].metric("Positive", report.label_counts["positive"], border=True)
+    columns[2].metric("Neutral", report.label_counts["neutral"], border=True)
+    columns[3].metric("Negative", report.label_counts["negative"], border=True)
+    left, right = st.columns(2)
+    with left, st.container(border=True):
+        st.markdown("**How are the labels distributed?**")
         balance = pd.DataFrame({"Sentiment": list(report.label_counts), "Messages": list(report.label_counts.values())})
-        balance_chart = px.bar(
-            balance,
-            x="Sentiment",
-            y="Messages",
-            color="Sentiment",
-            color_discrete_map=LABEL_COLORS,
-            title="Class balance",
-            text="Messages",
-        )
-        balance_chart.update_layout(showlegend=False, margin=dict(l=0, r=0, t=45, b=0))
-        st.plotly_chart(balance_chart, width="stretch")
-    with second_col:
-        length_frame = frame.copy()
-        length_frame["Message length"] = length_frame["text"].fillna("").astype(str).str.len()
-        length_chart = px.histogram(length_frame, x="Message length", nbins=min(20, max(5, len(length_frame))), title="Message-length distribution")
-        length_chart.update_traces(marker_color="#315F97")
-        length_chart.update_layout(margin=dict(l=0, r=0, t=45, b=0), yaxis_title="Messages")
-        st.plotly_chart(length_chart, width="stretch")
+        chart = px.bar(balance, x="Sentiment", y="Messages", color="Sentiment", color_discrete_map=LABEL_COLORS, text="Messages")
+        chart.update_layout(showlegend=False)
+        chart.update_xaxes(title=None)
+        st.plotly_chart(style_chart(chart), width="stretch", config={"displayModeBar": False})
+        st.caption("A balanced dataset represents all three sentiments. Real data may be uneven.")
+    with right, st.container(border=True):
+        st.markdown("**How long are the messages?**")
+        lengths = frame["text"].fillna("").astype(str).str.len()
+        chart = px.histogram(pd.DataFrame({"Characters per message": lengths}), x="Characters per message", nbins=min(20, max(5, len(frame))))
+        chart.update_traces(marker_color="#6264CF")
+        chart.update_yaxes(title="Messages")
+        st.plotly_chart(style_chart(chart), width="stretch", config={"displayModeBar": False})
+        st.caption("Longer messages may need a larger token limit during training.")
+    with st.container(border=True):
+        st.subheader("Browse the messages")
+        search_col, filter_col = st.columns([2, 1])
+        query = search_col.text_input("Search messages", placeholder="Search any word, label or annotation")
+        labels = filter_col.multiselect("Sentiment filter", ["positive", "neutral", "negative"], default=["positive", "neutral", "negative"])
+        visible = frame[frame["label"].astype(str).str.strip().str.lower().isin(labels)].copy()
+        if query.strip():
+            searchable = visible.fillna("").astype(str).apply(lambda row: row.str.contains(query, case=False, regex=False).any(), axis=1)
+            visible = visible[searchable]
+        st.caption(f"Showing {len(visible)} of {len(frame)} messages")
+        st.dataframe(visible, width="stretch", hide_index=True)
+        st.caption("Sarcasm-labelled share: " + ("not annotated" if sarcasm is None else f"{sarcasm:.0%}") + " · Additional fields: " + (", ".join(report.optional_columns) or "none"))
+        if uploaded is None:
+            st.download_button("Download demo workbook", data=SAMPLE_DATA.read_bytes(), file_name=SAMPLE_DATA.name, mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-    st.subheader("Source data")
-    query = st.text_input("Search messages", placeholder="Search text, label, or annotation")
-    visible = frame.copy()
-    if query.strip():
-        searchable = visible.fillna("").astype(str).apply(lambda row: row.str.contains(query, case=False, regex=False).any(), axis=1)
-        visible = visible[searchable]
-    st.dataframe(visible, width="stretch", hide_index=True)
 
-
-def evaluation_models(
-    model_path: str, use_reviewer: bool, ollama_model: str
-) -> tuple[list[tuple[str, EmotionPipeline]], list[str]]:
-    """Build only model variants that are genuinely available on this machine."""
+def evaluation_models(model_path: str, use_reviewer: bool, ollama_model: str) -> tuple[list[tuple[str, EmotionPipeline]], list[str]]:
     models: list[tuple[str, EmotionPipeline]] = [
         ("Rule-based baseline", EmotionPipeline(classifier=RuleBasedClassifier()))
     ]
@@ -294,115 +474,96 @@ def evaluation_models(
     if model_path.strip():
         path = Path(model_path.strip())
         if not checkpoint_ready(path):
-            notices.append("The selected transformer has no complete trained checkpoint, so it was skipped.")
+            notices.append("The selected encoder has no trained checkpoint. Only ready models will be evaluated.")
         else:
-            transformer = LocalTransformerClassifier(path)
-            transformer_name = f"Local transformer · {path.name}"
+            transformer = local_classifier(str(path), (path / "config.json").stat().st_mtime_ns)
+            transformer_name = classifier_name(model_path)
             models.append((transformer_name, EmotionPipeline(classifier=transformer)))
-
     if use_reviewer:
         reviewer = OllamaReviewer(model=ollama_model)
         ready, message = reviewer.availability()
         if ready:
-            primary = transformer or RuleBasedClassifier()
-            primary_name = transformer_name or "Rule baseline"
-            models.append(
-                (
-                    f"{primary_name} + Qwen review",
-                    EmotionPipeline(classifier=primary, reviewer=reviewer),
-                )
-            )
+            models.append((
+                f"{transformer_name or 'Rule baseline'} + Qwen review",
+                EmotionPipeline(classifier=transformer or RuleBasedClassifier(), reviewer=reviewer),
+            ))
         else:
-            notices.append(f"Qwen evaluation was skipped: {message}")
+            notices.append(f"Qwen review is unavailable: {message}")
     return models, notices
 
 
 def render_model_panel(evaluation: ModelEvaluation) -> None:
     summary = evaluation.summary
-    metrics = st.columns(5)
-    metrics[0].metric("Accuracy", f"{float(summary['accuracy']):.1%}")
-    metrics[1].metric("Macro-F1", f"{float(summary['macro_f1']):.1%}")
-    metrics[2].metric("Calibration error", f"{float(summary['calibration_error']):.3f}")
-    metrics[3].metric("Avg confidence", f"{float(summary['average_confidence']):.1%}")
-    metrics[4].metric("Review routed", f"{float(summary['review_route_rate']):.1%}")
-
+    columns = st.columns(3)
+    columns[0].metric("Accuracy", f"{float(summary['accuracy']):.1%}", help="The share of messages with a correct final sentiment.", border=True)
+    columns[1].metric("Macro-F1", f"{float(summary['macro_f1']):.1%}", help="Averages the F1 score of each sentiment equally. Higher is better, especially for uneven class sizes.", border=True)
+    columns[2].metric("Messages evaluated", int(summary["rows"]), border=True)
     left, right = st.columns(2)
-    with left:
+    with left, st.container(border=True):
+        st.markdown("**Which sentiments does it handle well?**")
         class_frame = evaluation.per_class.melt(
-            id_vars=["sentiment", "support"],
-            value_vars=["precision", "recall", "f1"],
-            var_name="Metric",
-            value_name="Score",
+            id_vars=["sentiment", "support"], value_vars=["precision", "recall", "f1"],
+            var_name="Metric", value_name="Score",
         )
-        class_chart = px.bar(
-            class_frame,
-            x="sentiment",
-            y="Score",
-            color="Metric",
-            barmode="group",
-            range_y=[0, 1],
-            title=f"{evaluation.model}: per-class effectiveness",
-            labels={"sentiment": "Actual sentiment"},
+        class_frame["Metric"] = class_frame["Metric"].str.title()
+        chart = px.bar(
+            class_frame, x="sentiment", y="Score", color="Metric", barmode="group", range_y=[0, 1],
+            color_discrete_sequence=["#6264CF", "#46A390", "#A59CE3"],
+            labels={"sentiment": "Sentiment"},
         )
-        class_chart.update_layout(margin=dict(l=0, r=0, t=55, b=0), yaxis_tickformat=".0%")
-        st.plotly_chart(class_chart, width="stretch")
-    with right:
-        confusion_chart = px.imshow(
-            evaluation.confusion,
-            text_auto=True,
-            aspect="auto",
-            color_continuous_scale="Blues",
-            title=f"{evaluation.model}: confusion matrix",
-            labels={"x": "Predicted", "y": "Actual", "color": "Rows"},
+        chart.update_yaxes(tickformat=".0%")
+        st.plotly_chart(style_chart(chart), width="stretch", config={"displayModeBar": False})
+        st.caption("Precision: how often a predicted label is right. Recall: how many real examples it finds. F1 balances both.")
+    with right, st.container(border=True):
+        st.markdown("**Where does it confuse the labels?**")
+        chart = px.imshow(
+            evaluation.confusion, text_auto=True, aspect="auto", color_continuous_scale="Purples",
+            labels={"x": "Predicted sentiment", "y": "Actual sentiment", "color": "Messages"},
         )
-        confusion_chart.update_layout(margin=dict(l=0, r=0, t=55, b=0))
-        st.plotly_chart(confusion_chart, width="stretch")
-
-    calibration = go.Figure()
-    calibration.add_trace(
-        go.Scatter(
-            x=[0, 1], y=[0, 1], mode="lines", name="Perfect calibration",
-            line={"dash": "dash", "color": "#6B7280"},
+        st.plotly_chart(style_chart(chart), width="stretch", config={"displayModeBar": False})
+        st.caption("Rows are the true labels; columns are predictions. Numbers on the diagonal are correct.")
+    with st.expander("Confidence reliability and review activity"):
+        columns = st.columns(3)
+        columns[0].metric("Calibration error", f"{float(summary['calibration_error']):.3f}", help="Distance between confidence and observed correctness. Lower is better.")
+        columns[1].metric("Avg confidence", f"{float(summary['average_confidence']):.1%}")
+        columns[2].metric("Review routed", f"{float(summary['review_route_rate']):.1%}", help="Messages flagged for a second look, whether or not Qwen was enabled.")
+        st.caption("Confidence comes from the primary classifier. For a Qwen variant, correctness uses the final reviewed label.")
+        calibration = go.Figure()
+        calibration.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode="lines", name="Ideal confidence", line={"dash": "dash", "color": "#9CA3B8"}))
+        if not evaluation.calibration.empty:
+            calibration.add_trace(go.Scatter(
+                x=evaluation.calibration["mean_confidence"], y=evaluation.calibration["empirical_accuracy"],
+                mode="lines+markers", name=evaluation.model, line={"color": "#6264CF"},
+                customdata=evaluation.calibration["count"],
+                hovertemplate="Confidence: %{x:.0%}<br>Correct: %{y:.0%}<br>Messages: %{customdata}<extra></extra>",
+            ))
+        calibration.update_layout(
+            xaxis={"title": "Classifier confidence", "range": [0, 1], "tickformat": ".0%"},
+            yaxis={"title": "Actual correctness", "range": [0, 1], "tickformat": ".0%"},
         )
-    )
-    if not evaluation.calibration.empty:
-        calibration.add_trace(
-            go.Scatter(
-                x=evaluation.calibration["mean_confidence"],
-                y=evaluation.calibration["empirical_accuracy"],
-                mode="lines+markers+text",
-                text=evaluation.calibration["count"].map(lambda value: f"n={value}"),
-                textposition="top center",
-                name=evaluation.model,
-                marker={"size": 9},
-            )
-        )
-    calibration.update_layout(
-        title=f"{evaluation.model}: reliability by confidence bin",
-        xaxis={"title": "Mean confidence", "range": [0, 1], "tickformat": ".0%"},
-        yaxis={"title": "Observed accuracy", "range": [0, 1], "tickformat": ".0%"},
-        margin=dict(l=0, r=0, t=55, b=0),
-    )
-    st.plotly_chart(calibration, width="stretch")
-
+        st.plotly_chart(style_chart(calibration), width="stretch")
+        st.caption("A reliable classifier follows the dashed line: 80% confidence should mean about 80% correct.")
     errors = evaluation.predictions[~evaluation.predictions["correct"]]
-    with st.expander(f"Misclassified phrases ({len(errors)})"):
-        st.dataframe(errors, width="stretch", hide_index=True)
+    with st.expander(f"Inspect incorrect predictions · {len(errors)} messages"):
+        if errors.empty:
+            st.success("All labels matched on this dataset.")
+        else:
+            st.dataframe(errors, width="stretch", hide_index=True)
+    st.download_button(
+        "Download these predictions", data=evaluation.predictions.to_csv(index=False).encode("utf-8"),
+        file_name=f"{evaluation.model.lower().replace(' ', '_')}_predictions.csv",
+        mime="text/csv", key=f"predictions_{evaluation.model}",
+    )
 
 
 def render_evaluation(model_path: str, use_reviewer: bool, ollama_model: str) -> None:
-    st.title("Model effectiveness")
-    st.markdown(
-        '<p class="research-note">Run every available model variant on the same labelled phrases. '
-        "All scores shown here are measured live; unavailable checkpoints are never assigned placeholder scores.</p>",
-        unsafe_allow_html=True,
-    )
-    uploaded = st.file_uploader(
-        "Evaluation dataset (CSV or XLSX)",
-        type=["csv", "xlsx"],
-        key="evaluation_dataset",
-        help="Leave empty to use the balanced 75-phrase workbook.",
-    )
+    page_header("Model effectiveness", "Check predictions against labelled messages, then see which labels the model gets right and where it struggles.")
+    with st.container(border=True):
+        st.markdown("**1. Choose the labelled messages**")
+        uploaded = st.file_uploader("Evaluation dataset (CSV or XLSX)", type=["csv", "xlsx"], key="evaluation_dataset", help="Leave empty to use the demo workbook.")
+        st.caption("**2. Choose a classifier** in the sidebar. The rule baseline is always included as a comparison.")
+        selected = st.session_state.get("encoder_choice", "Rule-based baseline")
+        st.caption(f"Selected: {selected} · Qwen second opinion: {'on' if use_reviewer else 'off'}")
     try:
         frame, source = load_dataset(uploaded)
         report = dataframe_report(frame)
@@ -410,16 +571,13 @@ def render_evaluation(model_path: str, use_reviewer: bool, ollama_model: str) ->
         st.error(f"Could not read this evaluation dataset: {exc}")
         return
     if not report.valid:
-        st.error("The evaluation dataset has empty text or invalid labels.")
-        st.json(report_dict(report))
+        show_invalid_dataset(report)
         return
-
-    st.caption(f"Source: {source} · {report.rows} labelled rows")
-    st.info(
-        "The bundled workbook is an illustrative smoke-test set. Its results verify this implementation, "
-        "but they are not a substitute for a held-out research benchmark."
-    )
-    evaluation_signature = (source, model_path.strip(), use_reviewer, ollama_model)
+    st.caption(f"{source} · {report.rows} labelled messages")
+    if uploaded is None:
+        st.info("Demo evaluation · these 75 phrases check the implementation. They do not establish research accuracy.")
+    digest = hashlib.sha256(frame.to_csv(index=False).encode("utf-8")).hexdigest()
+    signature = (source, digest, selected, model_path, use_reviewer, ollama_model)
     if st.button("Run model evaluation", type="primary"):
         try:
             models, notices = evaluation_models(model_path, use_reviewer, ollama_model)
@@ -428,46 +586,34 @@ def render_evaluation(model_path: str, use_reviewer: bool, ollama_model: str) ->
             progress = st.progress(0, text="Preparing evaluation…")
             evaluations = []
             for index, (name, pipeline) in enumerate(models, start=1):
-                progress.progress((index - 1) / len(models), text=f"Evaluating {name}…")
+                progress.progress((index - 1) / len(models), text=f"Checking messages with {name}…")
                 evaluations.append(evaluate_pipeline(frame, pipeline, name))
-            progress.progress(1.0, text="Evaluation complete")
+            progress.empty()
             st.session_state.model_evaluations = evaluations
-            st.session_state.model_evaluation_signature = evaluation_signature
+            st.session_state.model_evaluation_signature = signature
         except Exception as exc:
-            st.error(f"Evaluation could not be completed: {exc}")
+            st.error(f"Evaluation could not finish: {exc}")
             return
-
     evaluations = st.session_state.get("model_evaluations", [])
     if not evaluations:
-        st.caption("Run the evaluation to generate comparison and per-model graphs.")
+        with st.container(border=True):
+            st.subheader("Your comparison will appear here")
+            st.write("Select **Run model evaluation** to measure accuracy and inspect actual mistakes.")
         return
-    if st.session_state.get("model_evaluation_signature") != evaluation_signature:
-        st.warning("The graphs below use previous data or model settings. Run evaluation again to refresh them.")
-
+    if st.session_state.get("model_evaluation_signature") != signature:
+        st.warning("These results use previous data or settings. Run evaluation again to refresh them.")
+    st.divider()
+    st.subheader("Results on the selected messages")
     summary = pd.DataFrame([item.summary for item in evaluations])
-    comparison = summary.melt(
-        id_vars=["model"],
-        value_vars=["accuracy", "macro_f1"],
-        var_name="Metric",
-        value_name="Score",
-    )
-    comparison["Metric"] = comparison["Metric"].map(
-        {"accuracy": "Accuracy", "macro_f1": "Macro-F1"}
-    )
-    comparison_chart = px.bar(
-        comparison,
-        x="model",
-        y="Score",
-        color="Metric",
-        barmode="group",
-        text_auto=".1%",
-        range_y=[0, 1],
-        title="Available model comparison on the selected dataset",
-        labels={"model": "Model"},
-    )
-    comparison_chart.update_layout(margin=dict(l=0, r=0, t=55, b=0), yaxis_tickformat=".0%")
-    st.plotly_chart(comparison_chart, width="stretch")
-
+    if len(evaluations) == 1:
+        st.caption("Only the rule-based baseline was evaluated. Select a trained encoder to compare models.")
+    else:
+        comparison = summary.melt(id_vars=["model"], value_vars=["accuracy", "macro_f1"], var_name="Metric", value_name="Score")
+        comparison["Metric"] = comparison["Metric"].map({"accuracy": "Accuracy", "macro_f1": "Macro-F1"})
+        chart = px.bar(comparison, x="model", y="Score", color="Metric", barmode="group", text_auto=".1%", range_y=[0, 1], color_discrete_sequence=["#6264CF", "#46A390"])
+        chart.update_xaxes(title=None)
+        chart.update_yaxes(tickformat=".0%")
+        st.plotly_chart(style_chart(chart), width="stretch", config={"displayModeBar": False})
     tabs = st.tabs([item.model for item in evaluations])
     for tab, evaluation in zip(tabs, evaluations):
         with tab:
@@ -475,45 +621,21 @@ def render_evaluation(model_path: str, use_reviewer: bool, ollama_model: str) ->
 
 
 def main() -> None:
-    st.set_page_config(page_title="Hinglish Emotion Research", page_icon="💬", layout="wide")
-    inject_theme()
+    st.set_page_config(page_title="Hinglish Lab", page_icon="💬", layout="wide", initial_sidebar_state="expanded")
     if "history" not in st.session_state:
         st.session_state.history = []
-
-    with st.sidebar:
-        st.header("Local model settings")
-        encoder_choice = st.selectbox(
-            "Primary classifier",
-            ["Rule-based baseline", *(encoder.name for encoder in ENCODERS), "Custom checkpoint"],
-        )
-        model_path = ""
-        if encoder_choice == "Custom checkpoint":
-            model_path = st.text_input("Local transformer folder", placeholder="models/my_checkpoint")
-        elif encoder_choice != "Rule-based baseline":
-            encoder = next(item for item in ENCODERS if item.name == encoder_choice)
-            model_path = str(checkpoint_path(encoder, PROJECT_ROOT / "models"))
-            if checkpoint_ready(model_path):
-                st.success(f"{encoder.name} checkpoint ready")
-            else:
-                st.warning(f"{encoder.name} is not trained here yet. Run training.compare_encoders first.")
-        use_reviewer = st.toggle("Use local Qwen reviewer", value=False)
-        ollama_model = st.text_input("Ollama model", value=DEFAULT_OLLAMA_MODEL, disabled=not use_reviewer)
-        if use_reviewer:
-            ready, message = OllamaReviewer(model=ollama_model).availability()
-            (st.success if ready else st.warning)(message)
-        st.caption("The baseline needs no download. Transformer choices use only trained local checkpoints.")
-
-    overview, analysis, evaluation, dataset = st.tabs(
-        ["Overview", "Analyze text", "Model effectiveness", "Dataset explorer"]
-    )
-    with overview:
-        render_overview()
-    with analysis:
+    page, model_path, use_reviewer, ollama_model = render_sidebar()
+    if page == "Analyze text":
         render_analysis(model_path, use_reviewer, ollama_model)
-    with evaluation:
+    elif page == "Emotion lab":
+        from dashboard.emotions import render_emotion_lab
+        render_emotion_lab(page_header, style_chart)
+    elif page == "Model effectiveness":
         render_evaluation(model_path, use_reviewer, ollama_model)
-    with dataset:
+    elif page == "Dataset explorer":
         render_dataset()
+    else:
+        render_overview()
 
 
 if __name__ == "__main__":
