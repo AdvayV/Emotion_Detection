@@ -1,0 +1,85 @@
+text,emotion,language_pair,group_id,source,split
+Aaj main bahut khush hoon because I passed my exam,joy,hi-en,joy_1,illustrative,demo
+Je suis très heureux because I passed my exam,joy,fr-en,joy_1,illustrative,demo
+Family ke saath time spend karke maza aa gaya 😊,joy,hi-en,joy_2,illustrative,demo
+Time with my family me rend heureuse 😊,joy,fr-en,joy_2,illustrative,demo
+Promotion mil gayi and I am so happy,joy,hi-en,joy_3,illustrative,demo
+I got a promotion et je suis ravie,joy,fr-en,joy_3,illustrative,demo
+Hum match jeet gaye 🎉 what a day,joy,hi-en,joy_4,illustrative,demo
+We won the match quelle joie 🎉,joy,fr-en,joy_4,illustrative,demo
+Yeh song sunke main khush ho gaya,joy,hi-en,joy_5,illustrative,demo
+This song me rend tellement content,joy,fr-en,joy_5,illustrative,demo
+Finally weekend aa gaya I can relax now,joy,hi-en,joy_6,illustrative,demo
+Enfin le weekend I can relax now,joy,fr-en,joy_6,illustrative,demo
+Aaj bahut udaas hoon after hearing the news,sadness,hi-en,sadness_1,illustrative,demo
+Je suis triste after hearing the news,sadness,fr-en,sadness_1,illustrative,demo
+Tum chale gaye and I feel heartbroken 💔,sadness,hi-en,sadness_2,illustrative,demo
+Tu es parti and I feel heartbroken 💔,sadness,fr-en,sadness_2,illustrative,demo
+Mera dost door chala gaya I miss you,sadness,hi-en,sadness_3,illustrative,demo
+Mon ami est loin I miss you,sadness,fr-en,sadness_3,illustrative,demo
+Exam fail hua and I am feeling sad,sadness,hi-en,sadness_4,illustrative,demo
+I failed the exam et je suis déçue,sadness,fr-en,sadness_4,illustrative,demo
+Uski yaad aati hai aur rona aa raha hai 😢,sadness,hi-en,sadness_5,illustrative,demo
+I remember him et le chagrin revient 😢,sadness,fr-en,sadness_5,illustrative,demo
+Ab woh chair hamesha khaali rahegi I cannot stop thinking about it,sadness,hi-en,sadness_6,illustrative,demo
+Cette chaise restera vide I cannot stop thinking about it,sadness,fr-en,sadness_6,illustrative,demo
+Mujhe bahut gussa aa raha hai at this unfair treatment,anger,hi-en,anger_1,illustrative,demo
+Je suis en colère at this unfair treatment,anger,fr-en,anger_1,illustrative,demo
+Stop lying yaar I am furious,anger,hi-en,anger_2,illustrative,demo
+Arrête de mentir I am furious,anger,fr-en,anger_2,illustrative,demo
+Tumne phir promise toda and I am angry 😡,anger,hi-en,anger_3,illustrative,demo
+Tu as encore rompu ta promesse and I am angry 😡,anger,fr-en,anger_3,illustrative,demo
+Itna rude reply main bahut naraz hoon,anger,hi-en,anger_4,illustrative,demo
+Such a rude reply je suis énervée,anger,fr-en,anger_4,illustrative,demo
+Bill galat hai this makes me angry,anger,hi-en,anger_5,illustrative,demo
+La facture est fausse this makes me angry,anger,fr-en,anger_5,illustrative,demo
+Wah kya service hai three hours wasted again,anger,hi-en,anger_6,illustrative,demo
+Bravo quel service three hours wasted again,anger,fr-en,anger_6,illustrative,demo
+Andhere mein chalne se dar lag raha hai I feel scared,fear,hi-en,fear_1,illustrative,demo
+I am walking in the dark et j'ai peur,fear,fr-en,fear_1,illustrative,demo
+Kal exam hai and I am terrified,fear,hi-en,fear_2,illustrative,demo
+The exam is tomorrow et je suis terrifiée,fear,fr-en,fear_2,illustrative,demo
+Koi mera peecha kar raha hai I am afraid,fear,hi-en,fear_3,illustrative,demo
+Quelqu'un me suit I am afraid,fear,fr-en,fear_3,illustrative,demo
+Stage pe jaane se darr lagta hai,fear,hi-en,fear_4,illustrative,demo
+Before going on stage je suis effrayé,fear,fr-en,fear_4,illustrative,demo
+Yeh loud noise mujhe dara raha hai 😨,fear,hi-en,fear_5,illustrative,demo
+Ce bruit is making me scared 😨,fear,fr-en,fear_5,illustrative,demo
+Door locked hai and someone is trying to get inside,fear,hi-en,fear_6,illustrative,demo
+La porte est fermée and someone is trying to get inside,fear,fr-en,fear_6,illustrative,demo
+Itna bada gift dekhke main hairan hoon,surprise,hi-en,surprise_1,illustrative,demo
+Such a big gift je suis étonnée,surprise,fr-en,surprise_1,illustrative,demo
+Tum yahan ho I am so surprised 😲,surprise,hi-en,surprise_2,illustrative,demo
+Tu es ici I am so surprised 😲,surprise,fr-en,surprise_2,illustrative,demo
+Result dekhke shocked ho gaya,surprise,hi-en,surprise_3,illustrative,demo
+I saw the result et je suis surpris,surprise,fr-en,surprise_3,illustrative,demo
+Yeh twist bilkul unexpected tha,surprise,hi-en,surprise_4,illustrative,demo
+That plot twist était inattendu,surprise,fr-en,surprise_4,illustrative,demo
+Achanak tumhara call aaya what a surprise,surprise,hi-en,surprise_5,illustrative,demo
+Your sudden call quelle surprise,surprise,fr-en,surprise_5,illustrative,demo
+Seriously tumne poori marathon complete kar li,surprise,hi-en,surprise_6,illustrative,demo
+Seriously tu as terminé tout le marathon,surprise,fr-en,surprise_6,illustrative,demo
+Yeh spoiled food dekhke ghin aa rahi hai,disgust,hi-en,disgust_1,illustrative,demo
+This spoiled food me dégoûte 🤢,disgust,fr-en,disgust_1,illustrative,demo
+Bathroom itna dirty hai it is disgusting,disgust,hi-en,disgust_2,illustrative,demo
+La salle de bain is disgusting,disgust,fr-en,disgust_2,illustrative,demo
+Uska behavior ghinauna hai I feel disgusted,disgust,hi-en,disgust_3,illustrative,demo
+His behavior est dégoûtant,disgust,fr-en,disgust_3,illustrative,demo
+Yeh smell gross hai mujhe bahar jaana hai,disgust,hi-en,disgust_4,illustrative,demo
+This smell est écœurant I need to leave,disgust,fr-en,disgust_4,illustrative,demo
+Plate mein insects hain 🤢 I cannot eat this,disgust,hi-en,disgust_5,illustrative,demo
+There are insects dans mon assiette 🤢,disgust,fr-en,disgust_5,illustrative,demo
+Usne floor ka khana plate mein daal diya I cannot even look,disgust,hi-en,disgust_6,illustrative,demo
+Il a remis la nourriture du sol on the plate I cannot even look,disgust,fr-en,disgust_6,illustrative,demo
+Meeting kal three baje hai,neutral,hi-en,neutral_1,illustrative,demo
+La réunion is tomorrow at three,neutral,fr-en,neutral_1,illustrative,demo
+File desk par hai please check it,neutral,hi-en,neutral_2,illustrative,demo
+Le fichier is on the desk please check it,neutral,fr-en,neutral_2,illustrative,demo
+Main bus se office jaata hoon,neutral,hi-en,neutral_3,illustrative,demo
+I go to the office en bus,neutral,fr-en,neutral_3,illustrative,demo
+Aaj temperature twenty degrees hai,neutral,hi-en,neutral_4,illustrative,demo
+Il fait twenty degrees today,neutral,fr-en,neutral_4,illustrative,demo
+Package Monday ko arrive hoga,neutral,hi-en,neutral_5,illustrative,demo
+Le colis will arrive on Monday,neutral,fr-en,neutral_5,illustrative,demo
+Mujhe dar nahi lag raha this is routine,neutral,hi-en,neutral_6,illustrative,demo
+Je n'ai pas peur this is routine,neutral,fr-en,neutral_6,illustrative,demo

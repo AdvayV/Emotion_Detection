@@ -8,12 +8,12 @@ from typing import Iterable, Sequence
 LABELS = ("positive", "neutral", "negative")
 
 
-def classification_metrics(y_true: Sequence[str], y_pred: Sequence[str]) -> dict[str, object]:
+def classification_metrics(y_true: Sequence[str], y_pred: Sequence[str], labels: Sequence[str] = LABELS) -> dict[str, object]:
     if len(y_true) != len(y_pred) or not y_true:
         raise ValueError("y_true and y_pred must be non-empty and have equal length")
     per_class: dict[str, dict[str, float | int]] = {}
     f1_values: list[float] = []
-    for label in LABELS:
+    for label in labels:
         tp = sum(actual == label and predicted == label for actual, predicted in zip(y_true, y_pred))
         fp = sum(actual != label and predicted == label for actual, predicted in zip(y_true, y_pred))
         fn = sum(actual == label and predicted != label for actual, predicted in zip(y_true, y_pred))
@@ -32,14 +32,14 @@ def classification_metrics(y_true: Sequence[str], y_pred: Sequence[str]) -> dict
         "accuracy": sum(actual == predicted for actual, predicted in zip(y_true, y_pred)) / len(y_true),
         "macro_f1": sum(f1_values) / len(f1_values),
         "per_class": per_class,
-        "confusion_matrix": confusion_matrix(y_true, y_pred),
+        "confusion_matrix": confusion_matrix(y_true, y_pred, labels),
     }
 
 
-def confusion_matrix(y_true: Sequence[str], y_pred: Sequence[str]) -> dict[str, dict[str, int]]:
-    matrix = {actual: {predicted: 0 for predicted in LABELS} for actual in LABELS}
+def confusion_matrix(y_true: Sequence[str], y_pred: Sequence[str], labels: Sequence[str] = LABELS) -> dict[str, dict[str, int]]:
+    matrix = {actual: {predicted: 0 for predicted in labels} for actual in labels}
     for actual, predicted in zip(y_true, y_pred):
-        if actual not in matrix or predicted not in LABELS:
+        if actual not in matrix or predicted not in labels:
             raise ValueError(f"Unknown label pair: {actual!r}, {predicted!r}")
         matrix[actual][predicted] += 1
     return matrix

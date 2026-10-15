@@ -6,8 +6,10 @@ import re
 import unicodedata
 
 
+LATIN_WORD = r"[A-Za-zÀ-ÖØ-öø-ÿŒœ]+(?:['’][A-Za-zÀ-ÖØ-öø-ÿŒœ]+)*"
 TOKEN_PATTERN = re.compile(
-    r"https?://\S+|@[A-Za-z0-9_]+|#[A-Za-z0-9_]+|[A-Za-z]+|[0-9]+|[\u0900-\u097F]+|[^\w\s]",
+    r"https?://\S+|@[A-Za-z0-9_]+|#[A-Za-zÀ-ÖØ-öø-ÿŒœ0-9_]+|"
+    + LATIN_WORD + r"|[0-9]+|[\u0900-\u097F]+|[^\w\s]",
     flags=re.UNICODE,
 )
 LONG_RUN_PATTERN = re.compile(r"(.)\1{2,}", flags=re.IGNORECASE)
@@ -46,7 +48,7 @@ DEFAULT_VARIANTS: dict[str, str] = {
     "hate": "hate",
 }
 
-NEGATIONS = {"nahi", "not", "never", "no", "mat", "without"}
+NEGATIONS = {"nahi", "not", "never", "no", "mat", "without", "pas", "jamais", "sans"}
 
 
 @dataclass(frozen=True)
@@ -123,7 +125,7 @@ class HinglishNormalizer:
                 raw, f"#{normalized}", "hashtag", self._language(normalized), elongated, removed,
                 normalized in NEGATIONS,
             )
-        if re.fullmatch(r"[A-Za-z]+", raw):
+        if re.fullmatch(LATIN_WORD, raw):
             normalized, elongated, removed = self._normalize_latin(raw.lower())
             return NormalizedToken(
                 raw, normalized, "word", self._language(normalized), elongated, removed,
@@ -183,6 +185,8 @@ class HinglishNormalizer:
         return candidates
 
     def _language(self, token: str) -> str:
+        if token in {"heureux", "heureuse", "triste", "colère", "peur", "surpris", "surprise", "dégoût", "dégoûté", "content", "contente", "pas", "jamais", "sans", "très", "merci"}:
+            return "fr"
         if token in {"accha", "acchi", "bahut", "nahi", "bakwaas", "bekaar", "mast", "wah", "yaar", "theek", "mat"}:
             return "hi"
         if token in {"good", "bad", "happy", "sad", "love", "hate", "not", "never", "no", "without"}:

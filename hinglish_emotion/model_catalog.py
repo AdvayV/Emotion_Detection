@@ -22,8 +22,10 @@ ENCODERS = (
 ENCODER_BY_KEY = {encoder.key: encoder for encoder in ENCODERS}
 
 
-def checkpoint_path(encoder: EncoderSpec, root: str | Path = "models") -> Path:
-    return Path(root) / encoder.folder
+def checkpoint_path(encoder: EncoderSpec, root: str | Path = "models", task: str = "sentiment") -> Path:
+    if task not in {"sentiment", "emotion"}:
+        raise ValueError("Task must be sentiment or emotion")
+    return Path(root) / (encoder.folder if task == "sentiment" else f"{encoder.key}_emotion")
 
 
 def checkpoint_ready(path: str | Path) -> bool:

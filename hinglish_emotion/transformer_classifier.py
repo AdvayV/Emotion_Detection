@@ -13,7 +13,7 @@ class LocalTransformerClassifier:
     usable on machines without PyTorch or Transformers.
     """
 
-    def __init__(self, model_path: str | Path, max_length: int = 128, device: str | None = None) -> None:
+    def __init__(self, model_path: str | Path, max_length: int = 128, device: str | None = None, required_labels: tuple[str, ...] = ("positive", "neutral", "negative")) -> None:
         try:
             import torch
             from transformers import AutoModelForSequenceClassification, AutoTokenizer
@@ -23,6 +23,7 @@ class LocalTransformerClassifier:
         self.torch = torch
         self.model_path = str(model_path)
         self.max_length = max_length
+        self.required_labels = set(required_labels)
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, local_files_only=True)
         self.model = AutoModelForSequenceClassification.from_pretrained(
@@ -30,9 +31,12 @@ class LocalTransformerClassifier:
         ).to(self.device)
         self.model.eval()
 
-    def predict(self, message: NormalizedMessage) -> ClassifierResult:
+    def predict_probabilities(self, message: NormalizedMessage) -> dict[str, float]:
+        return self.predict_text_probabilities(message.normalized_text)
+
+    def predict_text_probabilities(self, text: str) -> dict[str, float]:
         encoded = self.tokenizer(
-            message.normalized_text,
+            text,
             return_tensors="pt",
             truncation=True,
             max_length=self.max_length,
@@ -44,9 +48,12 @@ class LocalTransformerClassifier:
 
         id2label = {int(key): value.lower() for key, value in self.model.config.id2label.items()}
         probabilities = {id2label[index]: float(value) for index, value in enumerate(values)}
-        required = {"positive", "neutral", "negative"}
+        required = self.required_labels
         if set(probabilities) != required:
             raise RuntimeError(f"Local model label mapping must be {sorted(required)}, got {sorted(probabilities)}")
+        return probabilities
+
+    def predict(self, message: NormalizedMessage) -> ClassifierResult:
+        probabilities = self.predict_probabilities(message)
         label = max(probabilities, key=probabilities.get)
         return ClassifierResult(label=label, probabilities=probabilities)  # type: ignore[arg-type]
-

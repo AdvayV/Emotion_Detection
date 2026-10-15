@@ -10,6 +10,8 @@ from .normalization import HinglishNormalizer
 from .ollama_reviewer import DEFAULT_OLLAMA_MODEL, OllamaReviewer
 from .pipeline import EmotionPipeline
 from .transformer_classifier import LocalTransformerClassifier
+from .emotions import EmotionDetector, LocalEmotionClassifier
+from .emotion_data import read_emotion_csv, evaluate_emotions
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -30,6 +32,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     validate = subparsers.add_parser("validate-data", help="Validate a training CSV")
     validate.add_argument("path")
+    emotion = subparsers.add_parser("emotions", help="Detect seven emotions in Hindi-English or French-English")
+    emotion.add_argument("text")
+    emotion.add_argument("--language-pair", choices=("hi-en", "fr-en"), default="hi-en")
+    emotion.add_argument("--model-path", help="Local seven-emotion checkpoint; otherwise use demo rules")
+    emotion_eval = subparsers.add_parser("evaluate-emotions", help="Evaluate emotion accuracy overall and by language mix")
+    emotion_eval.add_argument("path")
+    emotion_eval.add_argument("--model-path")
     return parser
 
 
@@ -45,6 +54,14 @@ def main() -> None:
         reviewer = OllamaReviewer(model=args.ollama_model) if args.reviewer == "ollama" else None
         classifier = LocalTransformerClassifier(args.model_path) if args.model_path else None
         result = EmotionPipeline(classifier=classifier, reviewer=reviewer).predict(args.text).to_dict()
+    elif args.command in {"emotions", "evaluate-emotions"}:
+        classifier = LocalEmotionClassifier(args.model_path) if args.model_path else None
+        detector = EmotionDetector(classifier)
+        if args.command == "emotions":
+            result = detector.predict(args.text, args.language_pair).to_dict()
+        else:
+            result = evaluate_emotions(read_emotion_csv(args.path), detector)
+        result["classifier"] = "trained checkpoint" if args.model_path else "demo lexical rules"
     else:
         result = validate_csv(args.path).to_dict()
     print(json.dumps(result, indent=2, ensure_ascii=False))
