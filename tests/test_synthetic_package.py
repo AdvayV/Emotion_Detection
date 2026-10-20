@@ -11,7 +11,7 @@ import zipfile
 from hinglish_emotion.tasks import EMOTION_LABELS
 from hinglish_emotion.text_preparation import duplicate_key
 from training.synthetic_phrases import generated_rows, save_dataset, COUNTS
-from training.package_synthetic import notebook
+from training.package_synthetic import DATASET_FILES, notebook, snapshot_dataset
 
 
 class GeneratedDataTests(unittest.TestCase):
@@ -51,6 +51,30 @@ class GeneratedDataTests(unittest.TestCase):
                 ast.parse("".join(cell["source"]))
                 self.assertEqual(cell["outputs"], [])
                 self.assertIsNone(cell["execution_count"])
+
+
+class DatasetSnapshotTests(unittest.TestCase):
+    def test_packaging_copies_existing_working_data_without_changing_it(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source, target = root / "working", root / "upload" / "data"
+            save_dataset(source)
+            before = {name: hashlib.sha256((source / name).read_bytes()).hexdigest() for name in DATASET_FILES}
+            snapshot_dataset(target, source)
+            self.assertEqual(before, {name: hashlib.sha256((source / name).read_bytes()).hexdigest() for name in DATASET_FILES})
+            self.assertEqual(before, {name: hashlib.sha256((target / name).read_bytes()).hexdigest() for name in DATASET_FILES})
+
+    def test_inconsistent_working_partition_is_not_regenerated(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "working"
+            save_dataset(source)
+            path = source / "train.csv"
+            path.write_bytes(path.read_bytes() + b"unexpected row\n")
+            changed = path.read_bytes()
+            with self.assertRaisesRegex(ValueError, "does not match"):
+                snapshot_dataset(root / "upload" / "data", source)
+            self.assertEqual(path.read_bytes(), changed)
 
 
 @unittest.skipUnless(importlib.util.find_spec("pandas") and importlib.util.find_spec("sklearn"), "Optional training dependencies")

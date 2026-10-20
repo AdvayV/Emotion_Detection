@@ -9,7 +9,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.table import Table, TableStyleInfo
 
 
-OUTPUT = Path(__file__).with_name("hinglish_emotion_phrases.xlsx")
+OUTPUT = Path(__file__).resolve().parents[1] / "data" / "demo" / "sentiment" / "hinglish_emotion_phrases.xlsx"
 
 
 POSITIVE = [
@@ -133,6 +133,7 @@ def rows() -> list[dict[str, object]]:
 
 
 def build(output: Path = OUTPUT) -> Path:
+    output.parent.mkdir(parents=True, exist_ok=True)
     workbook = Workbook()
     sheet = workbook.active
     sheet.title = "phrases"

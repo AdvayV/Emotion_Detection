@@ -337,6 +337,8 @@ def train(args):
         best_model.config.emotion_metadata = metadata
         best_model.config.save_pretrained(output)
         atomic_json(output / "emotion_metadata.json", metadata)
+        from hinglish_emotion.evaluation_guard import write_guard
+        write_guard(output / "evaluation_guard.json", prepared["manifest"].to_dict("records"), metadata)
     result = {
         **identity, "device": device, "training_mode": "frozen_encoder" if args.freeze_encoder else "full_fine_tuning",
         "split_sizes": dict(zip(("train", "validation", "test"), map(len, prepared["parts"]))),

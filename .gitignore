@@ -16,3 +16,25 @@ colab_ready_8000.zip
 # Local browser downloads and downloaded training archives
 *.crdownload
 HinglishEmotionSynthetic8000*.zip
+
+# Organised local artifacts and generated training data
+archive/
+colab/colab_ready_8000/
+colab/colab_ready_8000.zip
+colab/research_source/*.zip
+data/training/synthetic_hinglish_8000/
+outputs/training/
+outputs/exports/
+colab/xlmr_multilingual/package/
+colab/xlmr_multilingual/*.zip
+data/training/multilingual_bootstrap_v1/
+
+# Generated Colab source copies and archives
+colab/project_training/package/
+colab/project_training/*.zip
+.agent-state/
+
+# Downloaded combined model weights and disposable verification runs
+/xlmr_combined*.zip
+outputs/verification/pytest*/
+outputs/verification/temp/

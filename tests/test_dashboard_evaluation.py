@@ -13,7 +13,7 @@ class DashboardEvaluationTests(unittest.TestCase):
         from dashboard.evaluation import evaluate_pipeline
         from hinglish_emotion.pipeline import EmotionPipeline
 
-        path = Path(__file__).resolve().parents[1] / "data" / "hinglish_emotion_phrases.xlsx"
+        path = Path(__file__).resolve().parents[1] / "data" / "demo" / "sentiment" / "hinglish_emotion_phrases.xlsx"
         result = evaluate_pipeline(read_dataset(path), EmotionPipeline(), "Rule baseline")
 
         self.assertEqual(result.summary["rows"], 75)

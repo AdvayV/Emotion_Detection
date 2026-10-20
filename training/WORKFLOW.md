@@ -5,13 +5,13 @@
 The self-contained synthetic route is available now:
 
 ```powershell
-python -m training.package_synthetic --output-dir colab_ready_8000
+python -m training.package_synthetic
 ```
 
 Add `--overwrite` only when refreshing an existing package. The generated folder
 contains `TRAIN_ON_COLAB.ipynb`, current source, 8,000 training phrases, 1,000
 validation phrases and 1,000 synthetic test phrases. Upload the notebook to Colab,
-select a GPU, then run all cells and supply `colab_ready_8000.zip` when prompted.
+select a GPU, then run all cells and supply `colab/colab_ready_8000.zip` when prompted.
 Connect your own Drive to retain recovery checkpoints. Start with XLM-R; change
 `MODELS` to `["xlmr", "muril"]` for sequential comparison.
 
@@ -26,6 +26,11 @@ Synthetic training requires `--allow-synthetic`; the notebook supplies it. The
 dataset card, audit, SHA256 manifest and exported checkpoint keep the synthetic
 scope explicit. Synthetic test scores do not establish real-world accuracy.
 The package and ZIP are ignored by Git and can be rebuilt from committed source.
+
+The local working dataset is `data/training/synthetic_hinglish_8000`.
+The notebook and upload ZIP are under `colab`. Packaging copies a verified
+snapshot of the working CSVs; it does not silently regenerate existing data.
+See [the dataset index](../data/README.md) for exact file roles.
 
 If the runtime restarts, rerun setup from the first cell with the same package
 and settings. `PACKAGE` is created by the upload cell. The trainer resumes from
@@ -107,7 +112,7 @@ No automatic label replacement or silent resplitting is performed.
 Create a source-only ZIP from the current local code:
 
 ~~~powershell
-python -m training.cloud_bundle --output runs/emotion_cloud_source.zip
+python -m training.cloud_bundle --output colab/research_source/emotion_cloud_source.zip
 ~~~
 
 Open notebooks/train_emotion_pilot.ipynb in Google Colab and execute cells manually.
@@ -168,7 +173,7 @@ The new classification head learns the labels during fine-tuning.
 Export a completed inference checkpoint:
 
 ~~~powershell
-python -m training.cloud_bundle --model-dir models/xlmr_emotion --output runs/xlmr_emotion.zip
+python -m training.cloud_bundle --model-dir models/xlmr_emotion --output outputs/exports/xlmr_emotion.zip
 ~~~
 
 Inference ZIPs exclude optimizer state and raw split/test phrases. Extract the

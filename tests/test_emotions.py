@@ -48,7 +48,7 @@ class EmotionTests(unittest.TestCase):
             self.assertTrue(result.needs_context)
 
     def test_demo_is_balanced_and_evaluation_is_grouped_by_language(self):
-        rows = read_emotion_csv(ROOT / "data" / "mixed_emotions_demo.csv")
+        rows = read_emotion_csv(ROOT / "data" / "demo" / "emotions" / "mixed_emotions_demo.csv")
         report = evaluate_emotions(rows, EmotionDetector())
         self.assertTrue(report["illustrative"])
         self.assertEqual(report["overall"]["rows"], 84)

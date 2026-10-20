@@ -1,0 +1,15 @@
+text,emotion,language_pair,source,split
+Aaj main bahut khush hoon because I passed my exam,joy,hi-en,illustrative,demo
+Je suis très heureux because I passed my exam,joy,fr-en,illustrative,demo
+Aaj bahut udaas hoon after hearing the news,sadness,hi-en,illustrative,demo
+Je suis triste after hearing the news,sadness,fr-en,illustrative,demo
+Mujhe bahut gussa aa raha hai at this unfair treatment,anger,hi-en,illustrative,demo
+Je suis en colère at this unfair treatment,anger,fr-en,illustrative,demo
+Andhere mein chalne se dar lag raha hai I feel scared,fear,hi-en,illustrative,demo
+I am walking in the dark et j'ai peur,fear,fr-en,illustrative,demo
+Itna bada gift dekhke main hairan hoon,surprise,hi-en,illustrative,demo
+Such a big gift je suis étonnée,surprise,fr-en,illustrative,demo
+Yeh spoiled food dekhke ghin aa rahi hai,disgust,hi-en,illustrative,demo
+This spoiled food me dégoûte 🤢,disgust,fr-en,illustrative,demo
+Meeting kal three baje hai,neutral,hi-en,illustrative,demo
+La réunion is tomorrow at three,neutral,fr-en,illustrative,demo

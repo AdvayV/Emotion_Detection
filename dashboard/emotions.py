@@ -1,236 +1,250 @@
-from __future__ import annotations
-
-import csv
-import hashlib
-import io
-import json
+"""Multilingual emotion UI with explicit prediction sources and file scoring."""
 from pathlib import Path
-
+import json
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-
 from hinglish_emotion.emotions import EmotionDetector, LocalEmotionClassifier
-from hinglish_emotion.emotion_data import read_emotion_csv, validate_emotion_rows, evaluate_emotions
-from hinglish_emotion.model_catalog import ENCODERS, checkpoint_path, checkpoint_ready
+from hinglish_emotion.model_catalog import ENCODERS, checkpoint_ready
 from hinglish_emotion.tasks import EMOTION_LABELS, EMOTION_NAMES, LANGUAGE_PAIRS
 from hinglish_emotion.checkpoint_metadata import emotion_checkpoint_metadata
-
+from hinglish_emotion.checkpoints import checkpoint_version, emotion_checkpoint
 
 ROOT = Path(__file__).resolve().parents[1]
-DEMO = ROOT / "data" / "mixed_emotions_demo.csv"
-ICONS = {"joy": "😊", "sadness": "😢", "anger": "😡", "fear": "😨", "surprise": "😲", "disgust": "🤢", "neutral": "😐"}
+DEMO = ROOT / "data/demo/emotions/mixed_emotions_demo.csv"
+ACTIVE_LANGUAGE_PAIRS = LANGUAGE_PAIRS
+ICONS = {"joy":"😊", "sadness":"😢", "anger":"😡", "fear":"😨", "surprise":"😲", "disgust":"🤢", "neutral":"😐"}
 EXAMPLES = {
     "Choose an example": ("", "hi-en"),
     "Hindi–English · happy": ("Aaj main bahut khush hoon because I passed my exam 😊", "hi-en"),
-    "French–English · happy": ("Je suis très heureux because I passed my exam 😊", "fr-en"),
-    "French–English · sad": ("Je suis triste because my friend moved away", "fr-en"),
     "Hindi–English · fear": ("Kal exam hai and mujhe darr lag raha hai", "hi-en"),
+    "Hindi–English · sad": ("Mera dost doosre shehar chala gaya, uski bahut yaad aa rahi hai.", "hi-en"),
+    "Hindi–English · neutral": ("Meeting kal subah das baje hai.", "hi-en"),
+    "English–French · happy": ("Je suis très heureux because I passed my exam 😊", "fr-en"),
+    "English–French · sad": ("Je suis triste because my friend moved away", "fr-en"),
+    "English–French · fear": ("J'ai peur de demain, the interview is stressing me out", "fr-en"),
+    "English–French · neutral": ("La réunion is tomorrow at ten", "fr-en"),
 }
+
+
+def clear_result():
+    st.session_state.pop("emotion_result", None)
 
 
 def example_changed():
     text, pair = EXAMPLES[st.session_state.emotion_example]
     st.session_state.emotion_message = text
     st.session_state.emotion_language = pair
+    clear_result()
 
 
 @st.cache_resource(max_entries=1, show_spinner=False)
-def trained_classifier(path: str, version: int):
+def trained_classifier(path: str, version: str):
     return LocalEmotionClassifier(path)
 
 
-def detector_for(path: str) -> EmotionDetector:
+@st.cache_resource(max_entries=2, show_spinner=False)
+def trained_sarcasm_classifier(path: str, version: str):
+    """Cache an optional classifier against both its location and file version."""
+    from hinglish_emotion.sarcasm import LocalSarcasmClassifier
+    return LocalSarcasmClassifier(path)
+
+
+def detector_for(path: str):
+    return EmotionDetector(trained_classifier(path, checkpoint_version(path))) if path else EmotionDetector()
+
+
+def resolve_model(choice, pair, custom=""):
+    if choice == "Demo lexical rules": return None, None, ""
+    if choice in {item.name for item in ENCODERS}:
+        encoder = next(item for item in ENCODERS if item.name == choice)
+        path = emotion_checkpoint(ROOT / "models", pair, encoder.key, ready=checkpoint_ready, read_metadata=emotion_checkpoint_metadata)
+        if path is None:
+            return None, None, f"No complete {choice} checkpoint trained for {LANGUAGE_PAIRS[pair]} is installed. Train with the Colab package or explicitly choose Demo lexical rules."
+    elif choice == "Custom emotion checkpoint":
+        if not custom.strip(): return None, None, "Enter a local checkpoint folder."
+        path = Path(custom.strip())
+        if not path.is_absolute(): path = ROOT / path
+    if not checkpoint_ready(path): return None, None, "This checkpoint is not trained or installed yet."
+    try: metadata = emotion_checkpoint_metadata(path)
+    except ValueError as exc: return None, None, str(exc)
+    trained = metadata.get("trained_language_pairs", [])
+    if trained and pair not in trained: return None, metadata, f"This checkpoint was trained for {', '.join(trained)}, not {pair}."
+    return path, metadata, ""
+
+
+def use_rules():
+    st.session_state.emotion_classifier_choice = "Demo lexical rules"
+    clear_result()
+
+
+def render_training_status(path, metadata):
     if not path:
-        return EmotionDetector()
-    return EmotionDetector(trained_classifier(path, (Path(path) / "config.json").stat().st_mtime_ns))
+        st.info("Choose an installed checkpoint to inspect its saved training run. Demo rules have no trained weights.")
+        return
+    st.write(f"**Checkpoint:** {path}")
+    st.write("**Trained language mixes:** " + ", ".join(LANGUAGE_PAIRS.get(pair,pair) for pair in metadata.get("trained_language_pairs", [])))
+    st.caption(f"Training status: {metadata.get('training_status')} · input: {metadata['text_mode']} · maximum tokens: {metadata['max_length']}")
+    file = Path(path) / "metrics.json"
+    if not file.is_file():
+        st.info("No saved training metrics are bundled with this checkpoint.")
+        return
+    try:
+        metrics = json.loads(file.read_text(encoding="utf-8"))
+        if any(metrics.get(key) != metadata.get(key) for key in ("dataset_sha256", "split_sha256")):
+            raise ValueError("Saved metrics do not match this checkpoint dataset and split")
+        scope = metrics.get("evaluation_scope", "unverified")
+        st.subheader("Recorded Colab run")
+        st.caption(f"Scope: {scope}. These are saved run results, not the accuracy of your current typed phrase.")
+        c=st.columns(3)
+        c[0].metric("Saved test accuracy", f"{metrics['test']['accuracy']:.1%}")
+        c[1].metric("Saved test macro-F1", f"{metrics['test']['macro_f1']:.4f}")
+        c[2].metric("Test phrases", metrics["split_sizes"]["test"])
+        if "synthetic" in scope: st.warning("Synthetic test results do not establish real-world accuracy. Confident predictions can still be wrong on ordinary phrases.")
+        sizes = metrics.get("split_sizes", {})
+        st.caption(f"Training phrases: {sizes.get('train', 'unknown'):,} · validation phrases: {sizes.get('validation', 'unknown'):,}" if all(isinstance(sizes.get(key), int) for key in ("train", "validation")) else "Training split sizes were not recorded.")
+        language_scores = metrics.get("test_by_language", {})
+        if language_scores:
+            st.markdown("**Saved test results by language mix**")
+            rows = [{"Language mix": LANGUAGE_PAIRS.get(pair, pair), "Accuracy": scores["accuracy"], "Macro-F1": scores["macro_f1"], "Test phrases": scores["rows"]} for pair, scores in language_scores.items()]
+            st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch", column_config={"Accuracy": st.column_config.NumberColumn(format="percent"), "Macro-F1": st.column_config.NumberColumn(format="%.4f")})
+        history = pd.DataFrame(metrics.get("history", []))
+        if not history.empty:
+            best = history.loc[history["validation_macro_f1"].idxmax()]
+            st.caption(f"Best validation checkpoint: epoch {int(best['epoch'])}. Later epochs are not automatically better.")
+            st.dataframe(history,hide_index=True,width="stretch")
+        st.dataframe(pd.DataFrame(metrics["test"]["per_class"]).T.reset_index(names="Emotion"),hide_index=True,width="stretch")
+    except (ValueError, KeyError, TypeError, OSError) as exc: st.warning(f"Could not verify saved metrics: {exc}")
 
 
 def render_emotion_lab(header, chart_style):
-    header("Emotion lab", "Detect the dominant feeling in a phrase, then compare performance across Hindi–English and French–English.")
-    st.caption("SEVEN LABELS  ·  " + " · ".join(EMOTION_NAMES.values()))
-    with st.expander("Train a real model · readiness and cloud notebook"):
-        audit_path = ROOT / "data" / "audits" / "masac.json"
-        if audit_path.is_file():
-            audit = json.loads(audit_path.read_text(encoding="utf-8"))
-            st.write("**Public dataset reuse:** " + ("evidence recorded" if audit.get("reuse_conditions_verified") else "pending publisher terms or permission"))
-            st.caption(f"Source audit quarantined {audit.get('quarantined_cross_split_duplicate_rows', 0)} overlapping phrase rows. Episodes still recur across the source partitions.")
-        review_path = ROOT / "data" / "audits" / "pilot_annotations.json"
-        if review_path.is_file():
-            review = json.loads(review_path.read_text(encoding="utf-8"))
-            st.write("**Independent labels:** " + ("reconciliation completed" if review.get("ready") else "review or adjudication pending"))
-        else:
-            st.write("**Independent labels:** collection and two-reviewer annotation are pending.")
-        st.caption("Training happens in the cloud notebook. This dashboard loads a saved model and evaluates phrases.")
-        notebook_path = ROOT / "notebooks" / "train_emotion_pilot.ipynb"
-        if notebook_path.is_file():
-            st.download_button("Download training notebook", notebook_path.read_bytes(), file_name=notebook_path.name, mime="application/x-ipynb+json")
-        bundle_path = ROOT / "runs" / "emotion_cloud_source.zip"
-        if bundle_path.is_file():
-            st.download_button("Download current source bundle", bundle_path.read_bytes(), file_name=bundle_path.name, mime="application/zip")
+    header("Emotion lab", "Predict seven emotions from Hindi–English and English–French phrases, then measure results against your own dataset.")
+    st.caption("Local predictions · Seven emotions · CSV and XLSX evaluation")
     with st.container(border=True):
-        default_index = 1 if checkpoint_ready(ROOT / "models" / "xlmr_emotion") else 0
-        choice = st.selectbox("Emotion classifier", ["Demo lexical rules", "XLM-R", "mBERT", "MuRIL", "Custom emotion checkpoint"], index=default_index)
-        path = ""
-        if choice == "Custom emotion checkpoint":
-            custom = st.text_input("Seven-emotion checkpoint folder", placeholder="models/xlmr_emotion")
-            if custom.strip():
-                candidate = Path(custom.strip())
-                path = str(candidate if candidate.is_absolute() else ROOT / candidate)
-        elif choice != "Demo lexical rules":
-            encoder = next(item for item in ENCODERS if item.name == choice)
-            path = str(checkpoint_path(encoder, ROOT / "models", "emotion"))
-        ready = choice == "Demo lexical rules" or bool(path and checkpoint_ready(path))
-        metadata = None
-        if ready and path:
-            try:
-                metadata = emotion_checkpoint_metadata(path)
-            except ValueError as exc:
-                st.error(str(exc))
-                ready = False
-        if choice == "Demo lexical rules":
-            st.info("Demo mode · uses words and emoji rules in three languages. These are illustrative scores, not trained-model accuracy.")
-        elif not ready:
-            st.warning("Train a seven-emotion checkpoint first, or choose Demo lexical rules to try the workflow.")
-        else:
-            st.success("Seven-emotion checkpoint found.")
-            st.caption(f"Text preparation: {metadata['text_mode']} · token limit: {metadata['max_length']}")
-            scope = ", ".join(LANGUAGE_PAIRS[pair] for pair in metadata.get("validated_language_pairs", []))
-            st.caption("Verified labelled test scope: " + (scope or "not established"))
-            if metadata.get("training_status") != "complete":
-                st.warning("Training or provenance is incomplete. Treat this checkpoint as experimental.")
-        if choice == "MuRIL":
-            st.warning("MuRIL targets Indian languages. Treat it as a Hindi-focused comparison; XLM-R and mBERT are the multilingual choices for this experiment.")
-        st.caption("One dominant emotion per phrase. Mixed feelings, sarcasm and missing context can make that choice uncertain.")
-
-    phrase_tab, dataset_tab = st.tabs(["Try a phrase", "Evaluate mixed dataset"])
+        c1,c2=st.columns([1,1.3])
+        with c1:
+            if st.session_state.get("emotion_language") not in LANGUAGE_PAIRS: st.session_state.emotion_language="hi-en"
+            pair=st.selectbox("Language mix",list(LANGUAGE_PAIRS),format_func=LANGUAGE_PAIRS.get,key="emotion_language",on_change=clear_result)
+        with c2:
+            default=1 if emotion_checkpoint(ROOT/"models",pair,"xlmr",ready=checkpoint_ready,read_metadata=emotion_checkpoint_metadata) else 0
+            choice=st.selectbox("Emotion classifier",["Demo lexical rules","XLM-R","mBERT","MuRIL","Custom emotion checkpoint"],index=default,key="emotion_classifier_choice",on_change=clear_result)
+        custom=st.text_input("Seven-emotion checkpoint folder",placeholder="models/xlmr_multilingual_emotion",key="custom_emotion_path",on_change=clear_result) if choice=="Custom emotion checkpoint" else ""
+        path,metadata,issue=resolve_model(choice,pair,custom)
+        if issue:
+            st.warning(issue)
+            st.button("Use demo rules instead",on_click=use_rules)
+        elif metadata:
+            st.success("Seven-emotion checkpoint found. Predictions will use the local trained weights.")
+            st.caption(f"Input preparation: {metadata['text_mode']} · token limit: {metadata['max_length']} · model folder: {path.name}")
+            if metadata.get("evaluation_scope") in {"synthetic_only","mixed_test"}: st.warning("This checkpoint was evaluated on generated phrases. Real-world accuracy is unverified; a high prediction score can still be wrong.")
+        else: st.info("Demo lexical rules are active. They use words and emoji cues and are not XLM-R predictions.")
+    phrase_tab,file_tab,training_tab=st.tabs(["Try a phrase","Predict and evaluate a file","Training and Colab"])
     with phrase_tab:
-        left, right = st.columns([1, 1.1], gap="large")
-        with left, st.container(border=True):
+        left,right=st.columns([1,1.1],gap="large")
+        with left,st.container(border=True):
             st.subheader("Your phrase")
-            st.selectbox("Emotion example", list(EXAMPLES), key="emotion_example", on_change=example_changed)
-            if "emotion_message" not in st.session_state:
-                st.session_state.emotion_message = ""
-            pair = st.selectbox("Language mix", list(LANGUAGE_PAIRS), format_func=LANGUAGE_PAIRS.get, key="emotion_language")
-            if pair == "fr-en" and (metadata is None or "fr-en" not in metadata.get("validated_language_pairs", [])):
-                st.warning("French–English is experimental. A bilingual reviewer and independent test data are still required.")
-            text = st.text_area("Phrase to analyze", key="emotion_message", height=145, placeholder="Je suis triste because my friend moved away")
-            checkpoint_version = (Path(path) / "config.json").stat().st_mtime_ns if path and checkpoint_ready(path) else None
-            signature = (choice, path, checkpoint_version, pair, text)
-            if choice == "MuRIL" and pair == "fr-en":
-                st.info("Use XLM-R for French–English; this MuRIL experiment is Hindi–English only.")
-            if st.button("Detect emotion", type="primary", width="stretch", disabled=not ready or choice == "MuRIL" and pair == "fr-en"):
+            st.selectbox("Emotion example",list(EXAMPLES),key="emotion_example",on_change=example_changed)
+            text=st.text_area("Phrase to analyze",key="emotion_message",height=155,placeholder="Aaj main bahut khush hoon because I passed my exam 😊",on_change=clear_result)
+            version=checkpoint_version(path) if path else None
+            context=st.text_area("Optional conversation context",key="emotion_context",height=80,placeholder="What happened before this message?",on_change=clear_result)
+            qwen_enabled=st.checkbox("Use optional local Qwen review when needed",value=False,key="emotion_qwen_enabled",on_change=clear_result)
+            sarcasm_enabled=st.checkbox("Use trained sarcasm model",value=False,key="emotion_sarcasm_enabled",on_change=clear_result)
+            sarcasm_path_text=st.text_input("Sarcasm checkpoint folder",value="models/xlmr_sarcasm",key="sarcasm_checkpoint_path",on_change=clear_result) if sarcasm_enabled else "models/xlmr_sarcasm"
+            sarcasm_path=Path(sarcasm_path_text.strip()) if sarcasm_path_text.strip() else ROOT/"models"/"xlmr_sarcasm"
+            if not sarcasm_path.is_absolute(): sarcasm_path=ROOT/sarcasm_path
+            sarcasm_ready=(sarcasm_path/"config.json").is_file()
+            try: sarcasm_version=checkpoint_version(sarcasm_path) if sarcasm_ready else "missing"
+            except OSError: sarcasm_version="unreadable"
+            if sarcasm_enabled and not sarcasm_ready:
+                st.caption("No trained sarcasm weights were found here. The workbench will use its rule-based cue score.")
+            signature=(choice,str(path),version,pair,text,context,qwen_enabled,sarcasm_enabled,str(sarcasm_path),sarcasm_version)
+            if st.button("Detect emotion",type="primary",width="stretch",disabled=bool(issue)):
+                clear_result()
                 try:
-                    with st.spinner("Reading the phrase…"):
-                        result = detector_for(path).predict(text, pair)
-                    st.session_state.emotion_result = {
-                        "result": result, "signature": signature, "text": text, "choice": choice,
-                    }
-                except (ValueError, RuntimeError, OSError) as exc:
-                    st.error(f"Emotion detection could not finish: {exc}")
-        with right, st.container(border=True):
-            saved = st.session_state.get("emotion_result")
-            if not saved:
-                st.subheader("Which feeling does the phrase express?")
-                st.write("Choose an example and select **Detect emotion** to see all seven scores.")
+                    from hinglish_emotion.emotion_workbench import EmotionWorkbench
+                    reviewer=None
+                    if qwen_enabled:
+                        from hinglish_emotion.ollama_emotion_reviewer import OllamaEmotionReviewer
+                        reviewer=OllamaEmotionReviewer(model="qwen3:0.6b")
+                    sarcasm_classifier=None
+                    if sarcasm_enabled:
+                        try:
+                            if sarcasm_ready: sarcasm_classifier=trained_sarcasm_classifier(str(sarcasm_path),sarcasm_version)
+                        except (ImportError,ValueError,RuntimeError,OSError,TypeError) as exc:
+                            st.warning(f"The trained sarcasm model could not load; continuing with available cues. {exc}")
+                    workbench=EmotionWorkbench(detector_for(str(path) if path else ""),reviewer=reviewer,sarcasm_classifier=sarcasm_classifier)
+                    with st.spinner("Running local prediction…"): result=workbench.analyze(text,pair,context)
+                    st.session_state.emotion_result={"result":result.primary,"workbench":result,"signature":signature,"text":text,"choice":choice,"context":context}
+                    history=list(st.session_state.get("emotion_history",[])); history.append(result.to_dict()); st.session_state.emotion_history=history[-100:]
+                except (ValueError,RuntimeError,OSError) as exc: st.error(f"The selected model could not predict: {exc}. You can explicitly switch to demo rules.")
+            st.caption("Editing the phrase, language or model clears the previous result. Predictions do not train the model.")
+        with right,st.container(border=True):
+            saved=st.session_state.get("emotion_result")
+            if not saved or saved["signature"]!=signature:
+                st.subheader("Your result will appear here")
+                st.write("Choose a phrase and select Detect emotion. The result shows which model actually ran.")
             else:
-                if saved["signature"] != signature:
-                    st.info("Showing the previous phrase. Detect emotion again to update the result.")
-                result = saved["result"]
-                st.subheader(f"{ICONS[result.emotion]} {EMOTION_NAMES[result.emotion]}")
+                result=saved["workbench"]
+                primary=result.primary
+                st.subheader(f"{ICONS[result.final_emotion]} {EMOTION_NAMES[result.final_emotion]}")
+                if result.final_emotion != primary.emotion:
+                    st.caption(f"Base prediction: {EMOTION_NAMES[primary.emotion]} · final after review/cues: {EMOTION_NAMES[result.final_emotion]}")
                 st.write(saved["text"])
-                st.metric("Demo score" if saved["choice"] == "Demo lexical rules" else "Model confidence", f"{result.confidence:.0%}")
-                if result.needs_context:
-                    st.warning("The emotion is uncertain. More context or a human label may be needed.")
-                for warning in result.warnings:
-                    st.warning(warning)
-                st.caption("Model scores are not calibrated probabilities of being correct.")
-                probabilities = pd.DataFrame({
-                    "Emotion": [EMOTION_NAMES[label] for label in EMOTION_LABELS],
-                    "Score": [result.probabilities[label] for label in EMOTION_LABELS],
-                })
-                chart = px.bar(probabilities, y="Emotion", x="Score", orientation="h", text_auto=".0%", range_x=[0, 1])
-                chart.update_traces(marker_color="#6264CF")
-                chart.update_yaxes(autorange="reversed")
-                chart.update_xaxes(tickformat=".0%")
-                st.plotly_chart(chart_style(chart, 300), width="stretch", config={"displayModeBar": False})
-                if result.evidence:
-                    st.caption("Matched cues: " + ", ".join(result.evidence))
-                elif saved["choice"] == "Demo lexical rules":
-                    st.caption("No emotional keyword matched. Neutral is a fallback, not proof of a neutral meaning.")
-
-    with dataset_tab:
-        st.subheader("Compare the two language mixes")
-        st.write("Every row needs a phrase, its expected emotion, and a language mix. With declared splits, only test rows are scored.")
-        uploaded = st.file_uploader("Mixed emotion dataset (CSV)", type=["csv"], key="mixed_emotion_dataset")
-        try:
-            rows = validate_emotion_rows(list(csv.DictReader(io.StringIO(uploaded.getvalue().decode("utf-8-sig"))))) if uploaded else read_emotion_csv(DEMO)
-        except (ValueError, UnicodeError, OSError) as exc:
-            st.error(f"Could not use this emotion dataset: {exc}")
-            st.code("text,emotion,language_pair\nJe suis triste today,sadness,fr-en", language=None)
-            return
-        frame = pd.DataFrame(rows)
-        counts = st.columns(3)
-        counts[0].metric("Phrases in file", len(frame), border=True)
-        counts[1].metric("Hindi–English", int(frame["language_pair"].eq("hi-en").sum()), border=True)
-        counts[2].metric("French–English", int(frame["language_pair"].eq("fr-en").sum()), border=True)
-        if uploaded is None or frame.get("source", pd.Series(dtype=str)).eq("illustrative").any():
-            st.info("Illustrative dataset · 84 drafted examples with suggested labels. It includes indirect phrases that demo rules can miss. Validate the labels independently before research use.")
-        with st.expander("Browse labels and phrases"):
-            st.dataframe(pd.crosstab(frame["language_pair"], frame["emotion"]).reindex(columns=EMOTION_LABELS, fill_value=0), width="stretch")
-            st.dataframe(frame, width="stretch", hide_index=True)
-            if uploaded is None:
-                st.download_button("Download mixed emotion demo CSV", DEMO.read_bytes(), file_name=DEMO.name, mime="text/csv")
-        available_pairs = ["hi-en"] if choice == "MuRIL" else list(LANGUAGE_PAIRS)
-        selected_pairs = st.multiselect("Evaluate language mixes", available_pairs, default=available_pairs, format_func=LANGUAGE_PAIRS.get)
-        selected_rows = [row for row in rows if row["language_pair"] in selected_pairs]
-        evaluation_signature = (choice, path, checkpoint_version, hashlib.sha256(json.dumps(selected_rows, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest())
-        if st.button("Evaluate seven emotions", type="primary", disabled=not ready or not selected_rows):
-            try:
-                with st.spinner("Comparing each prediction with its expected emotion…"):
-                    report = evaluate_emotions(selected_rows, detector_for(path))
-                st.session_state.emotion_evaluation = {"report": report, "signature": evaluation_signature, "choice": choice}
-            except (ValueError, RuntimeError, OSError) as exc:
-                st.error(f"Emotion evaluation could not finish: {exc}")
-        saved = st.session_state.get("emotion_evaluation")
-        if not saved:
-            st.caption("Run evaluation to generate overall, per-language and per-emotion results.")
-            return
-        if saved["signature"] != evaluation_signature:
-            st.warning("These scores use previous data or model settings. Run evaluation again to refresh them.")
-        report = saved["report"]
-        if report.get("synthetic_dataset"):
-            st.warning("This dataset uses generated labels. Its scores describe synthetic examples, not independent real-world accuracy.")
-        st.caption(f"Evaluated with {saved['choice']} · scope: {report['scope']}")
-        if saved["choice"] == "Demo lexical rules":
-            st.warning("These scores measure the lexical demo. They are not mBERT, MuRIL or XLM-R results.")
-        overall = report["overall"]
-        if report.get("training_overlap_rows"):
-            st.warning(f"{report['training_overlap_rows']} phrase(s) overlap this checkpoint's training or validation data. These are not independent test scores.")
-        for pair in report.get("experimental_language_pairs", []):
-            st.warning(f"{LANGUAGE_PAIRS[pair]} scores are experimental until reviewed seven-class coverage is established.")
-        columns = st.columns(3)
-        columns[0].metric("Emotion accuracy", f"{overall['accuracy']:.1%}", border=True, help="Share of phrases with the expected dominant emotion.")
-        columns[1].metric("Seven-class macro-F1", f"{overall['macro_f1']:.1%}", border=True, help="Each of the seven emotion classes contributes equally.")
-        columns[2].metric("Phrases evaluated", overall["rows"], border=True)
-        language_scores = []
-        for pair, scores in report["by_language"].items():
-            language_scores.append({"Language mix": LANGUAGE_PAIRS[pair], "Accuracy": scores["accuracy"], "Macro-F1": scores["macro_f1"], "Phrases": scores["rows"]})
-            if scores["missing_emotions"]:
-                st.warning(f"{LANGUAGE_PAIRS[pair]} has no test examples for: {', '.join(scores['missing_emotions'])}. This is incomplete seven-class coverage.")
-        st.markdown("**Accuracy by language mix**")
-        st.dataframe(pd.DataFrame(language_scores), width="stretch", hide_index=True, column_config={"Accuracy": st.column_config.NumberColumn(format="percent"), "Macro-F1": st.column_config.NumberColumn(format="percent")})
-        left, right = st.columns(2)
-        with left:
-            matrix = pd.DataFrame(overall["confusion_matrix"]).T.loc[list(EMOTION_LABELS), list(EMOTION_LABELS)]
-            chart = px.imshow(matrix, text_auto=True, aspect="auto", color_continuous_scale="Purples", labels={"x": "Predicted emotion", "y": "Expected emotion"})
-            st.plotly_chart(chart_style(chart, 390), width="stretch")
-            st.caption("Correct predictions lie on the diagonal.")
-        with right:
-            per_class = pd.DataFrame(overall["per_class"]).T.reset_index(names="Emotion")
-            st.markdown("**Scores for each emotion**")
-            st.dataframe(per_class, width="stretch", hide_index=True, column_config={name: st.column_config.NumberColumn(format="%.3f") for name in ("precision", "recall", "f1")})
-        predictions = pd.DataFrame(report["predictions"])
-        with st.expander("Inspect incorrect emotion predictions"):
-            st.dataframe(predictions[~predictions["correct"]], width="stretch", hide_index=True)
-        st.download_button("Download emotion predictions", predictions.to_csv(index=False).encode("utf-8"), file_name="mixed_emotion_predictions.csv", mime="text/csv")
+                st.metric("Base demo score" if primary.source=="lexical_demo" else "Base prediction score",f"{primary.confidence:.2%}")
+                st.caption(f"Actual source: {primary.model_name} · {primary.source}. Scores are the base classifier probabilities, not a reviewed score or dataset accuracy.")
+                if primary.needs_context: st.warning("The scores are close, low, or the input was truncated. More context may help.")
+                for warning in primary.warnings: st.warning(warning)
+                probabilities=pd.DataFrame({"Emotion":[EMOTION_NAMES[label] for label in EMOTION_LABELS],"Score":[primary.probabilities[label] for label in EMOTION_LABELS]})
+                chart=px.bar(probabilities,y="Emotion",x="Score",orientation="h",text_auto=".1%",range_x=[0,1],color_discrete_sequence=["#6264CF"])
+                chart.update_yaxes(autorange="reversed");chart.update_xaxes(tickformat=".0%")
+                st.plotly_chart(chart_style(chart,300),width="stretch")
+                st.caption("Scores are uncalibrated. Experimental-data notices describe validation scope, not whether this score distribution is ambiguous.")
+                with st.expander("Prediction details"):
+                    normalization=result.normalization
+                    changes=[f"{item['raw']} → {item['normalized']}" for item in normalization.get("tokens",[]) if item.get("raw") != item.get("normalized")]
+                    st.markdown("**Text preparation**")
+                    st.write("Normalization changes: " + (", ".join(changes) if changes else "none"))
+                    st.write("Normalized cue text: " + (normalization.get("normalized_text") or "(empty)"))
+                    st.caption("These normalization details explain the rule cues. The encoder follows its saved input preparation setting; raw checkpoints keep your original phrase.")
+                    cues=result.cues
+                    st.markdown("**Signals and routing**")
+                    relation_labels={"none":"No emoji cue", "agreement":"Emoji agrees with word cues", "conflict":"Emoji conflicts with word cues", "uncertain":"Emoji relation is uncertain"}
+                    st.write(relation_labels.get(cues.get("emoji_relation"),cues.get("emoji_relation","unknown")))
+                    source_label="trained binary classifier" if cues.get("sarcasm_source")=="supervised" else "heuristic rule cue (not learned)"
+                    st.write(f"Sarcasm cue: {cues.get('sarcasm_score',0):.2f} · {source_label}. {cues.get('sarcasm_message','')}")
+                    intensity=cues.get("intensity",{})
+                    st.write(f"Intensity estimate (heuristic): valence {intensity.get('valence',0):.2f}, arousal {intensity.get('arousal',0):.2f}, strength {intensity.get('strength',0):.2f}; cues: {', '.join(intensity.get('cues',[])) or 'none'}")
+                    st.write("Lexical evidence: " + (", ".join(cues.get("evidence",[])) or "none detected"))
+                    review=result.review
+                    st.write(f"Qwen review: {review.get('status','unknown')} · {review.get('message','')}")
+                    if review.get("suggestion"):
+                        st.write(f"Suggested emotion: {EMOTION_NAMES.get(review['suggestion'],review['suggestion'])} · evidence: {', '.join(review.get('evidence',[])) or 'none'}")
+                    st.json({"primary":primary.to_dict(),"final_emotion":result.final_emotion,"normalization":result.normalization,"cues":result.cues,"review":result.review,"context":result.context})
+        history=st.session_state.get("emotion_history",[])
+        if history:
+            st.download_button("Download session history (CSV)",pd.json_normalize(history).to_csv(index=False),file_name="emotion_session_history.csv",mime="text/csv")
+            if st.button("Clear session history"):
+                st.session_state.pop("emotion_history",None); st.rerun()
+    with file_tab:
+        from dashboard.emotion_batch import render_file_predictions
+        render_file_predictions(ROOT,choice,pair,lambda selected,language:resolve_model(selected,language,custom),chart_style)
+    with training_tab:
+        render_training_status(path,metadata)
+        st.subheader("Separate Colab training files")
+        st.write("Start with the project training notebook and full package below. Choose XLM-R or mBERT for both language mixes, MuRIL for Hindi–English, or the separate reviewed-data sarcasm job. The guide covers Drive recovery, export and installation. New checkpoints are discovered after installation.")
+        project_training=ROOT/"colab"/"project_training"
+        if project_training.is_dir():
+            training_downloads=[("PROJECT_TRAINING.ipynb","Download project training notebook","application/x-ipynb+json"),("project_training.zip","Download full Colab training package","application/zip"),("START_HERE.md","Download project training guide","text/markdown")]
+            for name,label,mime in training_downloads:
+                file=project_training/name
+                if file.is_file(): st.download_button(label,file.read_bytes(),file_name=name,mime=mime)
+        with st.expander("Alternative XLM-R-only training workflow"):
+            folder=ROOT/"colab/xlmr_multilingual"
+            for name,label,mime in [("TRAIN_XLMR.ipynb","Download multilingual Colab notebook","application/x-ipynb+json"),("xlmr_multilingual.zip","Download multilingual training package","application/zip")]:
+                file=folder/name
+                if file.is_file(): st.download_button(label,file.read_bytes(),file_name=name,mime=mime)
+        st.caption("The bootstrap dataset is synthetic, not research validation. Replace it with reviewed labels for final claims. The selected checkpoint’s trained language mixes and saved test results are shown above.")
+        with st.expander("How this extends Team 5 G2"):
+            st.write("The base paper describes BERT/RoBERTa sentiment classification. This extension adds seven emotions, language-aware checkpoints, labelled-file evaluation, leakage checks and reproducible Colab training. A supervised sarcasm training workflow is available, but trained sarcasm weights are not provided. Emotion/emoji fusion is not implemented; emoji cues are shown separately.")
+            paper=ROOT/"Team 5 - G2.docx"
+            if paper.is_file(): st.download_button("Download base paper",paper.read_bytes(),file_name=paper.name,mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")

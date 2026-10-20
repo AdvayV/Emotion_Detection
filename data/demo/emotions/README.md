@@ -1,5 +1,10 @@
 # Mixed-language emotion data
 
+This folder is for interface examples, not training. The current dashboard uses
+the Hindi-English rows only; the retained French-English rows are for future work.
+The actual 8,000 training phrases are under
+`../../training/synthetic_hinglish_8000`; see [the dataset guide](../../README.md).
+
 The mixed_emotions_demo.csv file is an assistant-drafted illustrative dataset
 for testing the software interface. It contains 84 phrases, evenly split across
 Hindi–English and French–English and across seven labels. It has not been

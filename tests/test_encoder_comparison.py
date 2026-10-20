@@ -17,7 +17,7 @@ class EncoderComparisonTests(unittest.TestCase):
     def test_emotion_dry_run_uses_separate_checkpoints_and_multilingual_defaults(self):
         result = subprocess.run(
             [sys.executable, "-m", "training.compare_encoders", "--task", "emotion",
-             "--data", "data/mixed_emotions_demo.csv", "--freeze-encoder", "--dry-run"],
+             "--data", "data/demo/emotions/mixed_emotions_demo.csv", "--freeze-encoder", "--dry-run"],
             cwd=PROJECT_ROOT, capture_output=True, text=True, check=True,
         )
         self.assertIn("muril_emotion", result.stdout)

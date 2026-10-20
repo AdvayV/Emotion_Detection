@@ -31,7 +31,7 @@ class EmotionResult:
     @property
     def needs_context(self) -> bool:
         scores = sorted(self.probabilities.values(), reverse=True)
-        return self.experimental or self.truncated or scores[0] < 0.55 or scores[0] - scores[1] < 0.15
+        return self.truncated or scores[0] < 0.55 or scores[0] - scores[1] < 0.15
 
     def to_dict(self) -> dict[str, object]:
         return {**asdict(self), "confidence": self.confidence, "needs_context": self.needs_context}
@@ -104,6 +104,33 @@ class LocalEmotionClassifier(LocalTransformerClassifier):
     def predict(self, message: NormalizedMessage) -> EmotionResult:
         return self.predict_text(message.raw_text)
 
+    def predict_batch(self, texts: list[str], batch_size: int = 8) -> list[EmotionResult]:
+        if batch_size < 1 or any(not text.strip() for text in texts):
+            raise ValueError("Provide non-empty phrases and a positive batch size")
+        results = []
+        id2label = {int(key): value.lower() for key, value in self.model.config.id2label.items()}
+        if set(id2label.values()) != self.required_labels:
+            raise RuntimeError("The checkpoint does not have the seven required emotion labels")
+        for offset in range(0, len(texts), batch_size):
+            prepared = [prepare_text(text, self.metadata["text_mode"], self.metadata["preparation_version"]) for text in texts[offset:offset + batch_size]]
+            lengths = [len(ids) for ids in self.tokenizer(prepared, truncation=False)["input_ids"]]
+            encoded = self.tokenizer(prepared, return_tensors="pt", padding=True, truncation=True, max_length=self.max_length)
+            encoded = {key: value.to(self.device) for key, value in encoded.items()}
+            with self.torch.no_grad():
+                values = self.torch.softmax(self.model(**encoded).logits, dim=-1).cpu().tolist()
+            for scores, length in zip(values, lengths):
+                probabilities = {id2label[index]: float(value) for index, value in enumerate(scores)}
+                synthetic = self.metadata.get("evaluation_scope") in {"synthetic_only", "mixed_test"}
+                warnings = []
+                if synthetic:
+                    warnings.append("Synthetic or mixed synthetic test data: real-world human-labelled accuracy is not established.")
+                if self.metadata["legacy"]:
+                    warnings.append("Legacy checkpoint: training provenance and language validation are unknown.")
+                if length > self.max_length:
+                    warnings.append(f"Input was truncated to {self.max_length} tokens.")
+                results.append(EmotionResult(max(probabilities, key=probabilities.get), probabilities, source="trained_checkpoint", model_name=self.metadata.get("base_model", self.model_path), experimental=synthetic, warnings=tuple(warnings), truncated=length > self.max_length))
+        return results
+
 
 class EmotionDetector:
     def __init__(self, classifier=None) -> None:
@@ -126,3 +153,12 @@ class EmotionDetector:
         if language_pair == "fr-en":
             result = replace(result, experimental=True, warnings=("French–English is experimental until bilingual review is available.",))
         return result
+
+    def predict_many(self, texts: list[str], language_pairs: list[str], batch_size: int = 8) -> list[EmotionResult]:
+        if len(texts) != len(language_pairs) or any(pair not in LANGUAGE_PAIRS for pair in language_pairs):
+            raise ValueError("Every phrase needs a supported language mix")
+        if not hasattr(self.classifier, "predict_batch"):
+            return [self.predict(text, pair) for text, pair in zip(texts, language_pairs)]
+        results = self.classifier.predict_batch(texts, batch_size)
+        verified = self.classifier.metadata.get("validated_language_pairs", [])
+        return [replace(result, experimental=True, warnings=(*result.warnings, f"{LANGUAGE_PAIRS[pair]} has no verified seven-class test coverage for this checkpoint.")) if pair not in verified else result for result, pair in zip(results, language_pairs)]

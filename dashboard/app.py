@@ -19,8 +19,8 @@ from hinglish_emotion.transformer_classifier import LocalTransformerClassifier
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-SAMPLE_DATA = PROJECT_ROOT / "data" / "hinglish_emotion_phrases.xlsx"
-PAGES = ["Analyze text", "Emotion lab", "Model effectiveness", "Dataset explorer", "Overview"]
+SAMPLE_DATA = PROJECT_ROOT / "data" / "demo" / "sentiment" / "hinglish_emotion_phrases.xlsx"
+PAGES = ["Emotion lab", "Analyze text", "Model effectiveness", "Dataset explorer", "Overview"]
 EXAMPLES = {
     "Positive with emphasis": "movie acchaaa thi 😊",
     "Negation": "service acchi nahi thi 😞",
@@ -113,7 +113,7 @@ def render_sidebar() -> tuple[str, str, bool, str]:
         page = st.radio("Workspace", PAGES, key="workspace")
         if page == "Emotion lab":
             st.divider()
-            st.info("Emotion lab predicts seven feelings in Hindi–English and French–English phrases.")
+            st.info("Seven emotions for Hindi–English and English–French. The selected language determines which trained checkpoint is available.")
             st.caption("Choose its emotion classifier on the page. The sentiment checkpoint and Qwen reviewer use a different label set.")
             return page, "", False, DEFAULT_OLLAMA_MODEL
         st.divider()
@@ -271,6 +271,8 @@ def render_history() -> None:
 
 def render_analysis(model_path: str, use_reviewer: bool, ollama_model: str) -> None:
     page_header("Analyze text", "Understand the sentiment of a Hinglish message and see what influenced the prediction.")
+    st.caption("This page predicts three-class sentiment. The trained seven-emotion XLM-R checkpoint is used in Emotion lab.")
+    st.button("Open trained emotion workspace", on_click=navigate_to, args=("Emotion lab",), key="analysis_to_emotions")
     input_col, result_col = st.columns([1, 1.15], gap="large")
     selected = st.session_state.get("encoder_choice", "Rule-based baseline")
     signature = (selected, model_path, use_reviewer, ollama_model)
@@ -346,8 +348,11 @@ def render_overview() -> None:
     ready_encoders = sum(checkpoint_ready(checkpoint_path(encoder, PROJECT_ROOT / "models")) for encoder in ENCODERS)
     columns = st.columns(3)
     columns[0].metric("Default classifier", "Ready", help="The rule-based baseline runs without downloading model weights.", border=True)
-    columns[1].metric("Trained encoders", f"{ready_encoders} / 3", help="mBERT, MuRIL and XLM-R checkpoints found locally.", border=True)
+    columns[1].metric("Trained sentiment encoders", f"{ready_encoders} / 3", help="Three-class checkpoints only; the seven-emotion XLM-R checkpoint is counted separately below.", border=True)
     columns[2].metric("Review option", "Local Qwen", help="An optional second opinion for uncertain messages through Ollama.", border=True)
+    emotion_models = [p.name for p in (PROJECT_ROOT / "models").glob("xlmr*_emotion") if checkpoint_ready(p)]
+    st.caption("Seven-emotion XLM-R checkpoints: " + (", ".join(emotion_models) or "none installed"))
+    st.button("Open seven-emotion prediction and file evaluation", on_click=navigate_to, args=("Emotion lab",), key="overview_to_emotions")
     st.write("")
     first, second = st.columns(2)
     with first, st.container(border=True):
@@ -558,6 +563,7 @@ def render_model_panel(evaluation: ModelEvaluation) -> None:
 
 def render_evaluation(model_path: str, use_reviewer: bool, ollama_model: str) -> None:
     page_header("Model effectiveness", "Check predictions against labelled messages, then see which labels the model gets right and where it struggles.")
+    st.caption("This view evaluates three-class sentiment. For seven-emotion XLM-R accuracy on a CSV/XLSX file, open Emotion lab → Predict and evaluate a file.")
     with st.container(border=True):
         st.markdown("**1. Choose the labelled messages**")
         uploaded = st.file_uploader("Evaluation dataset (CSV or XLSX)", type=["csv", "xlsx"], key="evaluation_dataset", help="Leave empty to use the demo workbook.")

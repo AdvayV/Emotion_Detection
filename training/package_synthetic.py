@@ -3,15 +3,47 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
 from pathlib import Path
 import shutil
 import zipfile
 
-from training.synthetic_phrases import save_dataset
+from training.synthetic_phrases import COUNTS, save_dataset
 
 ROOT = Path(__file__).resolve().parents[1]
+DATASET_FILES = ("train.csv", "validation.csv", "test.csv", "all_splits.csv", "dataset_audit.json", "DATASET_CARD.md")
+
+
+def snapshot_dataset(destination, dataset_dir=None):
+    """Package the working CSVs without regenerating or silently replacing them."""
+    destination = Path(destination)
+    if dataset_dir is None:
+        return save_dataset(destination)
+    source = Path(dataset_dir).resolve()
+    if not source.exists():
+        save_dataset(source)
+    if not all((source / name).is_file() for name in DATASET_FILES):
+        raise ValueError("Working dataset is incomplete; preserve it and restore its missing files before packaging")
+    report = json.loads((source / "dataset_audit.json").read_text(encoding="utf-8"))
+    digest = hashlib.sha256((source / "all_splits.csv").read_bytes()).hexdigest()
+    if report.get("dataset_kind") != "synthetic_template" or report.get("prepared_csv_sha256") != digest:
+        raise ValueError("Working dataset audit does not match its CSV; do not overwrite or silently relabel the data")
+    with (source / "all_splits.csv").open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    if len(rows) != sum(COUNTS.values()) or report.get("split_sizes") != COUNTS:
+        raise ValueError("The 8000-phrase package requires its fixed 8000/1000/1000 partitions")
+    for split, count in COUNTS.items():
+        with (source / f"{split}.csv").open(encoding="utf-8", newline="") as handle:
+            part = list(csv.DictReader(handle))
+        if len(part) != count or part != [row for row in rows if row["split"] == split]:
+            raise ValueError(f"Working {split}.csv does not match all_splits.csv")
+    destination.mkdir(parents=True, exist_ok=True)
+    for name in DATASET_FILES:
+        if (source / name).resolve() != (destination / name).resolve():
+            shutil.copyfile(source / name, destination / name)
+    return report
 
 
 def notebook(package_name):
@@ -121,13 +153,13 @@ files.download(str(STORAGE / f"{MODELS[0]}_emotion.zip"))
     return {"cells": cells, "metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"name": "python"}, "colab": {"name": "TRAIN_ON_COLAB.ipynb", "provenance": []}}, "nbformat": 4, "nbformat_minor": 5}
 
 
-def build(output_dir, overwrite=False):
+def build(output_dir, overwrite=False, dataset_dir=None):
     output = Path(output_dir).resolve()
     if output.exists() and not overwrite:
         raise ValueError("Output folder exists; use --overwrite to refresh only the known package files")
     output.mkdir(parents=True, exist_ok=True)
-    report = save_dataset(output / "data")
-    paths = [output / "data" / name for name in ("train.csv", "validation.csv", "test.csv", "all_splits.csv", "dataset_audit.json", "DATASET_CARD.md")]
+    report = snapshot_dataset(output / "data", dataset_dir)
+    paths = [output / "data" / name for name in DATASET_FILES]
     source = output / "source"
     for directory in ("hinglish_emotion", "training"):
         target = source / directory
@@ -158,6 +190,10 @@ Labels are generated template-intent labels, not human annotations. This is an
 experimental alternative to the pending human-reviewed research dataset.
 The 10,000 rows are compositional variants, not 10,000 independently authored
 natural utterances. Read data/DATASET_CARD.md and data/dataset_audit.json.
+
+In the local project, the working datasets are under
+data/training/synthetic_hinglish_8000. This upload folder contains a verified
+snapshot of those files. Keep demo data separate from training data.
 
 ## Exact upload steps
 
@@ -206,10 +242,11 @@ reviewed real data for the eventual research experiment.
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output-dir", default="colab_ready_8000")
+    parser.add_argument("--output-dir", default="colab/colab_ready_8000")
+    parser.add_argument("--dataset-dir", default="data/training/synthetic_hinglish_8000", help="Working dataset folder; generated only if it does not exist")
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args()
-    folder, archive, report = build(args.output_dir, args.overwrite)
+    folder, archive, report = build(args.output_dir, args.overwrite, args.dataset_dir)
     print(json.dumps({"folder": str(folder), "zip": str(archive), "split_sizes": report["split_sizes"], "source": "synthetic_only"}, indent=2))
 
 

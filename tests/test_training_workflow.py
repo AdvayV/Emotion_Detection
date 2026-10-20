@@ -103,7 +103,7 @@ class DataWorkflowTests(unittest.TestCase):
     def test_illustrative_demo_remains_blocked(self):
         from training.data_workflow import prepare_data
         with self.assertRaisesRegex(ValueError, "Illustrative"):
-            prepare_data(ROOT / "data" / "mixed_emotions_demo.csv", "emotion", "raw")
+            prepare_data(ROOT / "data" / "demo" / "emotions" / "mixed_emotions_demo.csv", "emotion", "raw")
 
     def test_annotation_export_requires_independent_completed_reviews(self):
         from training.annotations import initialise, read_csv, write_csv, reviewer_sheets, reconcile

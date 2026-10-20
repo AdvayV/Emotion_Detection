@@ -6,7 +6,7 @@ EMOTION_NAMES = {
     "joy": "Happy / joy", "sadness": "Sadness", "anger": "Anger",
     "fear": "Fear", "surprise": "Surprise", "disgust": "Disgust", "neutral": "Neutral",
 }
-LANGUAGE_PAIRS = {"hi-en": "Hindi–English", "fr-en": "French–English"}
+LANGUAGE_PAIRS = {"hi-en": "Hindi–English", "fr-en": "English–French"}
 EMOTION_ALIASES = {
     "happy": "joy", "happiness": "joy", "sad": "sadness",
     "joie": "joy", "tristesse": "sadness", "colère": "anger",

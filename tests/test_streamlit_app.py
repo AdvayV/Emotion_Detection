@@ -1,6 +1,8 @@
 import importlib.util
 from pathlib import Path
 import unittest
+from unittest.mock import patch, Mock
+import tempfile
 
 
 STREAMLIT_AVAILABLE = importlib.util.find_spec("streamlit") is not None
@@ -12,7 +14,9 @@ class StreamlitAppTests(unittest.TestCase):
         from streamlit.testing.v1 import AppTest
 
         app_path = Path(__file__).resolve().parents[1] / "dashboard" / "app.py"
-        return AppTest.from_file(str(app_path), default_timeout=30).run()
+        app = AppTest.from_file(str(app_path), default_timeout=30)
+        app.session_state["workspace"] = "Analyze text"
+        return app.run()
 
     def test_untrained_encoder_is_shown_as_unavailable(self):
         app = self.make_app()
@@ -87,21 +91,51 @@ class StreamlitAppTests(unittest.TestCase):
         next(button for button in app.button if button.label == "Open text analysis").click().run()
         self.assertEqual(app.radio[0].value, "Analyze text")
 
-    def test_seven_emotion_lab_analyzes_and_evaluates_both_languages(self):
+    def test_seven_emotion_lab_analyzes_and_evaluates_current_hinglish_scope(self):
         app = self.make_app()
         app.radio[0].set_value("Emotion lab").run()
         self.assertEqual(len(app.exception), 0)
-        next(item for item in app.selectbox if item.label == "Emotion example").set_value("French–English · happy").run()
+        next(item for item in app.selectbox if item.label == "Emotion classifier").set_value("Demo lexical rules").run()
+        next(item for item in app.selectbox if item.label == "Emotion example").set_value("Hindi–English · happy").run()
         next(button for button in app.button if button.label == "Detect emotion").click().run()
         self.assertEqual(len(app.exception), 0)
         self.assertEqual(app.session_state["emotion_result"]["result"].emotion, "joy")
         next(button for button in app.button if button.label == "Evaluate seven emotions").click().run()
         self.assertEqual(len(app.exception), 0)
         report = app.session_state["emotion_evaluation"]["report"]
-        self.assertEqual(report["overall"]["rows"], 84)
-        self.assertEqual(set(report["by_language"]), {"hi-en", "fr-en"})
-        next(item for item in app.selectbox if item.label == "Emotion classifier").set_value("XLM-R").run()
+        self.assertEqual(report["overall"]["rows"], 42)
+        self.assertEqual(set(report["by_language"]), {"hi-en"})
+        self.assertEqual(next(item for item in app.selectbox if item.label == "Language mix").options, ["Hindi–English", "English–French"])
+        with patch("dashboard.emotions.checkpoint_ready", return_value=False):
+            next(item for item in app.selectbox if item.label == "Emotion classifier").set_value("XLM-R").run()
         self.assertTrue(next(button for button in app.button if button.label == "Detect emotion").disabled)
+
+    def test_emotion_lab_discovers_trained_checkpoint_and_retains_scope_warning(self):
+        from hinglish_emotion.emotions import EmotionResult
+        from hinglish_emotion.tasks import EMOTION_LABELS
+        result = EmotionResult("joy", {label: 1.0 if label == "joy" else 0.0 for label in EMOTION_LABELS}, source="trained_checkpoint", experimental=True, warnings=("Synthetic test data; real-world accuracy is unverified.",))
+        detector = Mock()
+        detector.predict.return_value = result
+        metadata = {"schema_version": 1, "text_mode": "raw", "max_length": 128, "trained_language_pairs": ["hi-en"], "validated_language_pairs": [], "training_status": "complete", "evaluation_scope": "synthetic_only"}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            model = root / "models" / "xlmr_emotion"
+            model.mkdir(parents=True)
+            (model / "config.json").write_text("{}", encoding="utf-8")
+            with patch("dashboard.emotions.ROOT", root), patch("dashboard.emotions.checkpoint_ready", side_effect=lambda path: Path(path).name == "xlmr_emotion"), patch("dashboard.emotions.emotion_checkpoint_metadata", return_value=metadata), patch("dashboard.emotions.detector_for", return_value=detector):
+                app = self.make_app()
+                app.radio[0].set_value("Emotion lab").run()
+                selector = next(item for item in app.selectbox if item.label == "Emotion classifier")
+                self.assertEqual(selector.value, "XLM-R")
+                self.assertTrue(any("generated phrases" in item.value for item in app.warning))
+                next(item for item in app.text_area if item.label == "Phrase to analyze").set_value("Aaj main bahut khush hoon").run()
+                next(button for button in app.button if button.label == "Detect emotion").click().run()
+                self.assertEqual(len(app.exception), 0)
+                detector.predict.assert_called_once_with("Aaj main bahut khush hoon", "hi-en")
+                self.assertEqual(app.session_state["emotion_result"]["result"].source, "trained_checkpoint")
+                self.assertTrue(any("real-world accuracy" in item.value.lower() for item in app.warning))
+                next(item for item in app.text_area if item.label == "Phrase to analyze").set_value("A different phrase").run()
+                self.assertNotIn("emotion_result", app.session_state)
 
 
 if __name__ == "__main__":
