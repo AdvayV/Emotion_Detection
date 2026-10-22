@@ -1,0 +1,13 @@
+flowchart TB
+  classDef core fill:#162D46,color:#FFFFFF,stroke:#162D46,stroke-width:2px
+  classDef learned fill:#DDF3ED,color:#16463F,stroke:#218477,stroke-width:1.5px
+  classDef optional fill:#FFF2D8,color:#62491E,stroke:#C9A45C,stroke-width:1.5px
+  classDef pending fill:#F5F6F8,color:#4B596E,stroke:#98A5B5,stroke-dasharray:5 4
+  A["Target phrase + optional context<br/>Reviewed context mode only"]:::core --> B["XLM-R encoder<br/>Contextual text vector"]:::learned
+  C["Current-message emoji<br/>Sequence hash IDs"]:::core --> D["Learned emoji embeddings<br/>Pool and project"]:::learned
+  B --> E["Learned vector gate<br/>Residual text + emoji fusion"]:::learned
+  D --> E
+  E --> F["Seven-emotion head<br/>Supervised phrase labels"]:::core
+  E --> G["Optional sarcasm head<br/>Reviewed rows; mask missing labels"]:::optional
+  H["No emoji present<br/>Gate forced to zero"]:::optional -.-> E
+  G -. "after an actual GPU run" .-> I["Record trained objectives<br/>No advanced weights installed yet"]:::pending

@@ -28,6 +28,9 @@ It installs to `models/xlmr_multilingual_emotion` and leaves the original
 in **Emotion lab**. This installs existing trained weights; it does not train a
 new model. See the results and evaluation limits below.
 
+For the saved model review and implementation snapshot, open the
+[23 October report](outputs/23OctReview%20AdvayV%20KaavishG%20CD.docx).
+
 ## Predict phrases or score a file
 
 **Try a phrase:** choose an example or type your message and click Detect emotion.
@@ -83,6 +86,40 @@ English-French, compare the installed XLM-R and mBERT checkpoints; MuRIL is unav
 Separate challenge drafts are in `evaluation_set/`; choose them in the Emotion
 lab file tab. The expected labels are unreviewed proposals. Use the unlabelled
 copies for prediction only, or obtain independent reviews before reporting accuracy.
+
+## Research workbench
+
+In the sidebar, open **Research workbench** and select a section:
+
+1. **Experiments:** select one available model, language mix, input variants and
+   CSV. Runs default to 10 rows (up to 200). Context/no-context is optional; local
+   Qwen review is optional and limited to five calls. The bundled 200 challenge
+   drafts are assistant-authored. Use them to inspect behavior only, not to report
+   benchmark accuracy. Download the CSV rows and JSON report to retain results.
+2. **Confidence calibration:** upload text plus gold emotion labels, then declare
+   either a validation split column or a dedicated calibration file. Frozen test
+   overlaps are blocked. Synthetic or unreviewed labels require the explicit
+   experimental opt-in. Inspect before/after NLL, Brier score and ECE, and download
+   the profile JSON. Calibration adjusts scores; it does not fix the predicted label.
+3. **Human review:** upload a queue CSV and create two blank sheets. Have distinct
+   reviewers fill them independently; disagreement or a context flag needs a
+   separate adjudicator and notes. Reconcile the sheets, then provide the frozen
+   `all_splits.csv`, reviewed corrections and matching audit to build a versioned
+   training dataset. Only training-role corrections are merged; test rows remain
+   protected. Synthetic ancestry is kept and may require an explicit experimental
+   training flag. All packages are downloads; no weights change automatically.
+4. **Conversation:** enter `Speaker: phrase` turns. Select a language, model, and
+   how many earlier turns to show. Optional local Qwen review is limited to five
+   turns. Existing checkpoints use context only if trained for it; otherwise the
+   encoder still predicts each phrase individually.
+5. **GPU training:** advanced learned emoji fusion is optional and is not installed
+   as trained weights. Start with the [advanced guide](colab/advanced_training/START_HERE.md),
+   upload [the Colab notebook](colab/advanced_training/TRAIN_ADVANCED.ipynb) or
+   [Kaggle notebook](colab/advanced_training/TRAIN_ADVANCED_KAGGLE.ipynb), and attach
+   [the training package](colab/advanced_training/xlmr_advanced_training.zip).
+   Its default synthetic run trains emotion and emoji fusion only; context and
+   sarcasm heads require independently reviewed labels. The guide covers recovery,
+   export and installation after a GPU run.
 
 ## Train the models on Google Colab
 
@@ -165,6 +202,8 @@ consistent; it does not measure the optional reviewer's effect.
 
 The detailed training guide is `colab/project_training/START_HERE.md`.
 The earlier `colab/xlmr_multilingual` notebook remains an XLM-R-only alternative.
+The separate [advanced Colab/Kaggle package](colab/advanced_training/START_HERE.md)
+trains optional learned text-emoji fusion; it does not replace existing checkpoints.
 
 ## Command-line file prediction
 

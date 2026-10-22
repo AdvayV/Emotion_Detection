@@ -1,0 +1,20 @@
+flowchart TB
+  classDef ink fill:#162D46,color:#FFFFFF,stroke:#162D46,stroke-width:2px
+  classDef teal fill:#DDF3ED,color:#16463F,stroke:#218477,stroke-width:1.5px
+  classDef blue fill:#E7EDFC,color:#263B66,stroke:#637CB5,stroke-width:1.5px
+  classDef gold fill:#FFF2D8,color:#62491E,stroke:#C9A45C,stroke-width:1.5px
+  classDef pending fill:#F5F6F8,color:#4B596E,stroke:#98A5B5,stroke-dasharray:5 4
+  subgraph SETUP["Before learning"]
+    direction LR
+    A["Source + labels + audit<br/>Frozen group-aware splits"]:::teal --> B["Verified notebook and ZIP<br/>Colab / Kaggle GPU"]:::ink --> C["Training configuration<br/>Raw text; seed; token budget"]:::blue
+  end
+  subgraph LEARN["Training and selection"]
+    direction LR
+    D["Mini-batch forward pass<br/>Loss + backpropagation"]:::ink --> E["Accumulated optimizer updates<br/>Encoder, task head, optional gate"]:::blue --> F["Validate each epoch<br/>Keep best macro-F1"]:::teal
+    F -. "next epoch" .-> D
+  end
+  subgraph SAVE["Export and recovery"]
+    direction LR
+    G["Newest complete epoch<br/>Safe recovery tensors + JSON"]:::gold --> H["Frozen test evaluation<br/>Class and language results"]:::blue --> I["Inference-only ZIP<br/>Safe local installation"]:::teal
+  end
+  SETUP --> LEARN --> SAVE

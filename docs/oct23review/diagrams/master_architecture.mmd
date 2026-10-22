@@ -1,0 +1,24 @@
+flowchart TB
+  classDef ink fill:#162D46,color:#FFFFFF,stroke:#162D46,stroke-width:2px
+  classDef teal fill:#DDF3ED,color:#16463F,stroke:#218477,stroke-width:1.5px
+  classDef blue fill:#E7EDFC,color:#263B66,stroke:#637CB5,stroke-width:1.5px
+  classDef gold fill:#FFF2D8,color:#62491E,stroke:#C9A45C,stroke-width:1.5px
+  classDef pending fill:#F5F6F8,color:#4B596E,stroke:#98A5B5,stroke-dasharray:5 4
+  subgraph TRAIN["01 GPU training"]
+    direction LR
+    A["20,000 generated rows<br/>16k train / 2k validation / 2k test"]:::teal --> B["Colab or Kaggle GPU<br/>Validation selection + recovery"]:::ink --> C["Inference export<br/>Weights, tokenizer and metadata"]:::blue
+  end
+  subgraph INFER["02 Local analysis"]
+    direction LR
+    D["Phrase or CSV / XLSX<br/>Task and language selection"]:::ink --> E["Compatible checkpoint<br/>XLM-R / mBERT / MuRIL hi-en"]:::blue --> F["Sentiment OR seven emotions<br/>Base scores + actual source"]:::teal
+  end
+  subgraph REVIEW["03 Decision review"]
+    direction LR
+    G["Spelling and emoji cues<br/>Uncertainty and token warnings"]:::teal --> H["Optional confidence scaling<br/>Optional local Qwen review"]:::gold --> I["Base and reviewed outputs<br/>Scope and provenance retained"]:::blue
+  end
+  subgraph RESEARCH["04 Research"]
+    direction LR
+    J["File metrics + model comparisons<br/>Ablations + conversation trace"]:::blue ~~~ K["Model disagreement<br/>Human-confirmed candidate queue"]:::teal --> L["Blind review and adjudication<br/>Versioned train-only corrections"]:::teal
+  end
+  TRAIN --> INFER --> REVIEW --> RESEARCH
+  RESEARCH -. "next explicit GPU run" .-> M["Learned emoji gate implemented<br/>Context/sarcasm require reviewed labels<br/>Advanced trained weights still pending"]:::pending

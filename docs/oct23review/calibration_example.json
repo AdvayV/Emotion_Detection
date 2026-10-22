@@ -1,0 +1,19 @@
+{
+  "temperature": 2.646110905055132,
+  "rows": 98,
+  "scope": "hi-en",
+  "status": "experimental_unreviewed",
+  "metrics_before": {
+    "nll": 1.5043822603638652,
+    "brier": 0.4231668211347909,
+    "ece": 0.2165111365964462
+  },
+  "metrics_after": {
+    "nll": 0.7878709402481823,
+    "brier": 0.3577673949636659,
+    "ece": 0.0441497107694552
+  },
+  "data_selection": "98 existing synthetic Hindi-English validation rows,14 per emotion; random_state42; frozen train/test/evaluation hashes excluded",
+  "accuracy_changed": false,
+  "independent_evaluation": false
+}

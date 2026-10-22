@@ -42,9 +42,11 @@ def install(archive, models_root=None, target=None):
         pairs=set(metadata.get("trained_language_pairs",[]))
         supported_pairs={"hi-en","fr-en"} if encoder.key!="muril" else {"hi-en"}
         if not pairs or not pairs<=supported_pairs:raise ValueError("Missing or unsupported trained language scope")
-        default=f"{encoder.key}_multilingual_emotion" if len(pairs)==2 else f"{encoder.key}_{next(iter(pairs)).replace('-', '_')}_emotion"
+        advanced = metadata.get("architecture") == "text_emoji_multitask_v1"
+        if advanced and encoder.key != "xlmr": raise ValueError("Learned emoji fusion currently requires XLM-R")
+        default = "xlmr_fusion_emotion" if advanced else (f"{encoder.key}_multilingual_emotion" if len(pairs)==2 else f"{encoder.key}_{next(iter(pairs)).replace('-', '_')}_emotion")
         name=target or default
-        if name not in {f"{encoder.key}_multilingual_emotion",f"{encoder.key}_hi_en_emotion",f"{encoder.key}_fr_en_emotion",f"{encoder.key}_emotion"}:raise ValueError("Use a supported target folder name for the detected encoder")
+        if name not in {f"{encoder.key}_multilingual_emotion",f"{encoder.key}_hi_en_emotion",f"{encoder.key}_fr_en_emotion",f"{encoder.key}_emotion", *( ["xlmr_fusion_emotion"] if advanced else [] )}:raise ValueError("Use a supported target folder name for the detected encoder")
         destination=models_root/name
         if destination.exists():raise ValueError(f"Preserving existing model at {destination}. Choose a different models root or archive it explicitly first.")
         stage=models_root/(".import_"+uuid.uuid4().hex)
@@ -55,6 +57,9 @@ def install(archive, models_root=None, target=None):
                 with z.open(item) as src,(stage/filename).open("xb") as out:shutil.copyfileobj(src,out,4*1024*1024)
             actual=emotion_checkpoint_metadata(stage)
             if actual["legacy"] or not checkpoint_ready(stage):raise ValueError("Missing usable model weights or tokenizer")
+            if advanced:
+                from hinglish_emotion.fusion import validate_fusion_checkpoint
+                validate_fusion_checkpoint(stage)
             from safetensors import safe_open
             weight_files=list(stage.glob("*.safetensors"))
             if not weight_files:raise ValueError("SafeTensor weights are required")

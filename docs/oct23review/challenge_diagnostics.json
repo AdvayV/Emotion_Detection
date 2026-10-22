@@ -1,0 +1,58 @@
+{
+  "recorded_at": "2026-10-22",
+  "source": "Coordinator local CPU diagnostic calls using LocalEmotionClassifier and predict_dataset after the mBERT integration. No new weights or training.",
+  "label_scope": "Unreviewed assistant-draft or illustrative labels; not independent human evaluation.",
+  "exact_user_61_percent_run_identified": false,
+  "results": [
+    {
+      "model": "mBERT",
+      "dataset": "Hindi-English challenge draft",
+      "file": "evaluation_set/hindi_english_100.csv",
+      "language_pair": "hi-en",
+      "rows": 100,
+      "correct": 50,
+      "accuracy": 0.5,
+      "file_sha256": "49febcd9e0116a93db7fff7c65cd107205ed5496b9900aace95ba70dd8e4e105"
+    },
+    {
+      "model": "mBERT",
+      "dataset": "English-French challenge draft",
+      "file": "evaluation_set/english_french_100.csv",
+      "language_pair": "fr-en",
+      "rows": 100,
+      "correct": 41,
+      "accuracy": 0.41,
+      "file_sha256": "25c00322642e55451a7f18002c8d654a2b77739508001b7e172a2b0d87a86f06"
+    },
+    {
+      "model": "mBERT",
+      "dataset": "Hindi-English demo subset",
+      "file": "data/demo/emotions/mixed_emotions_demo.csv",
+      "language_pair": "hi-en",
+      "rows": 42,
+      "correct": 24,
+      "accuracy": 0.5714285714285714,
+      "file_sha256": "603af42a7bfd66638b23d51d3699917056e7204a284ed092aeb92c920b17eae6"
+    },
+    {
+      "model": "MuRIL",
+      "dataset": "Hindi-English challenge draft",
+      "file": "evaluation_set/hindi_english_100.csv",
+      "language_pair": "hi-en",
+      "rows": 100,
+      "correct": 51,
+      "accuracy": 0.51,
+      "file_sha256": "49febcd9e0116a93db7fff7c65cd107205ed5496b9900aace95ba70dd8e4e105"
+    },
+    {
+      "model": "MuRIL",
+      "dataset": "Hindi-English demo subset",
+      "file": "data/demo/emotions/mixed_emotions_demo.csv",
+      "language_pair": "hi-en",
+      "rows": 42,
+      "correct": 25,
+      "accuracy": 0.5952380952380952,
+      "file_sha256": "603af42a7bfd66638b23d51d3699917056e7204a284ed092aeb92c920b17eae6"
+    }
+  ]
+}

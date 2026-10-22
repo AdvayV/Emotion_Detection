@@ -12,6 +12,29 @@ The bundled emotion data is synthetic. The sarcasm template contains headers
 only; that job needs your own human-reviewed data. See ../GET_STARTED.md for
 the complete sequence and ../IMPLEMENTATION_STATUS.md for remaining experiments.
 
+## Optional advanced XLM-R learned emoji fusion
+
+The [advanced guide](advanced_training/START_HERE.md) covers both the
+[Colab notebook](advanced_training/TRAIN_ADVANCED.ipynb) and
+[Kaggle notebook](advanced_training/TRAIN_ADVANCED_KAGGLE.ipynb), plus the
+[training package](advanced_training/xlmr_advanced_training.zip). It trains a
+learned emoji embedding and gate with XLM-R; it does not use hand-authored emoji
+sentiment scores. Training runs on the selected GPU service, not on the project
+laptop. The package contains source and data, but no trained fusion weights.
+
+The default run uses the existing synthetic 16k/2k/2k emotion split and trains
+emotion plus emoji fusion only. It does not establish an improvement over the
+installed XLM-R, mBERT or MuRIL checkpoints. Context conditioning and the sarcasm
+head stay disabled until suitable human-reviewed labels and group-safe splits are
+provided. Human corrections retain synthetic origin; mixed-origin runs require
+the explicit experimental synthetic-data opt-in.
+
+After a completed GPU run, download the inference ZIP and install it from the
+project root with `python -m training.install_checkpoint`. The new profile is
+available only after export and installation. Existing trained checkpoints stay
+available. For the evidence snapshot and limits, see the
+[23 October report](../outputs/23OctReview%20AdvayV%20KaavishG%20CD.docx).
+
 The [xlmr_multilingual](xlmr_multilingual/START_HERE.md) folder remains an
 alternative XLM-R-only workflow with shared or separate language models.
 

@@ -7,7 +7,7 @@ name = "hinglish-emotion-local"
 version = "0.1.0"
 description = "Local-first Hinglish sentiment, emoji, sarcasm, and uncertainty pipeline"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = ["emoji>=2.12,<3"]
 
 [project.optional-dependencies]
 dashboard = [

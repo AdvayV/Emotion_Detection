@@ -13,6 +13,11 @@ been trained or that research accuracy has been established.
 | Sarcasm | Explicit rule baseline; supervised XLM-R binary trainer, importer and local adapter | Reviewed sarcasm data and the Colab run; no trained sarcasm checkpoint supplied |
 | Local Qwen | Optional seven-emotion structured review, routing, exact target evidence spans and graceful unavailable state | Measured reviewer benefit; calibrated confidence; no Qwen fine-tuning in this scope |
 | Conversation context | Optional context passed to the Qwen reviewer | No learned temporal/context encoder |
+| Input/reviewer experiments | Research workbench compares raw, normalized, emoji-removed, and optional context variants; exports row-level results with latency, coverage and label stability | Independent labels for variant accuracy; measured reviewer benefit remains pending |
+| Confidence calibration | Research workbench fits an explicitly experimental temperature profile from validation or dedicated calibration data; blocks frozen evaluation overlap | Human-reviewed calibration sample and transfer evaluation; profiles do not auto-deploy |
+| Blind human review | Two independent blank reviewer sheets, adjudication, audit receipt and versioned training dataset export | Human reviewers and a completed annotation round; no label is inferred from model output |
+| Conversation trace | Turn-by-turn base/reviewer output, bounded history and optional Qwen review | Context-trained encoder and human evaluation; current model curves are not a measure of mental state |
+| Advanced learned emoji fusion | XLM-R fusion model and Colab/Kaggle training package are implemented | GPU run and exported checkpoint; default uses synthetic emotion labels, context/sarcasm heads remain off without reviewed labels |
 | Intensity and evidence | Labelled heuristic intensity and lexical evidence | Human annotations; no claim of transformer attribution |
 | Dataset evaluation | CSV/XLSX mapping, accuracy, macro-F1, per-class/language scores, confusion matrix, leakage/source notices | Representative unseen human test set |
 | Training handoff | Separate Colab upload package, model cards, group-aware frozen splits, best validation checkpoint, test metrics, Drive recovery and inference ZIP | User-run GPU sessions and inspection of resulting metrics |
@@ -40,7 +45,7 @@ contains source and data only, never downloaded model weights, optimizer
 states or private credentials. Training runs on Colab; local execution is
 inference, analysis and software verification.
 
-## October 22 integration update
+## October 23 research-workbench update
 
 The focused bilingual mBERT package is in colab/mbert_study. It verifies the
 same data and split hashes as combined XLM-R and exports a checkpoint accepted
@@ -54,3 +59,13 @@ contain 100 unreviewed assistant-draft phrases, with separate unlabelled copies
 and a zero-exact-overlap audit. Real-world benchmark validation is still pending.
 
 Bilingual mBERT now works for both language mixes; CPU test inference reproduced 81.4% synthetic accuracy and 0.8119 macro-F1 on 2,000 rows. Encoder results and disagreement use its actual installed checkpoint. Representative human test data and reliable generalization remain open work.
+
+The Research workbench now exposes bounded input/reviewer experiments,
+experimental confidence calibration, blind two-reviewer correction export,
+conversation traces and the advanced GPU handoff. The optional fusion trainer is
+not evidence of a trained fusion model: no advanced checkpoint is installed.
+Challenge-draft labels remain assistant-authored and unreviewed. The 23 October
+review report and saved diagnostics are linked from [README.md](README.md).
+
+Project validation at this snapshot: 221 tests and 33 subtests passed. Software
+tests verify the workflows and do not establish model accuracy on human data.

@@ -23,7 +23,7 @@ from hinglish_emotion.tasks import LANGUAGE_PAIRS
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SAMPLE_DATA = PROJECT_ROOT / "data" / "demo" / "sentiment" / "hinglish_emotion_phrases.xlsx"
-PAGES = ["Emotion lab", "Model disagreement", "Analyze text", "Model effectiveness", "Dataset explorer", "Overview"]
+PAGES = ["Emotion lab", "Model disagreement", "Analyze text", "Model effectiveness", "Dataset explorer", "Research workbench", "Overview"]
 EXAMPLES = {
     "Positive with emphasis": "movie acchaaa thi 😊",
     "Negation": "service acchi nahi thi 😞",
@@ -656,6 +656,9 @@ def main() -> None:
         render_disagreement_lab(page_header, style_chart)
     elif page == "Model effectiveness":
         render_evaluation(model_path, use_reviewer, ollama_model)
+    elif page == "Research workbench":
+        from dashboard.research import render_research_workbench
+        render_research_workbench(page_header,style_chart)
     elif page == "Dataset explorer":
         render_dataset()
     else:

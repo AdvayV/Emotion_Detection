@@ -101,13 +101,13 @@ def prepare_data(data, task, text_mode, split_seed=42, split_manifest=None, data
     synthetic_train = train_sources.str.contains("synthetic", case=False, regex=False) | parts[0].get("annotation_status", pd.Series("", index=parts[0].index)).astype(str).eq("synthetic")
     synthetic_test = test_sources.str.contains("synthetic", case=False, regex=False) | test_statuses.eq("synthetic")
     training_kind = "synthetic_only" if synthetic_train.all() else "mixed_with_synthetic" if synthetic_train.any() else "human_or_unverified"
-    evaluation_scope = "synthetic_only" if synthetic_test.all() else "mixed_test" if synthetic_test.any() else "human_annotated" if test_statuses.isin({"public_annotation", "human_adjudicated"}).all() else "unverified"
+    evaluation_scope = "synthetic_only" if synthetic_test.all() else "mixed_test" if synthetic_test.any() else "human_annotated" if test_statuses.isin({"public_annotation", "human_adjudicated", "human_reviewed"}).all() else "unverified"
     if task == "emotion":
         for pair in sorted(test["language_pair"].unique()):
             subset = test[test["language_pair"] == pair]
             statuses = subset.get("annotation_status", pd.Series("", index=subset.index))
             source_is_synthetic = subset.get("source", pd.Series("", index=subset.index)).astype(str).str.contains("synthetic", case=False, regex=False).any()
-            if not source_is_synthetic and set(subset["label"]) == set(labels) and statuses.isin({"public_annotation", "human_adjudicated"}).all():
+            if not source_is_synthetic and set(subset["label"]) == set(labels) and statuses.isin({"public_annotation", "human_adjudicated", "human_reviewed"}).all():
                 verified_pairs.append(pair)
     return {
         "parts": parts, "manifest": manifest, "manifest_sha256": manifest_hash,

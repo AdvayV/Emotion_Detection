@@ -79,10 +79,31 @@ class RuleEmotionClassifier:
 class LocalEmotionClassifier(LocalTransformerClassifier):
     def __init__(self, model_path, max_length: int | None = None, device: str | None = None) -> None:
         self.metadata = emotion_checkpoint_metadata(model_path)
+        self.fusion = None
+        if self.metadata.get("architecture") == "text_emoji_multitask_v1":
+            from .fusion import LocalFusionClassifier
+            self.fusion = LocalFusionClassifier(model_path, device=device)
+            self.model_path = str(model_path)
+            self.model = self.fusion.model
+            self.tokenizer = self.fusion.tokenizer
+            self.torch = self.fusion.torch
+            self.device = self.fusion.device
+            self.required_labels = set(EMOTION_LABELS)
+            self.max_length = self.metadata["max_length"]
+            return
         limit = self.metadata["max_length"] if max_length is None else max_length
         super().__init__(model_path, limit, device, required_labels=EMOTION_LABELS)
 
+    def predict_with_context(self, text: str, context: str) -> EmotionResult:
+        if self.fusion is not None:
+            return self.fusion.predict_with_context(text, context)
+        result = self.predict_text(text)
+        return replace(result, warnings=(*result.warnings,
+            "This encoder was trained on individual phrases; supplied context is only available to the optional reviewer."))
+
     def predict_text(self, text: str) -> EmotionResult:
+        if self.fusion is not None:
+            return self.fusion.predict_text(text)
         prepared = prepare_text(text, self.metadata["text_mode"], self.metadata["preparation_version"])
         token_ids = self.tokenizer(prepared, add_special_tokens=True, truncation=False)["input_ids"]
         truncated = len(token_ids) > self.max_length
@@ -105,6 +126,8 @@ class LocalEmotionClassifier(LocalTransformerClassifier):
         return self.predict_text(message.raw_text)
 
     def predict_batch(self, texts: list[str], batch_size: int = 8) -> list[EmotionResult]:
+        if self.fusion is not None:
+            return self.fusion.predict_batch(texts, batch_size)
         if batch_size < 1 or any(not text.strip() for text in texts):
             raise ValueError("Provide non-empty phrases and a positive batch size")
         results = []
@@ -152,6 +175,17 @@ class EmotionDetector:
         result = self.classifier.predict(self.normalizer.normalize(text))
         if language_pair == "fr-en":
             result = replace(result, experimental=True, warnings=("French–English is experimental until bilingual review is available.",))
+        return result
+
+    def predict_context(self, text: str, language_pair: str = "hi-en", context: str = "") -> EmotionResult:
+        if not text.strip() or language_pair not in LANGUAGE_PAIRS:
+            raise ValueError("Use a non-empty phrase and supported language mix")
+        if not context.strip() or not hasattr(self.classifier, "predict_with_context"):
+            return self.predict(text, language_pair)
+        result = self.classifier.predict_with_context(text, context)
+        if language_pair not in self.classifier.metadata.get("validated_language_pairs", []):
+            result = replace(result, experimental=True, warnings=(*result.warnings,
+                f"{LANGUAGE_PAIRS[language_pair]} has no verified seven-class test coverage for this checkpoint."))
         return result
 
     def predict_many(self, texts: list[str], language_pairs: list[str], batch_size: int = 8) -> list[EmotionResult]:

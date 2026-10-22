@@ -1,0 +1,19 @@
+flowchart TB
+  classDef ink fill:#162D46,color:#FFFFFF,stroke:#162D46,stroke-width:2px
+  classDef teal fill:#DDF3ED,color:#16463F,stroke:#218477,stroke-width:1.5px
+  classDef blue fill:#E7EDFC,color:#263B66,stroke:#637CB5,stroke-width:1.5px
+  classDef gold fill:#FFF2D8,color:#62491E,stroke:#C9A45C,stroke-width:1.5px
+  classDef pending fill:#F5F6F8,color:#4B596E,stroke:#98A5B5,stroke-dasharray:5 4
+  subgraph COLLECT["Blind review"]
+    direction LR
+    A["Queue or challenge CSV<br/>Record original source and role"]:::ink --> B["Two blind reviewer sheets<br/>Proposed labels kept separate"]:::blue --> C["Reviewers supply labels<br/>Distinct reviewer identities"]:::teal
+  end
+  subgraph RESOLVE["Resolve and audit"]
+    direction LR
+    D["Disagreement/context flagged?<br/>Third adjudicator + reason"]:::gold --> E["Validate every row<br/>Bind sheets, CSV and receipt hashes"]:::blue --> F["Export reviewed candidates<br/>Preserve synthetic origin"]:::teal
+  end
+  subgraph HANDOFF["Training handoff"]
+    direction LR
+    G["Reject evaluation-role rows<br/>Protect frozen validation/test"]:::gold --> H["Merge eligible train corrections<br/>Keep original held-out rows"]:::blue --> I["Download new dataset and audit<br/>Explicit GPU retraining"]:::teal
+  end
+  COLLECT --> RESOLVE --> HANDOFF

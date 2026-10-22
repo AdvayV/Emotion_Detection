@@ -1,0 +1,268 @@
+{
+  "title": "October 23 model review figures",
+  "metric_scope": "saved synthetic-only test metrics; not a real-world benchmark",
+  "sources": [
+    "models/xlmr_multilingual_emotion/metrics.json",
+    "models/mbert_multilingual_emotion/metrics.json",
+    "models/muril_hi_en_emotion/metrics.json"
+  ],
+  "colab_cross_checks": [
+    {
+      "files": [
+        "models/xlmr_multilingual_emotion/metrics.json",
+        "colab/mbert_study/xlmr_baseline_metrics.json"
+      ],
+      "matched": true,
+      "dataset_sha256": "83430dd59167b6402cc2945f94f701e19eb5886c6ee7d3602227ad73d0159db0",
+      "split_sha256": "7b4c6c953d0ae6402250f82e94ebeabbb05605ddad9c2567a15e800414f5fd72"
+    },
+    {
+      "files": [
+        "models/xlmr_multilingual_emotion/metrics.json",
+        "colab/muril_study/xlmr_baseline_metrics.json"
+      ],
+      "matched": true,
+      "dataset_sha256": "83430dd59167b6402cc2945f94f701e19eb5886c6ee7d3602227ad73d0159db0",
+      "split_sha256": "7b4c6c953d0ae6402250f82e94ebeabbb05605ddad9c2567a15e800414f5fd72"
+    },
+    {
+      "files": [
+        "models/mbert_multilingual_emotion/metrics.json",
+        "colab/mbert_study/completed_metrics.json"
+      ],
+      "matched": true,
+      "dataset_sha256": "83430dd59167b6402cc2945f94f701e19eb5886c6ee7d3602227ad73d0159db0",
+      "split_sha256": "7b4c6c953d0ae6402250f82e94ebeabbb05605ddad9c2567a15e800414f5fd72"
+    }
+  ],
+  "mbert_metadata_matches_metrics": true,
+  "models": {
+    "xlmr": {
+      "name": "XLM-R",
+      "base_model": "FacebookAI/xlm-roberta-base",
+      "metrics_file": "models/xlmr_multilingual_emotion/metrics.json",
+      "evaluation_scope": "synthetic_only",
+      "training_data_kind": "synthetic_only",
+      "split_sizes": {
+        "train": 16000,
+        "validation": 2000,
+        "test": 2000
+      },
+      "dataset_sha256": "83430dd59167b6402cc2945f94f701e19eb5886c6ee7d3602227ad73d0159db0",
+      "split_sha256": "7b4c6c953d0ae6402250f82e94ebeabbb05605ddad9c2567a15e800414f5fd72",
+      "test_overall": {
+        "accuracy": 0.925,
+        "macro_f1": 0.9250594211769335,
+        "rows": 2000
+      },
+      "test_by_language": {
+        "fr-en": {
+          "accuracy": 0.894,
+          "macro_f1": 0.8937038364192301,
+          "rows": 1000
+        },
+        "hi-en": {
+          "accuracy": 0.956,
+          "macro_f1": 0.9562988745707631,
+          "rows": 1000
+        }
+      },
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.15166889538257602,
+          "validation_macro_f1": 0.9665953306589531
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.0002976660405402072,
+          "validation_macro_f1": 0.9639886634764893
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.00011797486576188022,
+          "validation_macro_f1": 0.9520315680765548
+        }
+      ],
+      "best_epoch": {
+        "epoch": 1,
+        "validation_macro_f1": 0.9665953306589531
+      }
+    },
+    "mbert": {
+      "name": "mBERT",
+      "base_model": "google-bert/bert-base-multilingual-cased",
+      "metrics_file": "models/mbert_multilingual_emotion/metrics.json",
+      "evaluation_scope": "synthetic_only",
+      "training_data_kind": "synthetic_only",
+      "split_sizes": {
+        "train": 16000,
+        "validation": 2000,
+        "test": 2000
+      },
+      "dataset_sha256": "83430dd59167b6402cc2945f94f701e19eb5886c6ee7d3602227ad73d0159db0",
+      "split_sha256": "7b4c6c953d0ae6402250f82e94ebeabbb05605ddad9c2567a15e800414f5fd72",
+      "test_overall": {
+        "accuracy": 0.814,
+        "macro_f1": 0.8119204373299015,
+        "rows": 2000
+      },
+      "test_by_language": {
+        "fr-en": {
+          "accuracy": 0.785,
+          "macro_f1": 0.770796074268007,
+          "rows": 1000
+        },
+        "hi-en": {
+          "accuracy": 0.843,
+          "macro_f1": 0.8439217764041637,
+          "rows": 1000
+        }
+      },
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.12984434999373842,
+          "validation_macro_f1": 0.7722790820720162
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.00037233291331722286,
+          "validation_macro_f1": 0.7694132115327178
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.00013984860959590151,
+          "validation_macro_f1": 0.765933076354001
+        }
+      ],
+      "best_epoch": {
+        "epoch": 1,
+        "validation_macro_f1": 0.7722790820720162
+      }
+    },
+    "muril": {
+      "name": "MuRIL",
+      "base_model": "google/muril-base-cased",
+      "metrics_file": "models/muril_hi_en_emotion/metrics.json",
+      "evaluation_scope": "synthetic_only",
+      "training_data_kind": "synthetic_only",
+      "split_sizes": {
+        "train": 8000,
+        "validation": 1000,
+        "test": 1000
+      },
+      "dataset_sha256": "0b0cd20738b34c46f32789105ef31e344ddd1315e0237904eb58f0fd6602a05c",
+      "split_sha256": "bd5ac69d00a55bd9c9cf8f94d202c849a3ef2ec4b102316334fcbbbb25e9d7ab",
+      "test_overall": {
+        "accuracy": 0.803,
+        "macro_f1": 0.8123164552869595,
+        "rows": 1000
+      },
+      "test_by_language": {
+        "hi-en": {
+          "accuracy": 0.803,
+          "macro_f1": 0.8123164552869595,
+          "rows": 1000
+        }
+      },
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 1.3836432203799487,
+          "validation_macro_f1": 0.7712262196653745
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.2617789356634021,
+          "validation_macro_f1": 0.7659376690697497
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.03681137823872268,
+          "validation_macro_f1": 0.7708286600955329
+        }
+      ],
+      "best_epoch": {
+        "epoch": 1,
+        "validation_macro_f1": 0.7712262196653745
+      }
+    }
+  },
+  "chart_artifacts": [
+    "figures/model_comparison.png",
+    "figures/validation_history.png"
+  ],
+  "challenge_diagnostics": {
+    "source": "Coordinator local CPU diagnostic calls using LocalEmotionClassifier and predict_dataset after the mBERT integration. No new weights or training.",
+    "source_file": "docs/oct23review/challenge_diagnostics.json",
+    "records": [
+      {
+        "model": "mBERT",
+        "dataset": "Hindi-English challenge draft",
+        "file": "evaluation_set/hindi_english_100.csv",
+        "language_pair": "hi-en",
+        "rows": 100,
+        "correct": 50,
+        "accuracy": 0.5,
+        "file_sha256": "49febcd9e0116a93db7fff7c65cd107205ed5496b9900aace95ba70dd8e4e105"
+      },
+      {
+        "model": "mBERT",
+        "dataset": "English-French challenge draft",
+        "file": "evaluation_set/english_french_100.csv",
+        "language_pair": "fr-en",
+        "rows": 100,
+        "correct": 41,
+        "accuracy": 0.41,
+        "file_sha256": "25c00322642e55451a7f18002c8d654a2b77739508001b7e172a2b0d87a86f06"
+      },
+      {
+        "model": "mBERT",
+        "dataset": "Hindi-English demo subset",
+        "file": "data/demo/emotions/mixed_emotions_demo.csv",
+        "language_pair": "hi-en",
+        "rows": 42,
+        "correct": 24,
+        "accuracy": 0.5714285714285714,
+        "file_sha256": "603af42a7bfd66638b23d51d3699917056e7204a284ed092aeb92c920b17eae6"
+      },
+      {
+        "model": "MuRIL",
+        "dataset": "Hindi-English challenge draft",
+        "file": "evaluation_set/hindi_english_100.csv",
+        "language_pair": "hi-en",
+        "rows": 100,
+        "correct": 51,
+        "accuracy": 0.51,
+        "file_sha256": "49febcd9e0116a93db7fff7c65cd107205ed5496b9900aace95ba70dd8e4e105"
+      },
+      {
+        "model": "MuRIL",
+        "dataset": "Hindi-English demo subset",
+        "file": "data/demo/emotions/mixed_emotions_demo.csv",
+        "language_pair": "hi-en",
+        "rows": 42,
+        "correct": 25,
+        "accuracy": 0.5952380952380952,
+        "file_sha256": "603af42a7bfd66638b23d51d3699917056e7204a284ed092aeb92c920b17eae6"
+      }
+    ],
+    "label_scope": "Unreviewed assistant-draft or illustrative labels; not independent human evaluation.",
+    "not_measured": [
+      {
+        "model": "XLM-R",
+        "dataset": "Assistant challenge drafts",
+        "reason": "No measured challenge score recorded."
+      }
+    ],
+    "included_in_figures": false
+  },
+  "interpretation_limits": [
+    "All saved test scores and training histories are from synthetic-only data.",
+    "MuRIL used a separate 8k/1k/1k hi-en synthetic split; XLM-R and mBERT used 16k/2k/2k bilingual synthetic splits.",
+    "MuRIL is not shown in the bilingual overall or English-French panels because no corresponding results are recorded.",
+    "These figures do not establish accuracy on independently reviewed human data.",
+    "Assistant-authored diagnostic draft scores are reported separately and are not subtracted from saved test scores because the sets are unmatched."
+  ]
+}

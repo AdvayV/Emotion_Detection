@@ -48,3 +48,14 @@ colab/mbert_study/*.zip
 outputs/verification/
 
 /mbert_combined*.zip
+
+# Generated advanced-model upload and private research outputs
+colab/advanced_training/package/
+colab/advanced_training/*.zip
+data/review_workflow/*.csv
+data/review_workflow/*.json
+outputs/calibration/
+outputs/experiments/
+
+data/review_workflow/*/
+data/review_workflow/*.zip

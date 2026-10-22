@@ -1,0 +1,19 @@
+flowchart TB
+  classDef ink fill:#162D46,color:#FFFFFF,stroke:#162D46,stroke-width:2px
+  classDef teal fill:#DDF3ED,color:#16463F,stroke:#218477,stroke-width:1.5px
+  classDef blue fill:#E7EDFC,color:#263B66,stroke:#637CB5,stroke-width:1.5px
+  classDef gold fill:#FFF2D8,color:#62491E,stroke:#C9A45C,stroke-width:1.5px
+  classDef pending fill:#F5F6F8,color:#4B596E,stroke:#98A5B5,stroke-dasharray:5 4
+  subgraph PREP["Input contract"]
+    direction LR
+    A["Phrase + selected language<br/>Optional earlier context"]:::ink --> B["Checkpoint metadata<br/>Labels, scope and preparation"]:::blue --> C["Saved tokenizer policy<br/>Preserve target; flag truncation"]:::teal
+  end
+  subgraph MODEL["Base prediction"]
+    direction LR
+    D["Selected local encoder<br/>One checkpoint per prediction"]:::ink --> E["Seven-class head<br/>Unchanged base scores"]:::blue --> F["Cue diagnostics<br/>Emoji conflict and sarcasm source"]:::teal
+  end
+  subgraph DECISION["Optional review"]
+    direction LR
+    G["Bound confidence profile<br/>Scale scores; keep class"]:::gold --> H["Route optional Qwen review<br/>Context and uncertainty cues"]:::gold --> I["Show source and final suggestion<br/>History export on request"]:::teal
+  end
+  PREP --> MODEL --> DECISION

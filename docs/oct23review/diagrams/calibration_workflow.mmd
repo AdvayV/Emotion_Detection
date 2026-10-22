@@ -1,0 +1,19 @@
+flowchart TB
+  classDef ink fill:#162D46,color:#FFFFFF,stroke:#162D46,stroke-width:2px
+  classDef teal fill:#DDF3ED,color:#16463F,stroke:#218477,stroke-width:1.5px
+  classDef blue fill:#E7EDFC,color:#263B66,stroke:#637CB5,stroke-width:1.5px
+  classDef gold fill:#FFF2D8,color:#62491E,stroke:#C9A45C,stroke-width:1.5px
+  classDef pending fill:#F5F6F8,color:#4B596E,stroke:#98A5B5,stroke-dasharray:5 4
+  subgraph DATA["Data eligibility"]
+    direction LR
+    A["Labelled validation/calibration rows<br/>Declare data origin"]:::ink --> B["Reject train, test and evaluation leaks<br/>Explicit unreviewed-data opt-in"]:::gold --> C["Predict seven base scores<br/>No neural weight updates"]:::blue
+  end
+  subgraph FIT["Fit one temperature"]
+    direction LR
+    D["Minimize validation NLL<br/>Bounded scalar search"]:::blue --> E["Measure NLL, Brier and ECE<br/>Report fitting-data scope"]:::teal --> F["Download experimental profile<br/>Bind checkpoint and preparation"]:::teal
+  end
+  subgraph APPLY["Explicit application"]
+    direction LR
+    G["Validate profile fingerprint<br/>Match language and preprocessing"]:::gold --> H["Scale confidence distribution<br/>Keep base predicted class"]:::blue --> I["Use scaled uncertainty for routing<br/>Retain original scores"]:::teal
+  end
+  DATA --> FIT --> APPLY

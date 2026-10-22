@@ -12,6 +12,9 @@ covers both language pairs while the original Hindi-English checkpoint remains
 available separately. The current training handoff covers all three encoders and a separate sarcasm task:
 [colab/project_training](colab/project_training/START_HERE.md).
 
+See the [23 October review report](outputs/23OctReview%20AdvayV%20KaavishG%20CD.docx)
+for the system map, saved synthetic results and evidence limits.
+
 ## Find the datasets and Colab files
 
 Start with [the dataset guide](data/README.md). The current combined-language
@@ -42,14 +45,13 @@ records are under `archive`; redundant downloads were removed with approval.
 | Expressive spelling | Conservative normalization, negation preservation and elongation cues such as `acchaaa` |
 | Emoji and sarcasm | Word–emoji agreement/conflict cues, a rule-based sarcasm baseline, and an optional separately trained binary sarcasm checkpoint |
 | Local Qwen | Optional Ollama `qwen3:0.6b` review for sentiment and seven emotions; context, uncertainty and conflicts can trigger review; suggestions retain the original classifier scores |
-| Research utilities | Dataset validation, class/per-language metrics, confusion matrices, calibration diagnostics, intensity, conversation memory and evidence-masking baselines |
+| Research workbench | Input/reviewer ablations, experimental calibration, blind review and versioned corrections, conversation traces, and the advanced GPU training handoff |
 | Model training | Colab jobs for combined-language XLM-R/mBERT, Hindi-English MuRIL and reviewed Hindi-English binary sarcasm; fixed splits, Drive recovery and inference export |
 
-The repository contains software, illustrative data and a synthetic-data
-experiment. It does not ship trained model weights or claim verified research
-accuracy. Base encoders are not finished emotion classifiers. Synthetic and demo
-scores do not establish performance on real user messages. Experimental multilingual
-utilities remain in the code for later reviewed experiments.
+The installed XLM-R, mBERT and MuRIL emotion checkpoints are trained weights;
+they are separate from the new advanced-fusion model. Synthetic and demo scores
+do not establish performance on real user messages. The advanced fusion notebook
+is available, but no advanced checkpoint has been trained or installed.
 
 ## Current mBERT run and model review
 
@@ -114,6 +116,8 @@ encoders for training does require internet access.
   matrices and reliability charts for models actually available on the machine.
 - **Dataset explorer:** validated CSV/XLSX uploads, filters, source table, class
   balance, sarcasm rate and message-length distributions.
+- **Research workbench:** bounded experiments, confidence calibration, blind
+  human review and versioned corrections, conversation traces, and GPU handoff.
 - **Overview:** current pipeline, proposed improvements and the distinction
   between implemented baselines and experiments requiring training.
 
@@ -121,6 +125,41 @@ Recent live analyses stay in Streamlit session state and can be downloaded as
 CSV. They are not automatically written to the dataset. Sentiment starts with
 rules; Emotion lab selects a complete local XLM-R checkpoint when available.
 Selecting an unavailable checkpoint does not train or download it.
+
+## Research workbench
+
+Open **Research workbench** and choose a workflow from its navigation:
+
+- **Experiments** compares baseline, normalized and emoji-removed inputs, with
+  optional context/no-context variants. Choose one compatible local model and a
+  CSV or the bundled assistant-authored drafts. The row limit defaults to 10 and
+  stops at 200. Optional local Qwen review is capped at five calls; suggestions
+  remain separate from base scores. Meaning-changing variants report label
+  stability, and accuracy requires labels declared valid for that variant. Draft
+  labels are diagnostic only, not benchmark evidence.
+- **Confidence calibration** fits an experimental temperature profile from a
+  declared validation split or dedicated calibration file. Frozen-evaluation
+  overlaps are blocked; synthetic or unreviewed labels require explicit opt-in.
+  Temperature changes confidence, not the predicted emotion, and profiles are
+  not applied to the installed model automatically.
+- **Human review** creates two blank reviewer sheets from a queue. Use two
+  different named reviewers and adjudicate disagreements or context flags. Upload
+  the frozen base split file, reviewed corrections and matching audit to build a
+  versioned dataset. Corrections go to train only; test rows remain protected and
+  synthetic origin is retained. Exports are explicit and do not update model
+  weights.
+- **Conversation** shows turn-level base/reviewed labels. Earlier turns can be
+  sent to local Qwen when enabled; existing encoders use context only if their
+  checkpoint was trained for it. Score curves are model outputs, not a person’s
+  emotional-state trajectory.
+- **GPU training** links to the optional advanced XLM-R learned emoji-fusion
+  workflow. Use Colab or Kaggle; no advanced weights are included. The default
+  run uses synthetic emotion data only. Context and sarcasm heads stay off until
+  suitable human-reviewed labels are supplied.
+
+Start with [GET_STARTED.md](GET_STARTED.md), the
+[advanced GPU guide](colab/advanced_training/START_HERE.md), or the
+[23 October review report](outputs/23OctReview%20AdvayV%20KaavishG%20CD.docx).
 
 For optional sentiment review, install Ollama separately and run:
 
@@ -324,13 +363,12 @@ synthetic counts/provenance, notebook syntax, exports and a tiny offline
 transformer training/resume experiment. These software checks do not validate
 the accuracy of a trained research model.
 
-The remaining research work is independently reviewed data, new Colab training runs,
-matched encoder comparisons and controlled emoji/normalization ablations. The binary
-sarcasm trainer and adapter are implemented, but no reviewed sarcasm corpus or
-trained sarcasm weights are supplied. Qwen review is implemented but uncalibrated;
-context is supplied to that optional reviewer, not a learned conversation encoder.
-Intensity remains heuristic. See [implementation status](IMPLEMENTATION_STATUS.md)
-for the distinction between working software and experiments still to run.
+Independent human-labelled evaluation, measured calibration/reviewer benefit,
+controlled ablation results and an advanced GPU run remain pending. The binary
+sarcasm trainer exists, but no reviewed sarcasm corpus or trained sarcasm weights
+are supplied. Qwen review is uncalibrated; context goes to that reviewer, not a
+learned conversation encoder. Intensity remains heuristic. See
+[implementation status](IMPLEMENTATION_STATUS.md) for current limits.
 
 ## MuRIL Hindi-English study
 
