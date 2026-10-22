@@ -3,7 +3,7 @@
 The latest report is [the project submission DOCX](../../outputs/CodeMood_Hindi_English_Project_Progress_Report.docx).
 It contains one full-page master architecture plus four module diagrams:
 seven-emotion inference, Colab training/export, file evaluation and model disagreement with human review.
-Team details are retained. mBERT is a ready Colab handoff with results pending.
+Team details are retained. mBERT is installed for both language mixes; its synthetic test results were reproduced locally.
 
 `report.md` is the editable report source. `diagrams/*.mmd` are Mermaid sources;
 `figures/*.svg` are vector artwork and `figures/*.png` are 3x print-quality renders.

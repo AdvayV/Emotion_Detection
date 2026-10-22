@@ -78,7 +78,7 @@ Open **Model disagreement**, choose Hindi-English and both installed encoders,
 enter one phrase per line and compare. Review the outputs, select your label,
 declare the phrase origin, confirm and add it to the session queue. Download
 candidate corrections before closing. This does not retrain the model. For
-English-French, install the trained mBERT checkpoint first; MuRIL is unavailable.
+English-French, compare the installed XLM-R and mBERT checkpoints; MuRIL is unavailable.
 
 Separate challenge drafts are in `evaluation_set/`; choose them in the Emotion
 lab file tab. The expected labels are unreviewed proposals. Use the unlabelled
@@ -196,3 +196,5 @@ the separate three-class sentiment page; the seven labels belong to **Emotion la
 
 Team 5 - G2.docx is the base paper and remains unchanged. See
 training/BASE_PAPER_COMPARISON.md for its relationship to this implementation.
+
+The downloaded bilingual mBERT checkpoint is now installed in this local project. To use it, select mBERT in Emotion lab. The Encoder results tab shows saved overall and language-specific scores; Model disagreement can compare all three encoders on Hindi-English. A fresh GitHub clone still needs its own downloaded weights installed.

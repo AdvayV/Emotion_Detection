@@ -9,3 +9,7 @@
 7. The last notebook cell compares validation-selected mBERT against the combined XLM-R baseline on the same held-out synthetic test examples, then downloads `mbert_combined.zip`. From the project root, install it with `python -m training.install_checkpoint "C:/path/to/mbert_combined.zip"`.
 
 The phrases are synthetic and template-based. The test split is shared intentionally with XLM-R; it is not an independent evaluation. The project contains no separate human-labelled evaluation set. The dataset audit reports zero cross-split group and template-family overlap. Report the synthetic limitation whenever sharing scores. Do not tune hyperparameters against test results.
+
+## Completed run
+
+The exported mBERT checkpoint is installed locally. Saved synthetic test accuracy is 81.4% overall, 84.3% Hindi-English and 78.5% English-French. The full 2,000-row result was reproduced using CPU inference. `completed_metrics.json` and `completed_metadata.json` preserve the original run evidence without weights. Validation selected epoch 1; later epochs did not improve validation macro-F1. These results are not a human benchmark.

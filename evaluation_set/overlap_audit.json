@@ -7,6 +7,9 @@
   "normalized_overlap_method": "hinglish_emotion.evaluation_guard.phrase_hash (HinglishNormalizer duplicate_key, casefold, SHA-256)",
   "warning": "Zero exact normalized phrase overlap does not establish independent authorship, statistical independence, translation independence, or human ground truth. Every row is assistant_draft and human_reviewed=false; require human review before evaluation claims.",
   "installed_model_guards": {
+    "mbert_multilingual_emotion": {
+      "training_validation_hashes": 18000
+    },
     "muril_hi_en_emotion": {
       "training_validation_hashes": 9000
     },
@@ -125,6 +128,7 @@
       ],
       "training_overlap_rows": 0,
       "guard_overlap_rows": {
+        "mbert_multilingual_emotion": 0,
         "muril_hi_en_emotion": 0,
         "xlmr_emotion": 0,
         "xlmr_multilingual_emotion": 0
@@ -148,6 +152,7 @@
       "labels_blank": true,
       "training_overlap_rows": 0,
       "guard_overlap_rows": {
+        "mbert_multilingual_emotion": 0,
         "muril_hi_en_emotion": 0,
         "xlmr_emotion": 0,
         "xlmr_multilingual_emotion": 0
@@ -260,6 +265,7 @@
       ],
       "training_overlap_rows": 0,
       "guard_overlap_rows": {
+        "mbert_multilingual_emotion": 0,
         "muril_hi_en_emotion": 0,
         "xlmr_emotion": 0,
         "xlmr_multilingual_emotion": 0
@@ -283,6 +289,7 @@
       "labels_blank": true,
       "training_overlap_rows": 0,
       "guard_overlap_rows": {
+        "mbert_multilingual_emotion": 0,
         "muril_hi_en_emotion": 0,
         "xlmr_emotion": 0,
         "xlmr_multilingual_emotion": 0

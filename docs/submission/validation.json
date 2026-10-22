@@ -1,9 +1,9 @@
 {
   "checked_at": "2026-10-22",
   "full_suite": {
-    "passed": 163,
+    "passed": 173,
     "subtests_passed": 33,
-    "duration_seconds": 118.6
+    "duration_seconds": 108.39
   },
   "live_disagreement": {
     "phrases": [
@@ -169,5 +169,6 @@
     "diagram_count": 5,
     "diagram_sources": "docs/submission/diagrams",
     "png_render_scale": 3
-  }
+  },
+  "mbert_integration": "mbert_validation.json"
 }

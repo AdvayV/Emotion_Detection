@@ -57,7 +57,7 @@ Use [the focused mBERT Colab guide](colab/mbert_study/START_HERE.md). Upload
 `colab/mbert_study/TRAIN_MBERT_STUDY.ipynb`, select a T4 GPU, run all cells and
 upload `colab/mbert_study/mbert_study.zip` at the first prompt. The package
 contains source and the same bilingual 16,000/2,000/2,000 frozen partitions as
-combined XLM-R. Training is pending; no mBERT result is claimed. The downloaded
+combined XLM-R. The completed run has now been installed and its held-out results reproduced on CPU. The downloaded
 `mbert_combined.zip` installs with `python -m training.install_checkpoint` and
 is discovered automatically for both language mixes after installation.
 
@@ -347,3 +347,19 @@ python -m training.install_checkpoint "muril_hi_en.zip"
 ```
 
 The installer validates the export and creates `models/muril_hi_en_emotion`. Refresh the dashboard and choose **MuRIL** with **Hindi-English** for live predictions. The comparison ZIP alone cannot enable these predictions.
+
+### Installed bilingual mBERT results
+
+`models/mbert_multilingual_emotion` contains the completed seven-emotion model.
+Select mBERT in Emotion lab for Hindi-English or English-French. The saved
+Encoder results tab compares XLM-R and mBERT on matching bilingual partitions
+and adds MuRIL for its verified Hindi-English study. Model disagreement now
+compares all three encoders for Hindi-English and XLM-R/mBERT for English-French.
+
+CPU inference reproduced all 2,000 held-out synthetic test results: mBERT
+accuracy 81.4%, macro-F1 0.8119; Hindi-English 84.3% / 0.8439 and English-French
+78.5% / 0.7708. Validation selected epoch 1 of three. These are generated-data
+results and do not establish accuracy on natural messages; a simple happy
+Hinglish phrase was confidently misclassified as sadness. Original exported
+metrics and metadata snapshots are in `colab/mbert_study/completed_*.json`.
+Model weights and the downloaded ZIP remain local and ignored by Git.

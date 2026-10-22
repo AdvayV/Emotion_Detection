@@ -46,3 +46,5 @@ colab/mbert_study/*.zip
 /muril_hi_en*.zip
 # Local verification images, temporary checks and rendering previews
 outputs/verification/
+
+/mbert_combined*.zip

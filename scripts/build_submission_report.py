@@ -83,12 +83,12 @@ def build():
     doc.add_paragraph('Compiler Design\n22 October 2026')
     p=doc.add_paragraph('Advay Vivek\n24BCT0136\n\nKaavish Gogia\n24BCT0103');p.paragraph_format.space_before=Pt(22)
     p=doc.add_paragraph('Local inference · Google Colab training · Seven emotions');p.paragraph_format.space_before=Pt(24)
-    doc.add_paragraph('This report explains the implemented pipeline, completed XLM-R and MuRIL experiments, the mBERT training handoff and the human review workflow. It separates measured results from the work that still requires training or independent evaluation.')
+    doc.add_paragraph('This report explains the implemented pipeline, completed XLM-R and MuRIL experiments, the completed mBERT experiment and the human review workflow. It separates measured results from the work that still requires training or independent evaluation.')
     doc.add_page_break()
     # Full-page system architecture, then connected prose and four module figures.
     doc.add_heading('Complete project architecture',level=1)
     picture(doc,'master_architecture',7.95)
-    doc.add_paragraph('Figure 1. Complete CodeMood workflow. The outputs are independent workspace actions. Dashed routes indicate optional review or a future, explicitly approved retraining step. MuRIL is limited to Hindi-English; mBERT weights await the Colab run.',style='Caption')
+    doc.add_paragraph('Figure 1. Complete CodeMood workflow. The outputs are independent workspace actions. Dashed routes indicate optional review or a future, explicitly approved retraining step. MuRIL is limited to Hindi-English; XLM-R and mBERT support both language mixes.',style='Caption')
     doc.add_page_break()
     body=s.split('<!-- PAGE -->',1)[1]
     lines=body.splitlines();i=0

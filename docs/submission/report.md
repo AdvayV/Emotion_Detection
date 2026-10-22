@@ -18,7 +18,7 @@ The work evolved from the team reference report, *Lexical and Emoji-Dependent Em
 
 An installed seven-emotion XLM-R checkpoint trained on 8,000 synthetic Hindi-English examples reports 90.7% test accuracy and 0.9078 macro-F1 on 1,000 generated phrases. A combined-language XLM-R checkpoint reports 92.5% / 0.9251 on 2,000 generated test rows: 95.6% / 0.9563 for Hindi-English and 89.4% / 0.8937 for English-French. A separate MuRIL Hindi-English study reports 80.3% / 0.8123 on the same 1,000 Hindi-English test identities. These are synthetic-only outcomes. Templates and generated language patterns, without independent human labels, limit what they support. They cannot be directly compared with the reference report’s three-class sentiment results.
 
-The contribution is an integrated local research workflow with task separation, language and provenance warnings, data guards, artifact export/import and human review controls. Real-world validity, learned sarcasm, learned emoji fusion, calibrated confidence, measured Qwen benefit and a completed mBERT emotion run remain open work.
+The contribution is an integrated local research workflow with task separation, language and provenance warnings, data guards, artifact export/import and human review controls. Real-world validity, learned sarcasm, learned emoji fusion, calibrated confidence and measured Qwen benefit remain open work. The bilingual mBERT run is now complete and installed.
 
 ## 1. Introduction
 
@@ -62,7 +62,7 @@ A softmax score is a model distribution over labels, not the probability an answ
 | Context/intensity | Reviewer context and heuristic intensity | No learned conversation encoder |
 | File evaluation | CSV/XLSX metrics and predictions | Results depend on supplied test data |
 | Provenance | Audits, manifests, source and overlap notices | Hashes do not prove representativeness |
-| Colab training | Packaging, recovery and export | mBERT result pending |
+| Colab training | XLM-R, MuRIL and mBERT exports installed | Independent human evaluation remains pending |
 | Disagreement | Sequential models and confirmed review queue | No consensus, auto-labelling or learning |
 
 These states separate available code from completed experiments. A trainer or installer makes a run possible; neither means weights were produced. A UI control does not constitute validation evidence.
@@ -92,7 +92,7 @@ The original synthetic Hindi-English dataset has 8,000 train, 1,000 validation a
 
 Combined XLM-R fully fine-tunes FacebookAI/xlm-roberta-base for three epochs, selecting epoch 1 by validation macro-F1. Its contract records seed 42, split seed 42, max length 128, batch 2, accumulation 8, learning rate 2e-5, balanced weights, fp16, CUDA and synthetic-only scope. Validation macro-F1 falls after epoch 1; test remains held out.
 
-MuRIL uses synthetic hi-en 8,000/1,000/1,000. It shares test identities with combined XLM-R’s hi-en slice, but combined XLM-R trained on both language pairs while MuRIL trained on hi-en only. This is not a controlled encoder comparison. Matched experiments must align rows, preprocessing and budget. The mBERT Colab package is ready and checks the same 16,000/2,000/2,000 data and split contract as combined XLM-R. Training and results are pending; no score is assigned.
+MuRIL uses synthetic hi-en 8,000/1,000/1,000. It shares test identities with combined XLM-R’s hi-en slice, but combined XLM-R trained on both language pairs while MuRIL trained on hi-en only. This is not a controlled encoder comparison. Matched experiments must align rows, preprocessing and budget. The completed mBERT run uses the same 16,000/2,000/2,000 data and split contract as combined XLM-R. It selected epoch 1 by validation macro-F1 and reports 81.4% accuracy with 0.8119 macro-F1 on 2,000 synthetic test phrases. CPU inference from the downloaded weights reproduced these metrics exactly. Hindi-English accuracy is 84.3% with macro-F1 0.8439; English-French accuracy is 78.5% with macro-F1 0.7708.
 
 Packaging assembles notebook, source, data, cards, audits and hashes. Colab training uses GPU and user Drive for epoch recovery. Export contains inference weights and metadata, not optimizer state or raw test phrases. Installers validate task-specific artifacts. Hashes/splits detect drift but do not make data representative. No full fine-tuning is claimed on this 8 GB CPU machine; training is intended for Colab GPU.
 
@@ -133,7 +133,7 @@ Each result should identify task, checkpoint fingerprint, dataset version/hash, 
 <!-- PAGE -->
 
 
-A separate evaluation_set folder now contains 100 Hindi-English and 100 English-French challenge phrases, plus unlabelled prediction copies. Their proposed labels are explicitly assistant-authored drafts and human_reviewed is false. The overlap audit found zero normalized exact matches against all 20,000 frozen source rows and the three installed model guards. This rules out those particular duplicates, not semantic overlap or annotation error. These files are for inspection and subsequent independent annotation; they are not a new human benchmark and must stay outside training.
+A separate evaluation_set folder now contains 100 Hindi-English and 100 English-French challenge phrases, plus unlabelled prediction copies. Their proposed labels are explicitly assistant-authored drafts and human_reviewed is false. The overlap audit found zero normalized exact matches against all 20,000 frozen source rows and the four installed model guards. This rules out those particular duplicates, not semantic overlap or annotation error. These files are for inspection and subsequent independent annotation; they are not a new human benchmark and must stay outside training.
 
 ## 7. Model disagreement and human feedback
 
@@ -172,7 +172,9 @@ Intensity is heuristic valence/arousal. Evidence cues are lexical matches. Norma
 | Combined XLM-R hi-en | 1,000 generated | 95.6%; macro-F1 0.9563 | Training used both languages |
 | Combined XLM-R fr-en | 1,000 generated | 89.4%; macro-F1 0.8937 | No human validation |
 | MuRIL hi-en | Same test identities | 80.3%; macro-F1 0.8123 | Different training scope |
-| mBERT | Pending | No score | Package is not a result |
+| Combined mBERT | 2,000 generated rows | 81.4%; macro-F1 0.8119 | Same bilingual partitions; CPU result reproduced |
+| mBERT hi-en | 1,000 generated | 84.3%; macro-F1 0.8439 | Synthetic only |
+| mBERT fr-en | 1,000 generated | 78.5%; macro-F1 0.7708 | Synthetic only |
 
 The combined XLM-R report also records a synthetic lexical baseline at 37.55% accuracy / 0.3765 macro-F1. It is an engineering reference, not a universal lower bound. Metrics are transcribed from saved artifacts and depend on those artifacts’ integrity and scope.
 
@@ -221,7 +223,7 @@ These are team work areas. Available records do not verify person-by-person assi
 
 Collect representative, independently reviewed Hinglish data with documented conditions and class support. Use independent reviewers, retain disagreements, adjudicate ambiguity, group conversations/paraphrases/templates, and freeze test identities.
 
-Complete mBERT only under the same protocol as its comparator. Match MuRIL/XLM-R on identical partitions, preprocessing and budget. Expand language scope after human review. Analyze negation, spellings, emoji, sarcasm, length and code-mix ratio.
+Repeat the matched mBERT and XLM-R experiments with additional seeds and reviewed data. Match MuRIL/XLM-R on identical partitions, preprocessing and budget. Expand language scope after human review. Analyze negation, spellings, emoji, sarcasm, length and code-mix ratio.
 
 Run raw/normalized and emoji-retained/removed ablations. Calibrate only on human-labelled validation data. Review/version queue candidates; never train on test data. Learned sarcasm requires its own reviewed corpus; contextual learning requires conversation labels and privacy review.
 
@@ -241,7 +243,7 @@ Until matched human experiments show a modeling gain, frame the contribution aro
 
 CodeMood grew from a Hinglish sentiment/emoji concept into a local seven-emotion workbench: separate tasks, local inference, synthetic training packages, Colab recovery/export, provenance checks, file evaluation, diagnostics, optional review and a human-controlled queue.
 
-Saved XLM-R/MuRIL scores demonstrate generated-data experiments, not accuracy on natural messages. Original sentiment metrics are context, not a seven-emotion baseline. Emoji2Vec fusion, trained sarcasm, calibration, Qwen benefit and mBERT training are not claimed. The defensible next step is human-reviewed data and matched frozen-split experiments with error analysis.
+Saved XLM-R, MuRIL and mBERT scores demonstrate generated-data experiments, not accuracy on natural messages. Original sentiment metrics are context, not a seven-emotion baseline. Emoji2Vec fusion, trained sarcasm, calibrated confidence and measured Qwen benefit are not claimed. The defensible next step is human-reviewed data and matched frozen-split experiments with error analysis.
 
 ## References
 
@@ -258,4 +260,6 @@ Saved XLM-R/MuRIL scores demonstrate generated-data experiments, not accuracy on
 
 ## Final validation record
 
-On 22 October 2026, the complete offline suite passed 163 tests and 33 subtests. Coverage includes routing, seven-label schemas, file mapping invalidation, dataset validation, checkpoint installation, review failures, sequential disagreement inference, session correction export and Colab packaging. The mBERT handoff also passed isolated imports using only its exported source tree. A live Streamlit test loaded the installed XLM-R and MuRIL weights sequentially and produced seven scores for each phrase without writing a review queue. Both predicted joy for Aaj main bahut khush hoon; both incorrectly predicted sadness for the fear phrase Mujhe bahut darr lag raha hai. This example shows why agreement is not correctness. Ollama was initially stopped. After starting it, a live Qwen3 0.6B call returned a valid structured review in 10.56 seconds using a lexical-demo primary prediction. It suggested neutral for the fear phrase, which was not a quality improvement. The call verifies connectivity and response validation, not reviewer accuracy; failure and unavailable states are also tested. No model was trained locally in this update.
+On 22 October 2026, the complete offline suite passed 173 tests and 33 subtests. Coverage includes routing, seven-label schemas, file mapping invalidation, dataset validation, checkpoint installation, review failures, sequential disagreement inference, session correction export and Colab packaging. The mBERT handoff also passed isolated imports using only its exported source tree. A live Streamlit test loaded the installed XLM-R and MuRIL weights sequentially and produced seven scores for each phrase without writing a review queue. Both predicted joy for Aaj main bahut khush hoon; both incorrectly predicted sadness for the fear phrase Mujhe bahut darr lag raha hai. This example shows why agreement is not correctness. Ollama was initially stopped. After starting it, a live Qwen3 0.6B call returned a valid structured review in 10.56 seconds using a lexical-demo primary prediction. It suggested neutral for the fear phrase, which was not a quality improvement. The call verifies connectivity and response validation, not reviewer accuracy; failure and unavailable states are also tested. No model was trained locally in this update.
+
+The newly installed mBERT model was tested in Emotion lab for both language mixes. All 2,000 held-out phrases reproduced the exported accuracy and macro-F1, with zero recorded training/validation overlap. The happy phrase Aaj main bahut khush hoon was nevertheless classified as sadness with score 0.9994. Successful export and matching synthetic scores verify deployment consistency; they do not establish natural-language reliability.

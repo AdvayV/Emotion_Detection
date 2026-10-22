@@ -1,0 +1,66 @@
+{
+  "checked_at": "2026-10-22",
+  "dashboard_phrases": [
+    {
+      "language_pair": "hi-en",
+      "text": "Aaj main bahut khush hoon!",
+      "emotion": "sadness",
+      "score": 0.9994304776191711,
+      "source": "trained_checkpoint"
+    },
+    {
+      "language_pair": "fr-en",
+      "text": "Je suis triste because my friend moved away",
+      "emotion": "sadness",
+      "score": 0.9985557198524475,
+      "source": "trained_checkpoint"
+    }
+  ],
+  "test_rows": 2000,
+  "accuracy": 0.814,
+  "macro_f1": 0.8119204373299015,
+  "by_language": {
+    "hi-en": {
+      "accuracy": 0.843,
+      "macro_f1": 0.8439217764041637,
+      "rows": 1000
+    },
+    "fr-en": {
+      "accuracy": 0.785,
+      "macro_f1": 0.770796074268007,
+      "rows": 1000
+    }
+  },
+  "training_overlap_rows": 0,
+  "elapsed_seconds": 160.62,
+  "local_training_performed": false,
+  "live_disagreement": {
+    "models": [
+      {
+        "model": "mBERT",
+        "emotion": "sadness",
+        "score": 0.9994304776191711
+      },
+      {
+        "model": "MuRIL",
+        "emotion": "joy",
+        "score": 0.5179038047790527
+      },
+      {
+        "model": "XLM-R",
+        "emotion": "joy",
+        "score": 0.9996752738952637
+      }
+    ],
+    "disagreement": true
+  },
+  "saved_results_tab_verified": true,
+  "french_disagreement_models": [
+    "mBERT",
+    "XLM-R"
+  ],
+  "full_suite": {
+    "passed": 173,
+    "subtests_passed": 33
+  }
+}

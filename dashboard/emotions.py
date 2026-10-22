@@ -140,7 +140,7 @@ def render_emotion_lab(header, chart_style):
             st.caption(f"Input preparation: {metadata['text_mode']} · token limit: {metadata['max_length']} · model folder: {path.name}")
             if metadata.get("evaluation_scope") in {"synthetic_only","mixed_test"}: st.warning("This checkpoint was evaluated on generated phrases. Real-world accuracy is unverified; a high prediction score can still be wrong.")
         else: st.info("Demo lexical rules are active. They use word and emoji cues; no trained emotion checkpoint is running.")
-    phrase_tab,file_tab,training_tab,study_tab=st.tabs(["Try a phrase","Predict and evaluate a file","Training and Colab","XLM-R vs MuRIL"])
+    phrase_tab,file_tab,training_tab,results_tab,study_tab=st.tabs(["Try a phrase","Predict and evaluate a file","Training and Colab","Encoder results","XLM-R vs MuRIL"])
     with phrase_tab:
         left,right=st.columns([1,1.1],gap="large")
         with left,st.container(border=True):
@@ -250,6 +250,9 @@ def render_emotion_lab(header, chart_style):
             st.write("The base paper describes BERT/RoBERTa sentiment classification. This extension adds seven emotions, language-aware checkpoints, labelled-file evaluation, leakage checks and reproducible Colab training. A supervised sarcasm training workflow is available, but trained sarcasm weights are not provided. Emotion/emoji fusion is not implemented; emoji cues are shown separately.")
             paper=ROOT/"Team 5 - G2.docx"
             if paper.is_file(): st.download_button("Download base paper",paper.read_bytes(),file_name=paper.name,mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    with results_tab:
+        from dashboard.encoder_results import render_encoder_results
+        render_encoder_results(ROOT, chart_style)
     with study_tab:
         from dashboard.muril_study import render_muril_study
         render_muril_study(ROOT, chart_style)

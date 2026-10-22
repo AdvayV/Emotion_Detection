@@ -10,7 +10,7 @@ flowchart TB
   end
   subgraph PREDICT["Selected encoder"]
     direction LR
-    D["XLM-R / MuRIL<br/>mBERT after training"]:::ink --> E["Contextual representation<br/>Seven-class task head"]:::blue --> F["Seven base scores<br/>Top emotion and source"]:::teal
+    D["XLM-R / MuRIL / mBERT<br/>Installed local checkpoint"]:::ink --> E["Contextual representation<br/>Seven-class task head"]:::blue --> F["Seven base scores<br/>Top emotion and source"]:::teal
   end
   subgraph DISPLAY["Result interpretation"]
     direction LR
