@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "job": "mbert_combined",
+  "base_model": "google-bert/bert-base-multilingual-cased",
+  "baseline_model": "FacebookAI/xlm-roberta-base",
+  "labels": [
+    "joy",
+    "sadness",
+    "anger",
+    "fear",
+    "surprise",
+    "disgust",
+    "neutral"
+  ],
+  "dataset_sha256": "83430dd59167b6402cc2945f94f701e19eb5886c6ee7d3602227ad73d0159db0",
+  "split_sha256": "7b4c6c953d0ae6402250f82e94ebeabbb05605ddad9c2567a15e800414f5fd72",
+  "split_sizes": {
+    "train": 16000,
+    "validation": 2000,
+    "test": 2000
+  },
+  "test_sha256": "a4b8feb43ba075cd271122fc419cfde350694082abe7b690b223d23dbd38f838",
+  "test_support": {
+    "joy": 286,
+    "sadness": 286,
+    "anger": 286,
+    "fear": 286,
+    "surprise": 286,
+    "disgust": 286,
+    "neutral": 284
+  },
+  "baseline_metrics_sha256": "aeda7069c5c8146c77186898b554fbfd4a2b90a708ddf5fe21620b47f73db9aa",
+  "baseline_metadata_sha256": "8a5cb7505b9be2312d3951387328cedf3a7e8878ee066242241d1d792ef0c49d",
+  "settings": {
+    "text_mode": "raw",
+    "preparation_version": 1,
+    "max_length": 128,
+    "seed": 42,
+    "split_seed": 42,
+    "batch_size": 2,
+    "gradient_accumulation": 8,
+    "learning_rate": 2e-05,
+    "class_weights": "balanced",
+    "freeze_encoder": false,
+    "precision": "fp16",
+    "patience": 2,
+    "training_mode": "full_fine_tuning",
+    "training_data_kind": "synthetic_only",
+    "allow_synthetic": true
+  },
+  "synthetic_data": true,
+  "independent_human_evaluation_set_available": false,
+  "cross_split_group_overlaps": 0,
+  "cross_split_scenario_family_overlaps": 0,
+  "cross_split_template_family_overlaps": 0,
+  "cross_split_normalized_duplicate_overlaps": 0
+}

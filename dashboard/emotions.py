@@ -128,6 +128,8 @@ def render_emotion_lab(header, chart_style):
         with c2:
             default=1 if emotion_checkpoint(ROOT/"models",pair,"xlmr",ready=checkpoint_ready,read_metadata=emotion_checkpoint_metadata) else 0
             choice=st.selectbox("Emotion classifier",["Demo lexical rules","XLM-R","mBERT","MuRIL","Custom emotion checkpoint"],index=default,key="emotion_classifier_choice",on_change=clear_result)
+        installed=[encoder.name for encoder in ENCODERS if emotion_checkpoint(ROOT/"models",pair,encoder.key,ready=checkpoint_ready,read_metadata=emotion_checkpoint_metadata)]
+        st.caption("Installed trained checkpoints for this language mix: " + (", ".join(installed) if installed else "none; demo rules remain available"))
         custom=st.text_input("Seven-emotion checkpoint folder",placeholder="models/xlmr_multilingual_emotion",key="custom_emotion_path",on_change=clear_result) if choice=="Custom emotion checkpoint" else ""
         path,metadata,issue=resolve_model(choice,pair,custom)
         if issue:
@@ -137,8 +139,8 @@ def render_emotion_lab(header, chart_style):
             st.success("Seven-emotion checkpoint found. Predictions will use the local trained weights.")
             st.caption(f"Input preparation: {metadata['text_mode']} · token limit: {metadata['max_length']} · model folder: {path.name}")
             if metadata.get("evaluation_scope") in {"synthetic_only","mixed_test"}: st.warning("This checkpoint was evaluated on generated phrases. Real-world accuracy is unverified; a high prediction score can still be wrong.")
-        else: st.info("Demo lexical rules are active. They use words and emoji cues and are not XLM-R predictions.")
-    phrase_tab,file_tab,training_tab=st.tabs(["Try a phrase","Predict and evaluate a file","Training and Colab"])
+        else: st.info("Demo lexical rules are active. They use word and emoji cues; no trained emotion checkpoint is running.")
+    phrase_tab,file_tab,training_tab,study_tab=st.tabs(["Try a phrase","Predict and evaluate a file","Training and Colab","XLM-R vs MuRIL"])
     with phrase_tab:
         left,right=st.columns([1,1.1],gap="large")
         with left,st.container(border=True):
@@ -195,7 +197,7 @@ def render_emotion_lab(header, chart_style):
                 if primary.needs_context: st.warning("The scores are close, low, or the input was truncated. More context may help.")
                 for warning in primary.warnings: st.warning(warning)
                 probabilities=pd.DataFrame({"Emotion":[EMOTION_NAMES[label] for label in EMOTION_LABELS],"Score":[primary.probabilities[label] for label in EMOTION_LABELS]})
-                chart=px.bar(probabilities,y="Emotion",x="Score",orientation="h",text_auto=".1%",range_x=[0,1],color_discrete_sequence=["#6264CF"])
+                chart=px.bar(probabilities,y="Emotion",x="Score",orientation="h",text_auto=".1%",range_x=[0,1],color_discrete_sequence=["#5655B8"])
                 chart.update_yaxes(autorange="reversed");chart.update_xaxes(tickformat=".0%")
                 st.plotly_chart(chart_style(chart,300),width="stretch")
                 st.caption("Scores are uncalibrated. Experimental-data notices describe validation scope, not whether this score distribution is ambiguous.")
@@ -248,3 +250,6 @@ def render_emotion_lab(header, chart_style):
             st.write("The base paper describes BERT/RoBERTa sentiment classification. This extension adds seven emotions, language-aware checkpoints, labelled-file evaluation, leakage checks and reproducible Colab training. A supervised sarcasm training workflow is available, but trained sarcasm weights are not provided. Emotion/emoji fusion is not implemented; emoji cues are shown separately.")
             paper=ROOT/"Team 5 - G2.docx"
             if paper.is_file(): st.download_button("Download base paper",paper.read_bytes(),file_name=paper.name,mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    with study_tab:
+        from dashboard.muril_study import render_muril_study
+        render_muril_study(ROOT, chart_style)

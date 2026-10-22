@@ -1,0 +1,101 @@
+row_id,text,language_pair,emotion,annotation_status,human_reviewed,source
+draft_fr_en_joy_001,"Maman a gardé une part de tarte pour moi, and it was still warm.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_joy_002,The grant got approved ce matin; je relis le mail juste pour y croire.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_joy_003,"Petite pluie, café serré, vieux vinyl — franchement, soirée parfaite.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_joy_004,"I found my lost sketchbook in the train station, quelle chance !",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_joy_005,Mon frère a appris la chanson entière et il la chante dans la cuisine.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_joy_006,"The whole team clapped when the demo worked, j'avais le sourire jusqu'aux oreilles.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_joy_007,"Elle a pensé à mon anniversaire sans rappel, ça m'a vraiment touché.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_joy_008,Le soleil est revenu juste pour notre pique-nique au bord du canal.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_joy_009,"I got the corner table with the window view, que demander de plus ?",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_joy_010,"On a cuisiné tous ensemble, la cuisine était en bazar mais quelle ambiance.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_joy_011,Mon vieux prof a reconnu ma voix au téléphone après toutes ces années.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_joy_012,"No grand plan, juste une balade avec mes amis et beaucoup de rires.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_joy_013,Mon dessin est enfin accroché dans le salon; la pièce paraît plus vivante.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_joy_014,The little note in the lunchbox said 'bonne chance'; j'en avais besoin.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_sadness_001,"Sa chaise est restée vide pendant le repas, et personne ne savait quoi dire.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_sadness_002,"I kept the ticket from our trip, même si on n'est jamais partis ensemble.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_sadness_003,Elle a entendu ma voix sans me reconnaître; ça m'a fait un drôle de vide.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_sadness_004,"The goodbye was full of jokes, puis le silence à la maison m'a rattrapé.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_sadness_005,"Le vieux bol de mon père s'est cassé, et je ne sais pas pourquoi ça me rend triste.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_sadness_006,I missed your call by a minute et maintenant ton téléphone est éteint.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_sadness_007,"Après tout ce travail, mon nom n'est même pas sur la liste; je suis épuisée.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_sadness_008,Le café du coin a fermé depuis son départ; nos soirées n'ont plus le même goût.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_sadness_009,"Je pensais qu'il resterait, mais il est parti sans se retourner.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_sadness_010,"The photo is still on my shelf, pourtant on ne se parle plus.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_sadness_011,"En rentrant, je n'avais envie de raconter ma journée à personne.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_sadness_012,Son dernier message disait seulement 'bien arrivé'; j'aurais voulu parler plus longtemps.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_sadness_013,"Everyone celebrated, mais la personne qui m'a formée n'était plus là.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_sadness_014,"Le plan de demain est annulé; je comprends, mais ça me déçoit quand même.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_anger_001,Vous avez changé l'horaire sans prévenir personne; c'est vraiment abusé.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_anger_002,"My package was left at the wrong building again, j'en ai marre.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_anger_003,"Il a présenté mon travail comme le sien devant toute l'équipe, quel culot.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_anger_004,On a attendu une heure puis le guichet a fermé sans explication. Sérieux ?,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_anger_005,Tu m'as coupée puis tu as repris exactement mon idée comme si de rien n'était.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_anger_006,They charged me twice et le service client m'envoie toujours la même réponse inutile.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_anger_007,Pourquoi les règles changent juste quand ça m'arrange ? C'est n'importe quoi.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_anger_008,"Tu peux arrêter de klaxonner, le feu ne va pas passer au vert plus vite.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_anger_009,"I asked for one simple update, pas une nouvelle excuse chaque semaine.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_anger_010,Quelqu'un a déposé une plainte en mon nom sans me demander; c'est inadmissible.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_anger_011,La cuisine commune est encore sale et on me demande de tout nettoyer.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_anger_012,The app logged me out after payment et ma commande a disparu.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_anger_013,"J'avais sauvegardé le dossier, mais vous l'avez supprimé sans vérifier. Bravo.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_anger_014,You said you'd return the keys yesterday; maintenant je dois appeler le serrurier.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_fear_001,"L'ascenseur s'est arrêté entre deux étages et les lumières clignotent, help.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_fear_002,The test result arrives tonight et je n'arrive pas à penser à autre chose.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_fear_003,"J'ai entendu un bruit dans le couloir, mais je n'ose pas ouvrir la porte.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_fear_004,My little sister hasn't answered for two hours et son portable est éteint.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_fear_005,La voiture a glissé sur le pont; maintenant conduire sous la pluie me terrifie.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_fear_006,Et si j'ai envoyé le mauvais fichier ? The deadline is in ten minutes.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_fear_007,"There is a burning smell près de la prise, on devrait sortir ?",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_fear_008,Le médecin a dit 'un autre examen' et depuis je tremble un peu.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_fear_009,"Le chien sans laisse est encore devant le portail, je dois passer seule.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_fear_010,"I think the platform changed, mais le train arrive déjà.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_fear_011,J'entends des pas au-dessus alors que l'appartement du dessus est vide.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_fear_012,"If that transfer went to the wrong account, je ne sais pas quoi faire.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_fear_013,J'ai un entretien aujourd'hui et si je perds mes mots ? J'ai le souffle court.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_fear_014,The smoke alarm made two beeps puis plus rien; quelque chose cloche.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_surprise_001,"Wait, j'ai été prise pour le stage ? Je pensais qu'ils avaient choisi quelqu'un d'autre.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_surprise_002,Mais toi ici ? I thought you were still in Lyon !,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_surprise_003,"La personne la plus discrète de la classe va présenter le spectacle, wow.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_surprise_004,Mon vieux dessin a été choisi par la galerie; je n'y croyais pas du tout.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_surprise_005,How did the parcel arrive before the tracking page changed?,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_surprise_006,"Il a payé le loyer sans rappel; honnêtement, je ne m'y attendais pas.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_surprise_007,Le courant est revenu pile au dernier point du match.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_surprise_008,I opened my old notebook et j'ai trouvé une lettre de ma meilleure amie.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_surprise_009,"On s'est retrouvés dans le même café après trois ans, quelle coïncidence.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_surprise_010,The tiny plant has a flower today ! Je pensais qu'elle ne pousserait jamais.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_surprise_011,Tu as déjà réparé le bug ? Hier encore on tournait en rond.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_surprise_012,Je croyais que la réunion serait en ligne; toute l'équipe était au bureau.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_surprise_013,That plain box had exactly the headphones I wanted; incroyable.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_surprise_014,Elle se souvenait de ma remarque de l'hiver dernier et l'a ressortie aujourd'hui.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_disgust_001,Il y a un reste oublié dans l'évier; l'odeur me donne la nausée.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_disgust_002,The public toilet floor was sticky et le robinet était couvert de crasse.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_disgust_003,"J'ai ouvert le pot et il y avait une couche verte dessus, beurk.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_disgust_004,Someone stuck chewing gum under the chair; j'en ai eu sur la main.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_disgust_005,Le lait avait un goût aigre alors que la date était encore bonne.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_disgust_006,That clip showed someone spitting near the food counter; quelle horreur.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_disgust_007,J'ai marché sur quelque chose de mou et c'était un vieux fruit écrasé.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_disgust_008,"They brought the plate with a hair in the sauce, appétit coupé.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_disgust_009,La serviette humide sentait comme si elle était là depuis une semaine.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_disgust_010,"L'eau sale du caniveau coule sur tout le trottoir, c'est immonde.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_disgust_011,A bug crawled over the spoon juste avant ma première bouchée.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_disgust_012,La bouteille commune avait des traces collantes sur le bord; personne ne répond.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_disgust_013,"Every handle in that room was greasy with fingerprints, dégoûtant.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_disgust_014,"La poubelle était ouverte et des mouches tournaient partout, ew.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_neutral_001,"The library closes at six, donc je rendrai le livre demain.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_neutral_002,J'ai laissé le dossier bleu à l'accueil; tu peux le récupérer là-bas.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_neutral_003,The meeting link is in the calendar invite for Thursday afternoon.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_neutral_004,"Demain, prends le bus 18A plutôt que le 18; c'est le même trajet.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_neutral_005,I moved the spare charger from the desk into the top drawer.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_neutral_006,La pause déjeuner est à 13 h 15; ensuite on regarde le tableau ensemble.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_neutral_007,The tracking page says the parcel reached the local sorting centre.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_neutral_008,"Mon carnet indique salle 204, pas 240.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_neutral_009,The recipe calls for two cups of water and one spoon of salt.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_neutral_010,Sors par la porte 3 du métro; la porte 2 est fermée pour travaux.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_neutral_011,Your appointment is listed for Monday morning at the clinic.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_neutral_012,J'ai enregistré le document mis à jour dans le dossier partagé.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_neutral_013,Class ends at four et le prochain cours est dans la même salle.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_neutral_014,"Le colis est adressé au 7B, pas au bureau du rez-de-chaussée.",fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_neutral_015,La réunion de 9 h 30 commencera par le deuxième point de l'ordre du jour.,fr-en,,assistant_draft,false,assistant_draft
+draft_fr_en_neutral_016,There are three clean mugs on the shelf beside the kettle.,fr-en,,assistant_draft,false,assistant_draft

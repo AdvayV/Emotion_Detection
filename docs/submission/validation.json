@@ -1,0 +1,173 @@
+{
+  "checked_at": "2026-10-22",
+  "full_suite": {
+    "passed": 163,
+    "subtests_passed": 33,
+    "duration_seconds": 118.6
+  },
+  "live_disagreement": {
+    "phrases": [
+      {
+        "text": "Aaj main bahut khush hoon!",
+        "language_pair": "hi-en",
+        "predictions": [
+          {
+            "model": "MuRIL",
+            "checkpoint": "models/muril_hi_en_emotion",
+            "version": "ab1fd30246e3eae6b62809fae0cf5acd54baddb8bb1766d6bc21727c29bac4ab",
+            "source": "trained_checkpoint",
+            "warnings": [
+              "Synthetic or mixed synthetic test data: real-world human-labelled accuracy is not established."
+            ],
+            "truncated": false,
+            "experimental": true,
+            "model_name": "google/muril-base-cased",
+            "probabilities": {
+              "joy": 0.5179038047790527,
+              "sadness": 0.07070314884185791,
+              "anger": 0.06805689632892609,
+              "fear": 0.07662943750619888,
+              "surprise": 0.09622082114219666,
+              "disgust": 0.0840010792016983,
+              "neutral": 0.08648481220006943
+            },
+            "emotion": "joy",
+            "score": 0.5179038047790527,
+            "uncertainty": true
+          },
+          {
+            "model": "XLM-R",
+            "checkpoint": "models/xlmr_multilingual_emotion",
+            "version": "1e2156d8b4aeb135b209766ae7ecdae7bebd759bd6e1bb0ae733fe700290ce50",
+            "source": "trained_checkpoint",
+            "warnings": [
+              "Synthetic or mixed synthetic test data: real-world human-labelled accuracy is not established."
+            ],
+            "truncated": false,
+            "experimental": true,
+            "model_name": "FacebookAI/xlm-roberta-base",
+            "probabilities": {
+              "joy": 0.9996752738952637,
+              "sadness": 0.00011107230966445059,
+              "anger": 5.26276598975528e-05,
+              "fear": 5.7412977184867486e-05,
+              "surprise": 2.434103771520313e-05,
+              "disgust": 4.051841824548319e-05,
+              "neutral": 3.8771355320932344e-05
+            },
+            "emotion": "joy",
+            "score": 0.9996752738952637,
+            "uncertainty": false
+          }
+        ],
+        "disagreement": false,
+        "uncertainty": true,
+        "pairwise_js": [
+          {
+            "models": [
+              "MuRIL",
+              "XLM-R"
+            ],
+            "divergence": 0.29543327957335075,
+            "distance": 0.5435377443870395
+          }
+        ]
+      },
+      {
+        "text": "Mujhe bahut darr lag raha hai",
+        "language_pair": "hi-en",
+        "predictions": [
+          {
+            "model": "MuRIL",
+            "checkpoint": "models/muril_hi_en_emotion",
+            "version": "ab1fd30246e3eae6b62809fae0cf5acd54baddb8bb1766d6bc21727c29bac4ab",
+            "source": "trained_checkpoint",
+            "warnings": [
+              "Synthetic or mixed synthetic test data: real-world human-labelled accuracy is not established."
+            ],
+            "truncated": false,
+            "experimental": true,
+            "model_name": "google/muril-base-cased",
+            "probabilities": {
+              "joy": 0.06620123237371445,
+              "sadness": 0.503796398639679,
+              "anger": 0.1106586828827858,
+              "fear": 0.11581289768218994,
+              "surprise": 0.08715368062257767,
+              "disgust": 0.08686760812997818,
+              "neutral": 0.02950945496559143
+            },
+            "emotion": "sadness",
+            "score": 0.503796398639679,
+            "uncertainty": true
+          },
+          {
+            "model": "XLM-R",
+            "checkpoint": "models/xlmr_multilingual_emotion",
+            "version": "1e2156d8b4aeb135b209766ae7ecdae7bebd759bd6e1bb0ae733fe700290ce50",
+            "source": "trained_checkpoint",
+            "warnings": [
+              "Synthetic or mixed synthetic test data: real-world human-labelled accuracy is not established."
+            ],
+            "truncated": false,
+            "experimental": true,
+            "model_name": "FacebookAI/xlm-roberta-base",
+            "probabilities": {
+              "joy": 5.680489630321972e-05,
+              "sadness": 0.9986376166343689,
+              "anger": 7.68092431826517e-05,
+              "fear": 0.0010712846415117383,
+              "surprise": 4.456988244783133e-05,
+              "disgust": 6.557830784004182e-05,
+              "neutral": 4.733430250780657e-05
+            },
+            "emotion": "sadness",
+            "score": 0.9986376166343689,
+            "uncertainty": false
+          }
+        ],
+        "disagreement": false,
+        "uncertainty": true,
+        "pairwise_js": [
+          {
+            "models": [
+              "MuRIL",
+              "XLM-R"
+            ],
+            "divergence": 0.30257651827410487,
+            "distance": 0.5500695576689414
+          }
+        ]
+      }
+    ],
+    "elapsed_seconds": 24.28,
+    "queue_written": false
+  },
+  "ollama": {
+    "available": false,
+    "message": "<urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>"
+  },
+  "new_training_run_performed": false,
+  "ollama_after_start": {
+    "available": true,
+    "message": "Ollama is ready with qwen3:0.6b.",
+    "review": {
+      "status": "applied",
+      "suggestion": "neutral",
+      "evidence": [
+        "darr"
+      ],
+      "message": "Local review applied as a second opinion; primary scores unchanged.",
+      "sarcasm": false
+    },
+    "final_emotion": "neutral",
+    "elapsed_seconds": 10.56,
+    "primary_source": "lexical_demo"
+  },
+  "report": {
+    "pages": 14,
+    "diagram_count": 5,
+    "diagram_sources": "docs/submission/diagrams",
+    "png_render_scale": 3
+  }
+}

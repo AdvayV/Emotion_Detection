@@ -32,9 +32,17 @@ data/training/multilingual_bootstrap_v1/
 # Generated Colab source copies and archives
 colab/project_training/package/
 colab/project_training/*.zip
+colab/muril_study/*.zip
 .agent-state/
 
 # Downloaded combined model weights and disposable verification runs
 /xlmr_combined*.zip
 outputs/verification/pytest*/
 outputs/verification/temp/
+
+# Generated mBERT uploads and downloaded checkpoints
+colab/mbert_study/package/
+colab/mbert_study/*.zip
+/muril_hi_en*.zip
+# Local verification images, temporary checks and rendering previews
+outputs/verification/

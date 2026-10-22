@@ -76,3 +76,11 @@ Rebuild the Colab upload with `python -m training.package_synthetic --overwrite`
 Existing working CSVs are verified and copied; they are not silently regenerated.
 On a fresh checkout, the same command without `--overwrite` creates the generated
 dataset and upload package. Generated data and model artifacts are ignored by Git.
+
+## Separate checking phrases
+
+[evaluation_set](../evaluation_set/README.md) is outside training: 100 Hindi-English
+and 100 English-French challenge drafts, plus unlabelled prediction copies.
+Their proposed labels are assistant-authored and not independently reviewed.
+The exact-overlap audit found no matches against the 20,000-row frozen source
+or installed checkpoint guards; that is not evidence of human label quality.

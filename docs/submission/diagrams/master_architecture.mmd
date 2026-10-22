@@ -1,0 +1,29 @@
+flowchart TB
+  classDef ink fill:#14263E,color:#FFFFFF,stroke:#14263E,stroke-width:2px
+  classDef teal fill:#DCF2EE,color:#173F43,stroke:#25877F,stroke-width:1.6px
+  classDef blue fill:#E9ECFA,color:#29345E,stroke:#6873AF,stroke-width:1.6px
+  classDef gold fill:#FFF2D8,color:#654D20,stroke:#C39A50,stroke-width:1.6px
+  classDef muted fill:#F3F5F7,color:#475569,stroke:#94A3B8,stroke-dasharray:5 4
+  subgraph DATA["01  Dataset"]
+    direction LR
+    A["Hindi-English + French-English<br/>16k train / 2k validation / 2k test"]:::teal --> B["Seven labels + source audit<br/>Freeze groups and split hashes"]:::blue
+  end
+  subgraph TRAIN["02  Colab training"]
+    direction LR
+    C["Choose one encoder<br/>XLM-R / mBERT / MuRIL hi-en"]:::ink --> D["GPU fine-tuning + Drive recovery<br/>Validation selects; test evaluates"]:::blue --> E["Inference ZIP<br/>Weights, tokenizer, metrics, metadata"]:::teal
+  end
+  subgraph LOCAL["03  Local prediction"]
+    direction LR
+    F["Phrase or CSV / XLSX<br/>Choose task and language"]:::ink --> G["Compatible local checkpoint<br/>Saved preparation and tokenizer"]:::blue --> H["Sentiment OR seven emotions<br/>Base scores and actual source"]:::teal
+  end
+  subgraph CHECKS["04  Diagnostics"]
+    direction LR
+    I["Spelling, negation, emoji conflict<br/>Heuristic sarcasm and intensity"]:::teal --> J["Scope, truncation, uncertainty<br/>Visible experimental notices"]:::gold
+    J -. optional .-> K["Ollama Qwen second opinion<br/>Original scores retained"]:::muted
+  end
+  subgraph RESULTS["05  Research outputs"]
+    direction LR
+    L["Labelled-file evaluation<br/>Accuracy, macro-F1, confusion"]:::blue ~~~ M["Model disagreement lab<br/>Sequential loads; compare scores"]:::blue --> N["Human-confirmed session queue<br/>Download candidate corrections"]:::teal
+  end
+  DATA --> TRAIN --> LOCAL --> CHECKS --> RESULTS
+  RESULTS -. "future data version" .-> Z["Colab retraining is explicit<br/>No automatic learning from predictions"]:::muted

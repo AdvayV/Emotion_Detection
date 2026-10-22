@@ -17,6 +17,8 @@ def render_file_predictions(root, choice, current_pair, resolver, chart_style):
         "Demo examples": root / "data/demo/emotions/mixed_emotions_demo.csv",
         "Current Hinglish synthetic test": root / "data/training/synthetic_hinglish_8000/test.csv",
         "Multilingual synthetic test": root / "data/training/multilingual_bootstrap_v1/test.csv",
+        "Hindi?English challenge draft": root / "evaluation_set/hindi_english_100.csv",
+        "English?French challenge draft": root / "evaluation_set/english_french_100.csv",
     }
     if upload:
         content, name = upload.getvalue(), upload.name
@@ -69,7 +71,7 @@ def render_file_predictions(root, choice, current_pair, resolver, chart_style):
         st.caption("Preview limited to 100 rows; all selected rows are processed, subject to the test-split option.")
     if not labelled:
         st.info("Prediction-only file: accuracy cannot be calculated without expected labels.")
-    signature = (choice, current_pair, digest, tuple(selected_pairs), test_only, fallback, tuple((pair, str(path)) for pair, path in selected_models.items()))
+    signature = (choice, current_pair, digest, text_col, label_col, pair_col, tuple(selected_pairs), test_only, fallback, tuple((pair, str(path)) for pair, path in selected_models.items()))
     from dashboard.emotions import detector_for
     from hinglish_emotion.checkpoints import checkpoint_version
     signature += (tuple((pair, checkpoint_version(path) if path else None) for pair, path in selected_models.items()),)

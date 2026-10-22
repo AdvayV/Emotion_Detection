@@ -1,0 +1,101 @@
+row_id,text,language_pair,emotion,annotation_status,human_reviewed,source
+draft_hi_en_joy_001,"Aaj maa ne bina bole meri favourite chai bana di, bas din ban gaya.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_joy_002,"The scholarship email finally came and I read it three times, khushi sambhal nahi rahi.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_joy_003,"Chhoti si baarish, pakode, aur doston ka voice note — perfect Sunday yaar.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_joy_004,I got the last seat by the window and the whole bus ride felt like a movie.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_joy_005,Papa remembered the date of my first presentation; I’m smiling like an idiot now.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_joy_006,Itna accha feedback mila ki puri team ka mood ek second mein lift ho gaya!,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_joy_007,"My little cousin learned to say my name and kept repeating it, so cute.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_joy_008,"Train was early, cab was waiting, aur ghar pahunchte hi sab mil gaye.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_joy_009,The old song came on just as we crossed the bridge — kya timing thi.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_joy_010,"Aaj ka lunch sabne milke banaya, kitchen messy tha par vibe top thi.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_joy_011,She sent the exact book I mentioned months ago; dil se khush hoon.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_joy_012,"No big plan, just an evening walk with my best friend and endless bakwaas.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_joy_013,Finally meri painting frame ho gayi; room dekhte hi alag lag raha hai.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_joy_014,"The surprise call from nani made my entire week, sach mein.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_sadness_001,Aaj uski kursi khali thi aur meeting ke baad office bahut suna laga.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_sadness_002,"I kept the old ticket, but the trip we planned together never happened.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_sadness_003,Meri awaaz sunke bhi usne pehchana nahi; thoda dil toot gaya.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_sadness_004,"The farewell ended with jokes, then I got home and the silence hit hard.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_sadness_005,"Papa ka favourite cup toot gaya, pata nahi kyun usse dekh ke rona aa gaya.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_sadness_006,I missed the call by one minute and now the number is switched off.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_sadness_007,"Itni mehnat ke baad bhi unhone mera naam list se hata diya, bas thak gayi hoon.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_sadness_008,Our usual chai stall is closed since he moved away; evenings feel incomplete.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_sadness_009,"Mujhe laga woh rukega, par station par bina mudhe chala gaya.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_sadness_010,"The photo is still pinned up, though we don't talk anymore.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_sadness_011,Aaj ghar lautkar kisi se baat karne ka mann hi nahi hua.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_sadness_012,Her last message was only 'reached'; I wish we had one more conversation.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_sadness_013,"The team celebrated, but the person who taught me everything wasn't there.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_sadness_014,"Kal ka plan cancel hua toh bura laga, par uski majboori bhi samajh rahi hoon.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_anger_001,Deadline badal di aur kisi ne bataya bhi nahi — this is so unfair.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_anger_002,"Mera parcel phir kisi aur building mein chhod diya, ab bas ho gaya.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_anger_003,He took credit for my slide in front of everyone; sach mein gussa aa raha hai.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_anger_004,"Queue mein ghante khade rahe, phir counter band karke chale gaye. Seriously?",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_anger_005,Tumne meri baat beech mein kaati aur phir wahi idea apna bol diya.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_anger_006,The fee was charged twice and support keeps sending the same useless reply.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_anger_007,Har baar rules mere liye alag kyun? I am done pretending this is okay.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_anger_008,"Road pe horn bajate rehne se traffic thodi gayab ho jayega, irritate kar diya.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_anger_009,"I asked for one clear update, not another week of excuses.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_anger_010,Mere naam se galat complaint daal di; bina pooche koi aisa kaise kar sakta hai?,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_anger_011,"They left the shared kitchen filthy again, and somehow I am asked to clean it.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_anger_012,The app logged me out after payment and now the order is nowhere to be found.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_anger_013,"Itni baar samjhaya phir bhi meri file delete kar di, unbelievable carelessness.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_anger_014,You promised to return the keys yesterday; ab mujhe lock change karwana padega.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_fear_001,"Lift beech floor par ruk gayi, lights bhi blink kar rahi hain — koi hai?",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_fear_002,The test result is due tonight and I can't stop imagining the worst.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_fear_003,Raat ko corridor se awaaz aayi; main darwaza kholne ki himmat nahi kar pa raha.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_fear_004,My little brother hasn't answered for two hours and his phone is off.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_fear_005,"Bridge par gaadi fisli thi, ab baarish mein drive karne ka soch ke haath kaanp rahe hain.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_fear_006,Kahin galat file submit toh nahi ki? The deadline is in ten minutes.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_fear_007,There is a strange burning smell near the plug; should we leave the room?,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_fear_008,Doctor said 'we need another scan' and bas tab se dimag ruk nahi raha.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_fear_009,The dog behind the gate is loose again; I have to pass that lane alone.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_fear_010,"Mujhe lag raha hai platform change hua, but the train is already coming.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_fear_011,I heard footsteps on the roof and everyone else says they heard nothing.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_fear_012,"If the bank transfer went to the wrong account, I don't know how to fix this.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_fear_013,Aaj interview hai aur blank ho gaya toh? Saans bhi fast chal rahi hai.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_fear_014,The smoke alarm chirped twice and then stopped; something feels off.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_surprise_001,"Wait, internship ka offer aaj hi? I thought they had picked someone else.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_surprise_002,"Arre, tum yahan? I thought you were still in Pune!",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_surprise_003,The quietest person in class volunteered to host the whole event — wow.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_surprise_004,"Mere purane sketch ko gallery ne select kiya, bilkul expect nahi tha.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_surprise_005,How did the parcel reach before the tracking page even updated?,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_surprise_006,"Usne bina reminder ke rent bhej diya; honestly, didn't see that coming.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_surprise_007,The power came back exactly when the match reached the final over.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_surprise_008,I opened the old notebook and found a note from my school bestie inside.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_surprise_009,"Teen saal baad woh same coffee shop mein mil gaya, kya coincidence.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_surprise_010,The tiny plant has a flower today! I thought it would never bloom.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_surprise_011,You already fixed the bug? Kal toh hum dono stuck the.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_surprise_012,"Mujhe laga meeting online hogi, poori team office mein khadi thi.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_surprise_013,That ordinary-looking box had the exact headphones I wanted — no way.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_surprise_014,She remembered my tiny comment from last winter and brought it up today.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_disgust_001,"Sink mein purana khana pada hai, smell se hi nausea aa raha hai.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_disgust_002,The public washroom floor was sticky and the tap had grime all over it.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_disgust_003,"Fridge khola aur ek container se green fuzz bahar aa raha tha, yuck.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_disgust_004,Kisi ne bus seat par chewing gum chipka di; haath lagte hi ghin aa gayi.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_disgust_005,The milk tasted sour even though the carton said it was fresh.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_disgust_006,That video showed someone spitting near the food counter. I feel sick.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_disgust_007,"Mere shoes ke paas kuch squishy tha, neeche dekha toh old fruit nikla.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_disgust_008,They served the plate with a hair stuck to the sauce — appetite gone.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_disgust_009,The damp towel smelled like it had been sitting there for days.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_disgust_010,"Yeh drain ka paani seedha footpath par aa raha hai, kya ganda scene hai.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_disgust_011,A bug crawled across the spoon just as I was about to take a bite.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_disgust_012,The shared bottle had lipstick marks on the rim and nobody owned up.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_disgust_013,Dust and oily fingerprints covered every handle in that room.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_disgust_014,"Kachre ke dabbe ka dhakkan khula tha aur flies har jagah thi, ew.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_neutral_001,"The library closes at six today, so I will return the book tomorrow.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_neutral_002,Maine blue folder reception par rakh diya hai; please wahan se le lena.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_neutral_003,The meeting link is in the calendar invite under Thursday afternoon.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_neutral_004,"Kal bus number 18 ki jagah 18A lena, route same hai.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_neutral_005,I moved the spare charger from the desk into the top drawer.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_neutral_006,Lunch break 1:15 par hai; uske baad spreadsheet review karenge.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_neutral_007,The parcel tracking page shows it reached the local sorting centre.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_neutral_008,"Meri notebook par room number 204 likha hai, 240 nahi.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_neutral_009,The recipe asks for two cups of water and one spoon of salt.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_neutral_010,"Aaj metro gate 3 se exit lena, road work gate 2 par chal raha hai.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_neutral_011,Your appointment is listed for Monday morning at the clinic.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_neutral_012,I saved the updated document with today's date in the shared folder.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_neutral_013,Class ends at four; the next session is in the same room.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_neutral_014,"The parcel is addressed to flat 7B, not the ground-floor office.",hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_neutral_015,Kal 9:30 wali call mein pehle agenda ka second point discuss karna.,hi-en,,assistant_draft,false,assistant_draft
+draft_hi_en_neutral_016,There are three clean mugs on the shelf beside the kettle.,hi-en,,assistant_draft,false,assistant_draft

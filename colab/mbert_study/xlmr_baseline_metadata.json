@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "task": "emotion",
+  "labels": [
+    "joy",
+    "sadness",
+    "anger",
+    "fear",
+    "surprise",
+    "disgust",
+    "neutral"
+  ],
+  "text_mode": "raw",
+  "preparation_version": 1,
+  "max_length": 128,
+  "base_model": "FacebookAI/xlm-roberta-base",
+  "trained_language_pairs": [
+    "fr-en",
+    "hi-en"
+  ],
+  "training_data_kind": "synthetic_only",
+  "evaluation_scope": "synthetic_only",
+  "validated_language_pairs": [],
+  "training_status": "complete",
+  "dataset_sha256": "83430dd59167b6402cc2945f94f701e19eb5886c6ee7d3602227ad73d0159db0",
+  "split_sha256": "7b4c6c953d0ae6402250f82e94ebeabbb05605ddad9c2567a15e800414f5fd72"
+}

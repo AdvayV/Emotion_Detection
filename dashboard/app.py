@@ -11,23 +11,26 @@ import streamlit as st
 
 from dashboard.data import dataframe_report, read_dataset, report_dict, sarcasm_rate
 from dashboard.evaluation import ModelEvaluation, evaluate_pipeline
+from dashboard.theme import apply_theme
 from hinglish_emotion.intensity import IntensityEstimator
 from hinglish_emotion.model_catalog import ENCODERS, checkpoint_path, checkpoint_ready
 from hinglish_emotion.ollama_reviewer import DEFAULT_OLLAMA_MODEL, OllamaReviewer
 from hinglish_emotion.pipeline import EmotionPipeline, RuleBasedClassifier
 from hinglish_emotion.transformer_classifier import LocalTransformerClassifier
+from hinglish_emotion.checkpoints import emotion_checkpoint
+from hinglish_emotion.tasks import LANGUAGE_PAIRS
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SAMPLE_DATA = PROJECT_ROOT / "data" / "demo" / "sentiment" / "hinglish_emotion_phrases.xlsx"
-PAGES = ["Emotion lab", "Analyze text", "Model effectiveness", "Dataset explorer", "Overview"]
+PAGES = ["Emotion lab", "Model disagreement", "Analyze text", "Model effectiveness", "Dataset explorer", "Overview"]
 EXAMPLES = {
     "Positive with emphasis": "movie acchaaa thi 😊",
     "Negation": "service acchi nahi thi 😞",
     "Possible sarcasm": "wah kya service hai, 2 ghante late 😂",
     "Neutral": "theek tha",
 }
-LABEL_COLORS = {"positive": "#27856D", "neutral": "#7B849B", "negative": "#C35C6D"}
+LABEL_COLORS = {"positive": "#087F83", "neutral": "#6B7888", "negative": "#B85C69"}
 SENTIMENT_ICONS = {"positive": "🙂", "neutral": "😐", "negative": "🙁"}
 SENTIMENT_EXPLANATIONS = {
     "positive": "The message expresses a positive opinion or feeling.",
@@ -43,9 +46,9 @@ REVIEW_REASONS = {
 }
 MODEL_DESCRIPTIONS = {
     "Rule-based baseline": "Uses sentiment words, negation and emoji rules. Ready to try immediately.",
-    "mBERT": "A multilingual BERT encoder. Needs a trained Hinglish sentiment checkpoint.",
-    "MuRIL": "An encoder for Indian languages and transliterated text. Needs a trained checkpoint.",
-    "XLM-R": "A multilingual RoBERTa encoder. Needs a trained Hinglish sentiment checkpoint.",
+    "mBERT": "A multilingual BERT encoder. Needs an installed three-class sentiment checkpoint.",
+    "MuRIL": "An encoder for Indian languages and transliterated text. Needs an installed sentiment checkpoint.",
+    "XLM-R": "A multilingual RoBERTa encoder. Needs an installed three-class sentiment checkpoint.",
     "Custom checkpoint": "Use another locally saved three-class sentiment model.",
 }
 
@@ -59,12 +62,12 @@ def page_header(title: str, description: str) -> None:
 def style_chart(figure, height: int = 320):
     figure.update_layout(
         template="plotly_white", height=height,
-        font={"family": "Arial, sans-serif", "color": "#4A5269", "size": 13},
+        font={"family": "Arial, sans-serif", "color": "#34475A", "size": 13},
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
         margin={"l": 5, "r": 10, "t": 30, "b": 5}, legend_title_text="",
     )
-    figure.update_xaxes(gridcolor="#E9ECF3")
-    figure.update_yaxes(gridcolor="#E9ECF3")
+    figure.update_xaxes(gridcolor="#E2E9EC")
+    figure.update_yaxes(gridcolor="#E2E9EC")
     return figure
 
 
@@ -109,15 +112,21 @@ def build_pipeline(model_path: str, use_reviewer: bool, ollama_model: str) -> tu
 def render_sidebar() -> tuple[str, str, bool, str]:
     with st.sidebar:
         st.title("💬 Hinglish Lab")
-        st.caption("Explore sentiment. Understand the decision.")
+        st.caption("A local workspace for model exploration")
         page = st.radio("Workspace", PAGES, key="workspace")
-        if page == "Emotion lab":
+        if page in {"Emotion lab", "Model disagreement"}:
             st.divider()
             st.info("Seven emotions for Hindi–English and English–French. The selected language determines which trained checkpoint is available.")
-            st.caption("Choose its emotion classifier on the page. The sentiment checkpoint and Qwen reviewer use a different label set.")
+            st.subheader("Seven-emotion settings")
+            st.caption("Choose the language mix and emotion checkpoint in the workspace. Sentiment checkpoints use a different label set; Qwen review supports both tasks.")
+            return page, "", False, DEFAULT_OLLAMA_MODEL
+        if page not in {"Analyze text", "Model effectiveness"}:
+            st.divider()
+            st.subheader("Explore the project")
+            st.caption("Choose a workspace above to inspect data, predictions or evaluation results.")
             return page, "", False, DEFAULT_OLLAMA_MODEL
         st.divider()
-        st.subheader("Analysis settings")
+        st.subheader("Sentiment settings")
         encoder_choice = st.selectbox(
             "Primary classifier",
             ["Rule-based baseline", *(encoder.name for encoder in ENCODERS), "Custom checkpoint"],
@@ -350,8 +359,13 @@ def render_overview() -> None:
     columns[0].metric("Default classifier", "Ready", help="The rule-based baseline runs without downloading model weights.", border=True)
     columns[1].metric("Trained sentiment encoders", f"{ready_encoders} / 3", help="Three-class checkpoints only; the seven-emotion XLM-R checkpoint is counted separately below.", border=True)
     columns[2].metric("Review option", "Local Qwen", help="An optional second opinion for uncertain messages through Ollama.", border=True)
-    emotion_models = [p.name for p in (PROJECT_ROOT / "models").glob("xlmr*_emotion") if checkpoint_ready(p)]
-    st.caption("Seven-emotion XLM-R checkpoints: " + (", ".join(emotion_models) or "none installed"))
+    emotion_models = [
+        f"{encoder.name} · {LANGUAGE_PAIRS[pair]}"
+        for pair in LANGUAGE_PAIRS
+        for encoder in ENCODERS
+        if emotion_checkpoint(PROJECT_ROOT / "models", pair, encoder.key) is not None
+    ]
+    st.caption("Installed seven-emotion checkpoints: " + (", ".join(emotion_models) or "none found"))
     st.button("Open seven-emotion prediction and file evaluation", on_click=navigate_to, args=("Emotion lab",), key="overview_to_emotions")
     st.write("")
     first, second = st.columns(2)
@@ -449,7 +463,7 @@ def render_dataset() -> None:
         st.markdown("**How long are the messages?**")
         lengths = frame["text"].fillna("").astype(str).str.len()
         chart = px.histogram(pd.DataFrame({"Characters per message": lengths}), x="Characters per message", nbins=min(20, max(5, len(frame))))
-        chart.update_traces(marker_color="#6264CF")
+        chart.update_traces(marker_color="#5655B8")
         chart.update_yaxes(title="Messages")
         st.plotly_chart(style_chart(chart), width="stretch", config={"displayModeBar": False})
         st.caption("Longer messages may need a larger token limit during training.")
@@ -513,7 +527,7 @@ def render_model_panel(evaluation: ModelEvaluation) -> None:
         class_frame["Metric"] = class_frame["Metric"].str.title()
         chart = px.bar(
             class_frame, x="sentiment", y="Score", color="Metric", barmode="group", range_y=[0, 1],
-            color_discrete_sequence=["#6264CF", "#46A390", "#A59CE3"],
+            color_discrete_sequence=["#5655B8", "#087F83", "#A7A3D2"],
             labels={"sentiment": "Sentiment"},
         )
         chart.update_yaxes(tickformat=".0%")
@@ -538,7 +552,7 @@ def render_model_panel(evaluation: ModelEvaluation) -> None:
         if not evaluation.calibration.empty:
             calibration.add_trace(go.Scatter(
                 x=evaluation.calibration["mean_confidence"], y=evaluation.calibration["empirical_accuracy"],
-                mode="lines+markers", name=evaluation.model, line={"color": "#6264CF"},
+                mode="lines+markers", name=evaluation.model, line={"color": "#5655B8"},
                 customdata=evaluation.calibration["count"],
                 hovertemplate="Confidence: %{x:.0%}<br>Correct: %{y:.0%}<br>Messages: %{customdata}<extra></extra>",
             ))
@@ -616,7 +630,7 @@ def render_evaluation(model_path: str, use_reviewer: bool, ollama_model: str) ->
     else:
         comparison = summary.melt(id_vars=["model"], value_vars=["accuracy", "macro_f1"], var_name="Metric", value_name="Score")
         comparison["Metric"] = comparison["Metric"].map({"accuracy": "Accuracy", "macro_f1": "Macro-F1"})
-        chart = px.bar(comparison, x="model", y="Score", color="Metric", barmode="group", text_auto=".1%", range_y=[0, 1], color_discrete_sequence=["#6264CF", "#46A390"])
+        chart = px.bar(comparison, x="model", y="Score", color="Metric", barmode="group", text_auto=".1%", range_y=[0, 1], color_discrete_sequence=["#5655B8", "#087F83"])
         chart.update_xaxes(title=None)
         chart.update_yaxes(tickformat=".0%")
         st.plotly_chart(style_chart(chart), width="stretch", config={"displayModeBar": False})
@@ -627,7 +641,8 @@ def render_evaluation(model_path: str, use_reviewer: bool, ollama_model: str) ->
 
 
 def main() -> None:
-    st.set_page_config(page_title="Hinglish Lab", page_icon="💬", layout="wide", initial_sidebar_state="expanded")
+    st.set_page_config(page_title="Hinglish Lab", page_icon="🧪", layout="wide", initial_sidebar_state="expanded")
+    apply_theme()
     if "history" not in st.session_state:
         st.session_state.history = []
     page, model_path, use_reviewer, ollama_model = render_sidebar()
@@ -636,6 +651,9 @@ def main() -> None:
     elif page == "Emotion lab":
         from dashboard.emotions import render_emotion_lab
         render_emotion_lab(page_header, style_chart)
+    elif page == "Model disagreement":
+        from dashboard.disagreement import render_disagreement_lab
+        render_disagreement_lab(page_header, style_chart)
     elif page == "Model effectiveness":
         render_evaluation(model_path, use_reviewer, ollama_model)
     elif page == "Dataset explorer":

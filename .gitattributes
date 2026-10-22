@@ -1,0 +1,4 @@
+# Preserve audited CSV bytes; treat Windows carriage returns as line endings.
+evaluation_set/*.csv -text whitespace=cr-at-eol
+# Baseline snapshot hashes use canonical JSON, independent of line endings.
+colab/*_study/*.json text eol=lf

@@ -1,0 +1,23 @@
+flowchart TB
+  classDef ink fill:#14263E,color:#FFFFFF,stroke:#14263E,stroke-width:2px
+  classDef teal fill:#DCF2EE,color:#173F43,stroke:#25877F,stroke-width:1.6px
+  classDef blue fill:#E9ECFA,color:#29345E,stroke:#6873AF,stroke-width:1.6px
+  classDef gold fill:#FFF2D8,color:#654D20,stroke:#C39A50,stroke-width:1.6px
+  classDef muted fill:#F3F5F7,color:#475569,stroke:#94A3B8,stroke-dasharray:5 4
+  subgraph SELECT["Model comparison"]
+    direction LR
+    A["1-20 phrases + language<br/>At least two compatible models"]:::ink --> B["Load, predict, release<br/>One checkpoint at a time"]:::blue --> C["Keep model and version<br/>Base scores + warnings"]:::teal
+  end
+  subgraph INSPECT["Interpretation"]
+    direction LR
+    D["Top-label disagreement<br/>Different predicted emotions"]:::gold
+    E["Score uncertainty<br/>Margin and truncation flags"]:::gold
+    F["Distribution distance<br/>Jensen-Shannon comparison"]:::blue
+    D ~~~ E ~~~ F
+  end
+  subgraph HUMAN["Human review"]
+    direction LR
+    G["Human selects emotion<br/>Notes + source declaration"]:::teal --> H["Explicit confirmation<br/>Deduplicated session queue"]:::teal --> I["Download candidate CSV<br/>Split remains unspecified"]:::blue
+  end
+  SELECT --> INSPECT --> HUMAN
+  HUMAN -. "future workflow" .-> J["Version new data before retraining<br/>Protect the frozen test set"]:::muted

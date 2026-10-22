@@ -55,6 +55,35 @@ data/training/synthetic_hinglish_8000/test.csv. The new combined bootstrap is
 data/training/multilingual_bootstrap_v1/test.csv. These are synthetic examples,
 not independent proof of accuracy on natural messages.
 
+## Start the current mBERT comparison
+
+1. Upload `colab/mbert_study/TRAIN_MBERT_STUDY.ipynb` to Google Colab.
+2. Choose Runtime > Change runtime type > T4 GPU, then Run all.
+3. Upload the sibling `mbert_study.zip` when prompted and mount your own Drive.
+4. Keep the existing settings. It uses the same bilingual data/splits as combined XLM-R.
+5. Download `mbert_combined.zip` when the notebook finishes, then run:
+
+```powershell
+python -m training.install_checkpoint "C:/Users/Advay/Downloads/mbert_combined.zip"
+```
+
+Refresh Emotion lab and choose mBERT. The installer uses
+`models/mbert_multilingual_emotion` and preserves existing encoders.
+See `colab/mbert_study/START_HERE.md` for recovery and comparison details.
+The upload package is generated locally and is not committed with the weights.
+
+## Review model disagreements
+
+Open **Model disagreement**, choose Hindi-English and both installed encoders,
+enter one phrase per line and compare. Review the outputs, select your label,
+declare the phrase origin, confirm and add it to the session queue. Download
+candidate corrections before closing. This does not retrain the model. For
+English-French, install the trained mBERT checkpoint first; MuRIL is unavailable.
+
+Separate challenge drafts are in `evaluation_set/`; choose them in the Emotion
+lab file tab. The expected labels are unreviewed proposals. Use the unlabelled
+copies for prediction only, or obtain independent reviews before reporting accuracy.
+
 ## Train the models on Google Colab
 
 The combined XLM-R checkpoint described above is already available for local

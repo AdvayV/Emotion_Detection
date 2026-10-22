@@ -1,0 +1,20 @@
+flowchart TB
+  classDef ink fill:#14263E,color:#FFFFFF,stroke:#14263E,stroke-width:2px
+  classDef teal fill:#DCF2EE,color:#173F43,stroke:#25877F,stroke-width:1.6px
+  classDef blue fill:#E9ECFA,color:#29345E,stroke:#6873AF,stroke-width:1.6px
+  classDef gold fill:#FFF2D8,color:#654D20,stroke:#C39A50,stroke-width:1.6px
+  classDef muted fill:#F3F5F7,color:#475569,stroke:#94A3B8,stroke-dasharray:5 4
+  subgraph PACKAGE["Training setup"]
+    direction LR
+    A["Versioned labelled CSV<br/>Source and label audit"]:::teal --> B["Freeze groups and splits<br/>Verify file + dataset hashes"]:::blue --> C["Upload notebook and ZIP<br/>Enable GPU; mount own Drive"]:::ink
+  end
+  subgraph LEARN["Learning loop"]
+    direction LR
+    D["Training batches<br/>Forward loss + gradients"]:::ink --> E["Optimizer updates<br/>Encoder and task head"]:::blue --> F["Validation each epoch<br/>Keep best macro-F1"]:::teal
+    F -. "next epoch" .-> D
+  end
+  subgraph SAVE["Recovery and export"]
+    direction LR
+    G["Drive recovery state<br/>Resume completed epoch"]:::gold --> H["Frozen test evaluation<br/>Class + language metrics"]:::blue --> I["Export inference ZIP<br/>Install local checkpoint"]:::teal
+  end
+  PACKAGE --> LEARN --> SAVE

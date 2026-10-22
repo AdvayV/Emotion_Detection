@@ -6,8 +6,8 @@ been trained or that research accuracy has been established.
 | Feature | Working implementation | What remains |
 | --- | --- | --- |
 | Seven emotions | Joy, sadness, anger, fear, surprise, disgust, neutral; phrase and file prediction | Independent human-labelled evaluation |
-| Model selection | Local XLM-R, mBERT and MuRIL registry; language checks; explicit demo fallback | New Colab weights for combined-language XLM-R/mBERT and Hindi-English MuRIL |
-| Existing learned weights | Hindi-English synthetic XLM-R run, three epochs, best validation epoch 1 | Real-data generalization; saved synthetic test accuracy 90.7% is not a real-world estimate |
+| Model selection | Local XLM-R, mBERT and MuRIL registry; language checks; explicit demo fallback | mBERT combined Colab training remains pending; XLM-R combined and Hindi-English MuRIL are installed |
+| Existing learned weights | Original XLM-R (90.7% synthetic); combined XLM-R (92.5% overall, 95.6% hi-en, 89.4% fr-en); MuRIL hi-en (80.3%) | Real-data generalization; saved synthetic test accuracy 90.7% is not a real-world estimate |
 | Expressive spelling | Conservative normalization, elongation and negation cues | Controlled normalization ablation; normalized text only used when checkpoint metadata requires it |
 | Emoji conflict | Word-only sentiment cues compared with emoji cues; ambiguous symbols marked uncertain | Learned multimodal fusion and annotated validation |
 | Sarcasm | Explicit rule baseline; supervised XLM-R binary trainer, importer and local adapter | Reviewed sarcasm data and the Colab run; no trained sarcasm checkpoint supplied |
@@ -39,3 +39,16 @@ colab/project_training; inspect START_HERE.md in that folder. The package
 contains source and data only, never downloaded model weights, optimizer
 states or private credentials. Training runs on Colab; local execution is
 inference, analysis and software verification.
+
+## October 22 integration update
+
+The focused bilingual mBERT package is in colab/mbert_study. It verifies the
+same data and split hashes as combined XLM-R and exports a checkpoint accepted
+by the existing installer. No mBERT weights or local training are claimed.
+
+Model disagreement is a sixth dashboard workspace, with sequential local model
+loading, base scores, disagreement/uncertainty separation and human-confirmed
+session corrections. Exports are candidate data with an unspecified split;
+there is no automatic model update. The two evaluation_set challenge files each
+contain 100 unreviewed assistant-draft phrases, with separate unlabelled copies
+and a zero-exact-overlap audit. Real-world benchmark validation is still pending.

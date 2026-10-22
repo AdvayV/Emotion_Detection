@@ -51,6 +51,38 @@ accuracy. Base encoders are not finished emotion classifiers. Synthetic and demo
 scores do not establish performance on real user messages. Experimental multilingual
 utilities remain in the code for later reviewed experiments.
 
+## Current mBERT run and model review
+
+Use [the focused mBERT Colab guide](colab/mbert_study/START_HERE.md). Upload
+`colab/mbert_study/TRAIN_MBERT_STUDY.ipynb`, select a T4 GPU, run all cells and
+upload `colab/mbert_study/mbert_study.zip` at the first prompt. The package
+contains source and the same bilingual 16,000/2,000/2,000 frozen partitions as
+combined XLM-R. Training is pending; no mBERT result is claimed. The downloaded
+`mbert_combined.zip` installs with `python -m training.install_checkpoint` and
+is discovered automatically for both language mixes after installation.
+
+**Model disagreement** is a separate dashboard workspace. Select Hindi-English
+and compare the installed XLM-R and MuRIL checkpoints on up to 20 phrases. Models
+load sequentially to limit RAM use. The page separates top-label disagreement,
+score uncertainty and distribution distance; agreement is not proof of correctness.
+Choose a reviewed label, declare the phrase origin and explicitly confirm it to
+add a candidate to the session queue. Download the candidate CSV before closing
+the session. It leaves the split unspecified and never changes training data or
+model weights automatically. Keep frozen evaluation examples out of later training.
+English-French comparison needs the completed mBERT export alongside XLM-R;
+MuRIL is restricted to Hindi-English.
+
+[Evaluation challenge drafts](evaluation_set/README.md) provide 100 phrases per
+language and unlabelled copies. They have no normalized exact overlap with the
+frozen 20,000-row source or the installed guards, but their assistant-proposed
+labels are unreviewed. They are not a human benchmark. They are selectable in
+Emotion lab's file evaluation tab and stay separate from all training packages.
+
+The [submission report](outputs/CodeMood_Hindi_English_Project_Progress_Report.docx)
+has a full-page architecture and four module diagrams. Editable Mermaid sources
+and SVG artwork are in [docs/submission](docs/submission/README.md). Saved results
+remain synthetic-only; current live inference still makes confident mistakes.
+
 ## Install and run
 
 Use Python 3.10 or newer and run commands from the repository root, where
@@ -299,3 +331,19 @@ trained sarcasm weights are supplied. Qwen review is implemented but uncalibrate
 context is supplied to that optional reviewer, not a learned conversation encoder.
 Intensity remains heuristic. See [implementation status](IMPLEMENTATION_STATUS.md)
 for the distinction between working software and experiments still to run.
+
+## MuRIL Hindi-English study
+
+The separate [MuRIL Colab guide](colab/muril_study/START_HERE.md) fine-tunes `google/muril-base-cased` for the seven emotion labels on synthetic Hindi-English data. Its default job uses 8,000 training, 1,000 validation and 1,000 test examples, with three epochs. It shares the test identities used by the installed combined XLM-R checkpoint, which was trained on 16,000 combined Hindi-English and English-French examples. This is an operational same-test comparison, not a controlled encoder comparison. The guide explains the optional matched 8,000-row XLM-R run and how to install either exported checkpoint.
+
+Scores are synthetic-only and do not establish real-world performance. The saved combined XLM-R Hindi-English baseline is 95.6% accuracy and 0.9563 macro-F1. The completed MuRIL Colab report records 80.3% accuracy and 0.8123 macro-F1 on the same 1,000 Hindi-English test phrases.
+
+Open **Emotion lab → XLM-R vs MuRIL** in the dashboard for summary scores, per-emotion F1 charts and downloadable comparison tables. With `models/muril_hi_en_emotion` installed, the dashboard checks its original training metrics against the study contract and baseline, and **Try a phrase → MuRIL → Hindi–English** runs the trained seven-emotion classifier locally. If only `muril_hi_en_comparison.zip` is present, saved comparison results remain available but live MuRIL inference requires the separate checkpoint export. Offline prediction was verified with the installed checkpoint; synthetic test scores do not guarantee correct predictions on new phrases.
+
+Download `muril_hi_en.zip` from Colab or Google Drive under `HinglishEmotionProject/MuRILStudy/exports`. From the project folder, install it with:
+
+```powershell
+python -m training.install_checkpoint "muril_hi_en.zip"
+```
+
+The installer validates the export and creates `models/muril_hi_en_emotion`. Refresh the dashboard and choose **MuRIL** with **Hindi-English** for live predictions. The comparison ZIP alone cannot enable these predictions.
