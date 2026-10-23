@@ -1,0 +1,519 @@
+[
+  {
+    "key": "devlin2019",
+    "title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+    "authors": [
+      "Jacob Devlin",
+      "Ming-Wei Chang",
+      "Kenton Lee",
+      "Kristina Toutanova"
+    ],
+    "year": 2019,
+    "venue": "NAACL-HLT 2019, Volume 1, pp. 4171-4186",
+    "url": "https://aclanthology.org/N19-1423/",
+    "note": "Bidirectional pretraining supports task adaptation through fine-tuning with an additional output layer.",
+    "verified_url": "https://aclanthology.org/N19-1423/",
+    "doi": "10.18653/v1/N19-1423"
+  },
+  {
+    "key": "conneau2020",
+    "title": "Unsupervised Cross-lingual Representation Learning at Scale",
+    "authors": [
+      "Alexis Conneau",
+      "Kartikay Khandelwal",
+      "Naman Goyal",
+      "Vishrav Chaudhary",
+      "Guillaume Wenzek",
+      "Francisco Guzm\u00e1n",
+      "Edouard Grave",
+      "Myle Ott",
+      "Luke Zettlemoyer",
+      "Veselin Stoyanov"
+    ],
+    "year": 2020,
+    "venue": "ACL 2020, pp. 8440-8451",
+    "url": "https://aclanthology.org/2020.acl-main.747/",
+    "note": "Introduces XLM-R and studies multilingual pretraining scale, transfer and capacity trade-offs.",
+    "verified_url": "https://aclanthology.org/2020.acl-main.747/",
+    "doi": "10.18653/v1/2020.acl-main.747"
+  },
+  {
+    "key": "khanuja2021",
+    "title": "MuRIL: Multilingual Representations for Indian Languages",
+    "authors": [
+      "Simran Khanuja",
+      "Diksha Bansal",
+      "Sarvesh Mehtani",
+      "Savya Khosla",
+      "Atreyee Dey",
+      "Balaji Gopalan",
+      "Dilip Kumar Margam",
+      "Pooja Aggarwal",
+      "Rajiv Teja Nagipogu",
+      "Shachi Dave",
+      "Shruti Gupta",
+      "Subhash Chandra Bose Gali",
+      "Vish Subramanian",
+      "Partha Talukdar"
+    ],
+    "year": 2021,
+    "venue": "arXiv preprint arXiv:2103.10730",
+    "url": "https://arxiv.org/abs/2103.10730",
+    "note": "MuRIL emphasizes Indian-language representations and incorporates translated and transliterated document pairs.",
+    "verified_url": "https://arxiv.org/abs/2103.10730"
+  },
+  {
+    "key": "aguilar2020",
+    "title": "LinCE: A Centralized Benchmark for Linguistic Code-switching Evaluation",
+    "authors": [
+      "Gustavo Aguilar",
+      "Sudipta Kar",
+      "Thamar Solorio"
+    ],
+    "year": 2020,
+    "venue": "Twelfth Language Resources and Evaluation Conference (LREC 2020), pp. 1803-1813",
+    "url": "https://aclanthology.org/2020.lrec-1.223/",
+    "note": "Consolidates code-switching corpora and multiple tasks, including sentiment analysis, for comparable evaluation.",
+    "verified_url": "https://aclanthology.org/2020.lrec-1.223/"
+  },
+  {
+    "key": "vijay2018",
+    "title": "Corpus Creation and Emotion Prediction for Hindi-English Code-Mixed Social Media Text",
+    "authors": [
+      "Deepanshu Vijay",
+      "Aditya Bohra",
+      "Vinay Singh",
+      "Syed Sarfaraz Akhtar",
+      "Manish Shrivastava"
+    ],
+    "year": 2018,
+    "venue": "NAACL-HLT 2018: Student Research Workshop, pp. 128-135",
+    "url": "https://aclanthology.org/N18-4018/",
+    "note": "Provides Hindi-English tweets annotated for emotion, token language and the language expressing the emotion.",
+    "verified_url": "https://aclanthology.org/N18-4018/",
+    "doi": "10.18653/v1/N18-4018"
+  },
+  {
+    "key": "vaswani2017",
+    "title": "Attention Is All You Need",
+    "authors": [
+      "Ashish Vaswani",
+      "Noam Shazeer",
+      "Niki Parmar",
+      "Jakob Uszkoreit",
+      "Llion Jones",
+      "Aidan N. Gomez",
+      "\u0141ukasz Kaiser",
+      "Illia Polosukhin"
+    ],
+    "year": 2017,
+    "venue": "Advances in Neural Information Processing Systems 30 (NIPS 2017)",
+    "url": "https://papers.nips.cc/paper_files/paper/2017/hash/3f5ee243547dee91fbd053c1c4a845aa-Abstract.html",
+    "note": "Introduces the Transformer architecture using attention in place of recurrence for sequence transduction.",
+    "verified_url": "https://papers.nips.cc/paper_files/paper/2017/hash/3f5ee243547dee91fbd053c1c4a845aa-Abstract.html"
+  },
+  {
+    "key": "pires2019",
+    "title": "How Multilingual is Multilingual BERT?",
+    "authors": [
+      "Telmo Pires",
+      "Eva Schlinger",
+      "Dan Garrette"
+    ],
+    "year": 2019,
+    "venue": "ACL 2019, pp. 4996-5001",
+    "url": "https://aclanthology.org/P19-1493/",
+    "note": "Probes multilingual BERT transfer, including code-switching, and identifies systematic language-pair limitations.",
+    "verified_url": "https://aclanthology.org/P19-1493/",
+    "doi": "10.18653/v1/P19-1493"
+  },
+  {
+    "key": "hu2020",
+    "title": "XTREME: A Massively Multilingual Multi-task Benchmark for Evaluating Cross-lingual Generalisation",
+    "authors": [
+      "Junjie Hu",
+      "Sebastian Ruder",
+      "Aditya Siddhant",
+      "Graham Neubig",
+      "Orhan Firat",
+      "Melvin Johnson"
+    ],
+    "year": 2020,
+    "venue": "ICML 2020, Proceedings of Machine Learning Research 119, pp. 4411-4421",
+    "url": "https://proceedings.mlr.press/v119/hu20b.html",
+    "note": "Evaluates cross-lingual transfer across 40 languages and nine tasks, revealing substantial variation across languages.",
+    "verified_url": "https://proceedings.mlr.press/v119/hu20b.html"
+  },
+  {
+    "key": "khanuja2020",
+    "title": "GLUECoS: An Evaluation Benchmark for Code-Switched NLP",
+    "authors": [
+      "Simran Khanuja",
+      "Sandipan Dandapat",
+      "Anirudh Srinivasan",
+      "Sunayana Sitaram",
+      "Monojit Choudhury"
+    ],
+    "year": 2020,
+    "venue": "ACL 2020, pp. 3575-3585",
+    "url": "https://aclanthology.org/2020.acl-main.329/",
+    "note": "Benchmarks six code-switching tasks and investigates additional adaptation on generated code-switched text.",
+    "verified_url": "https://aclanthology.org/2020.acl-main.329/",
+    "doi": "10.18653/v1/2020.acl-main.329"
+  },
+  {
+    "key": "patwa2020",
+    "title": "SemEval-2020 Task 9: Overview of Sentiment Analysis of Code-Mixed Tweets",
+    "authors": [
+      "Parth Patwa",
+      "Gustavo Aguilar",
+      "Sudipta Kar",
+      "Suraj Pandey",
+      "Srinivas PYKL",
+      "Bj\u00f6rn Gamb\u00e4ck",
+      "Tanmoy Chakraborty",
+      "Thamar Solorio",
+      "Amitava Das"
+    ],
+    "year": 2020,
+    "venue": "Fourteenth Workshop on Semantic Evaluation, pp. 774-790",
+    "url": "https://aclanthology.org/2020.semeval-1.100/",
+    "note": "SentiMix provides Hindi-English and Spanish-English tweets with three sentiment-polarity labels.",
+    "verified_url": "https://aclanthology.org/2020.semeval-1.100/",
+    "doi": "10.18653/v1/2020.semeval-1.100"
+  },
+  {
+    "key": "demszky2020",
+    "title": "GoEmotions: A Dataset of Fine-Grained Emotions",
+    "authors": [
+      "Dorottya Demszky",
+      "Dana Movshovitz-Attias",
+      "Jeongwoo Ko",
+      "Alan Cowen",
+      "Gaurav Nemade",
+      "Sujith Ravi"
+    ],
+    "year": 2020,
+    "venue": "ACL 2020, pp. 4040-4054",
+    "url": "https://aclanthology.org/2020.acl-main.372/",
+    "note": "Provides human annotations for English Reddit comments using 27 emotion categories and neutral.",
+    "verified_url": "https://aclanthology.org/2020.acl-main.372/",
+    "doi": "10.18653/v1/2020.acl-main.372"
+  },
+  {
+    "key": "mohammad2018",
+    "title": "SemEval-2018 Task 1: Affect in Tweets",
+    "authors": [
+      "Saif Mohammad",
+      "Felipe Bravo-Marquez",
+      "Mohammad Salameh",
+      "Svetlana Kiritchenko"
+    ],
+    "year": 2018,
+    "venue": "12th International Workshop on Semantic Evaluation, pp. 1-17",
+    "url": "https://aclanthology.org/S18-1001/",
+    "note": "Separates emotion classification and intensity from valence subtasks across English, Arabic and Spanish.",
+    "verified_url": "https://aclanthology.org/S18-1001/",
+    "doi": "10.18653/v1/S18-1001"
+  },
+  {
+    "key": "felbo2017",
+    "title": "Using millions of emoji occurrences to learn any-domain representations for detecting sentiment, emotion and sarcasm",
+    "authors": [
+      "Bjarke Felbo",
+      "Alan Mislove",
+      "Anders S\u00f8gaard",
+      "Iyad Rahwan",
+      "Sune Lehmann"
+    ],
+    "year": 2017,
+    "venue": "EMNLP 2017, pp. 1615-1625",
+    "url": "https://aclanthology.org/D17-1169/",
+    "note": "Uses emoji prediction as distant supervision to learn transferable affective representations.",
+    "verified_url": "https://aclanthology.org/D17-1169/",
+    "doi": "10.18653/v1/D17-1169"
+  },
+  {
+    "key": "kraljnovak2015",
+    "title": "Sentiment of Emojis",
+    "authors": [
+      "Petra Kralj Novak",
+      "Jasmina Smailovi\u0107",
+      "Borut Sluban",
+      "Igor Mozeti\u010d"
+    ],
+    "year": 2015,
+    "venue": "PLOS ONE 10(12), article e0144296",
+    "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0144296",
+    "note": "Constructs an emoji sentiment lexicon from sentiment-annotated tweets across 13 European languages.",
+    "verified_url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0144296",
+    "doi": "10.1371/journal.pone.0144296"
+  },
+  {
+    "key": "barbieri2018",
+    "title": "SemEval 2018 Task 2: Multilingual Emoji Prediction",
+    "authors": [
+      "Francesco Barbieri",
+      "Jose Camacho-Collados",
+      "Francesco Ronzano",
+      "Luis Espinosa-Anke",
+      "Miguel Ballesteros",
+      "Valerio Basile",
+      "Viviana Patti",
+      "Horacio Saggion"
+    ],
+    "year": 2018,
+    "venue": "12th International Workshop on Semantic Evaluation, pp. 24-33",
+    "url": "https://aclanthology.org/S18-1003/",
+    "note": "Benchmarks emoji prediction from English and Spanish tweet text using macro F-score.",
+    "verified_url": "https://aclanthology.org/S18-1003/",
+    "doi": "10.18653/v1/S18-1003"
+  },
+  {
+    "key": "vanhee2018",
+    "title": "SemEval-2018 Task 3: Irony Detection in English Tweets",
+    "authors": [
+      "Cynthia Van Hee",
+      "Els Lefever",
+      "V\u00e9ronique Hoste"
+    ],
+    "year": 2018,
+    "venue": "12th International Workshop on Semantic Evaluation, pp. 39-50",
+    "url": "https://aclanthology.org/S18-1005/",
+    "note": "Defines binary and fine-grained irony tasks with manually annotated tweets and removed collection hashtags.",
+    "verified_url": "https://aclanthology.org/S18-1005/",
+    "doi": "10.18653/v1/S18-1005"
+  },
+  {
+    "key": "aggarwal2020",
+    "title": "\u201cDid you really mean what you said?\u201d : Sarcasm Detection in Hindi-English Code-Mixed Data using Bilingual Word Embeddings",
+    "authors": [
+      "Akshita Aggarwal",
+      "Anshul Wadhawan",
+      "Anshima Chaudhary",
+      "Kavita Maurya"
+    ],
+    "year": 2020,
+    "venue": "Sixth Workshop on Noisy User-generated Text (W-NUT 2020), pp. 7-15",
+    "url": "https://aclanthology.org/2020.wnut-1.2/",
+    "note": "Provides a labelled Hinglish sarcasm dataset and evaluates neural approaches using bilingual embeddings.",
+    "verified_url": "https://aclanthology.org/2020.wnut-1.2/",
+    "doi": "10.18653/v1/2020.wnut-1.2"
+  },
+  {
+    "key": "ghosh2018",
+    "title": "Sarcasm Analysis Using Conversation Context",
+    "authors": [
+      "Debanjan Ghosh",
+      "Alexander R. Fabbri",
+      "Smaranda Muresan"
+    ],
+    "year": 2018,
+    "venue": "Computational Linguistics 44(4), pp. 755-792",
+    "url": "https://aclanthology.org/J18-4009/",
+    "note": "Compares contextual and current-turn sarcasm models on Twitter and discussion-forum data.",
+    "verified_url": "https://aclanthology.org/J18-4009/",
+    "doi": "10.1162/coli_a_00336"
+  },
+  {
+    "key": "poria2019",
+    "title": "MELD: A Multimodal Multi-Party Dataset for Emotion Recognition in Conversations",
+    "authors": [
+      "Soujanya Poria",
+      "Devamanyu Hazarika",
+      "Navonil Majumder",
+      "Gautam Naik",
+      "Erik Cambria",
+      "Rada Mihalcea"
+    ],
+    "year": 2019,
+    "venue": "ACL 2019, pp. 527-536",
+    "url": "https://aclanthology.org/P19-1050/",
+    "note": "Provides multi-party dialogue emotion annotations and evaluates contextual and multimodal baselines.",
+    "verified_url": "https://aclanthology.org/P19-1050/",
+    "doi": "10.18653/v1/P19-1050"
+  },
+  {
+    "key": "kumar2024",
+    "title": "SemEval 2024 - Task 10: Emotion Discovery and Reasoning its Flip in Conversation (EDiReF)",
+    "authors": [
+      "Shivani Kumar",
+      "Md. Shad Akhtar",
+      "Erik Cambria",
+      "Tanmoy Chakraborty"
+    ],
+    "year": 2024,
+    "venue": "18th International Workshop on Semantic Evaluation (SemEval-2024), pp. 1933-1946",
+    "url": "https://aclanthology.org/2024.semeval-1.270/",
+    "note": "Defines emotion recognition and emotion-flip reasoning using manually annotated English and Hindi-English conversations.",
+    "verified_url": "https://aclanthology.org/2024.semeval-1.270/",
+    "doi": "10.18653/v1/2024.semeval-1.270"
+  },
+  {
+    "key": "guo2017",
+    "title": "On Calibration of Modern Neural Networks",
+    "authors": [
+      "Chuan Guo",
+      "Geoff Pleiss",
+      "Yu Sun",
+      "Kilian Q. Weinberger"
+    ],
+    "year": 2017,
+    "venue": "ICML 2017, Proceedings of Machine Learning Research 70, pp. 1321-1330",
+    "url": "https://proceedings.mlr.press/v70/guo17a.html",
+    "note": "Studies neural-network miscalibration and temperature scaling as a post-processing calibration method.",
+    "verified_url": "https://proceedings.mlr.press/v70/guo17a.html"
+  },
+  {
+    "key": "ovadia2019",
+    "title": "Can you trust your model's uncertainty? Evaluating predictive uncertainty under dataset shift",
+    "authors": [
+      "Yaniv Ovadia",
+      "Emily Fertig",
+      "Jie Ren",
+      "Zachary Nado",
+      "D. Sculley",
+      "Sebastian Nowozin",
+      "Joshua V. Dillon",
+      "Balaji Lakshminarayanan",
+      "Jasper Snoek"
+    ],
+    "year": 2019,
+    "venue": "Advances in Neural Information Processing Systems 32 (NeurIPS 2019)",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2019/hash/8558cb408c1d76621371888657d2eb1d-Abstract.html",
+    "note": "Shows that calibration and uncertainty quality can deteriorate under dataset shift.",
+    "verified_url": "https://proceedings.neurips.cc/paper_files/paper/2019/hash/8558cb408c1d76621371888657d2eb1d-Abstract.html"
+  },
+  {
+    "key": "lakshminarayanan2017",
+    "title": "Simple and Scalable Predictive Uncertainty Estimation using Deep Ensembles",
+    "authors": [
+      "Balaji Lakshminarayanan",
+      "Alexander Pritzel",
+      "Charles Blundell"
+    ],
+    "year": 2017,
+    "venue": "Advances in Neural Information Processing Systems 30 (NIPS 2017)",
+    "url": "https://papers.nips.cc/paper_files/paper/2017/hash/9ef2ed4b7fd2c810847ffa5fa85bce38-Abstract.html",
+    "note": "Evaluates ensembles of neural predictors for predictive uncertainty and out-of-distribution behavior.",
+    "verified_url": "https://papers.nips.cc/paper_files/paper/2017/hash/9ef2ed4b7fd2c810847ffa5fa85bce38-Abstract.html"
+  },
+  {
+    "key": "lin1991",
+    "title": "Divergence measures based on the Shannon entropy",
+    "authors": [
+      "J. Lin"
+    ],
+    "year": 1991,
+    "venue": "IEEE Transactions on Information Theory 37(1), pp. 145-151",
+    "url": "https://ieeexplore.ieee.org/abstract/document/61115/authors",
+    "note": "Introduces Shannon-entropy-based divergence measures, including the Jensen-Shannon construction.",
+    "verified_url": "https://ieeexplore.ieee.org/abstract/document/61115/authors",
+    "doi": "10.1109/18.61115"
+  },
+  {
+    "key": "geifman2017",
+    "title": "Selective Classification for Deep Neural Networks",
+    "authors": [
+      "Yonatan Geifman",
+      "Ran El-Yaniv"
+    ],
+    "year": 2017,
+    "venue": "Advances in Neural Information Processing Systems 30 (NIPS 2017)",
+    "url": "https://papers.nips.cc/paper_files/paper/2017/hash/4a8423d5e91fda00bb7e46540e2b0cf1-Abstract.html",
+    "note": "Studies selective prediction and the trade-off between accepted-instance coverage and classification risk.",
+    "verified_url": "https://papers.nips.cc/paper_files/paper/2017/hash/4a8423d5e91fda00bb7e46540e2b0cf1-Abstract.html"
+  },
+  {
+    "key": "davani2022",
+    "title": "Dealing with Disagreements: Looking Beyond the Majority Vote in Subjective Annotations",
+    "authors": [
+      "Aida Mostafazadeh Davani",
+      "Mark D\u00edaz",
+      "Vinodkumar Prabhakaran"
+    ],
+    "year": 2022,
+    "venue": "Transactions of the Association for Computational Linguistics 10, pp. 92-110",
+    "url": "https://aclanthology.org/2022.tacl-1.6/",
+    "note": "Models individual annotators and shows that preserving disagreement can improve modeling of subjective judgments.",
+    "verified_url": "https://aclanthology.org/2022.tacl-1.6/",
+    "doi": "10.1162/tacl_a_00449"
+  },
+  {
+    "key": "plank2022",
+    "title": "The \u201cProblem\u201d of Human Label Variation: On Ground Truth in Data, Modeling and Evaluation",
+    "authors": [
+      "Barbara Plank"
+    ],
+    "year": 2022,
+    "venue": "EMNLP 2022, pp. 10671-10682",
+    "url": "https://aclanthology.org/2022.emnlp-main.731/",
+    "note": "Distinguishes meaningful human label variation from annotation mistakes and discusses implications for evaluation.",
+    "verified_url": "https://aclanthology.org/2022.emnlp-main.731/",
+    "doi": "10.18653/v1/2022.emnlp-main.731"
+  },
+  {
+    "key": "gebru2021",
+    "title": "Datasheets for Datasets",
+    "authors": [
+      "Timnit Gebru",
+      "Jamie Morgenstern",
+      "Briana Vecchione",
+      "Jennifer Wortman Vaughan",
+      "Hanna Wallach",
+      "Hal Daum\u00e9 III",
+      "Kate Crawford"
+    ],
+    "year": 2021,
+    "venue": "Communications of the ACM, December 2021; author manuscript arXiv:1803.09010v8",
+    "url": "https://arxiv.org/abs/1803.09010",
+    "note": "Proposes systematic documentation of dataset motivation, composition, collection, uses and maintenance.",
+    "verified_url": "https://arxiv.org/abs/1803.09010"
+  },
+  {
+    "key": "bender2018",
+    "title": "Data Statements for Natural Language Processing: Toward Mitigating System Bias and Enabling Better Science",
+    "authors": [
+      "Emily M. Bender",
+      "Batya Friedman"
+    ],
+    "year": 2018,
+    "venue": "Transactions of the Association for Computational Linguistics 6, pp. 587-604",
+    "url": "https://aclanthology.org/Q18-1041/",
+    "note": "Argues that dataset language and population documentation improves the precision of generalization claims.",
+    "verified_url": "https://aclanthology.org/Q18-1041/",
+    "doi": "10.1162/tacl_a_00041"
+  },
+  {
+    "key": "ribeiro2020",
+    "title": "Beyond Accuracy: Behavioral Testing of NLP Models with CheckList",
+    "authors": [
+      "Marco Tulio Ribeiro",
+      "Tongshuang Wu",
+      "Carlos Guestrin",
+      "Sameer Singh"
+    ],
+    "year": 2020,
+    "venue": "ACL 2020, pp. 4902-4912",
+    "url": "https://aclanthology.org/2020.acl-main.442/",
+    "note": "Introduces capability-oriented behavioral tests that reveal failures hidden by aggregate held-out accuracy.",
+    "verified_url": "https://aclanthology.org/2020.acl-main.442/",
+    "doi": "10.18653/v1/2020.acl-main.442"
+  },
+  {
+    "key": "dror2018",
+    "title": "The Hitchhiker\u2019s Guide to Testing Statistical Significance in Natural Language Processing",
+    "authors": [
+      "Rotem Dror",
+      "Gili Baumer",
+      "Segev Shlomov",
+      "Roi Reichart"
+    ],
+    "year": 2018,
+    "venue": "ACL 2018, Volume 1: Long Papers, pp. 1383-1392",
+    "url": "https://aclanthology.org/P18-1128/",
+    "note": "Explains how task, evaluation measure and experimental design determine appropriate significance tests.",
+    "verified_url": "https://aclanthology.org/P18-1128/",
+    "doi": "10.18653/v1/P18-1128"
+  }
+]

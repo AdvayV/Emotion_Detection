@@ -1,0 +1,32 @@
+﻿reference,key,title,year,venue,url
+1,devlin2019,BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding,2019,"NAACL-HLT 2019, Volume 1, pp. 4171-4186",https://aclanthology.org/N19-1423/
+2,conneau2020,Unsupervised Cross-lingual Representation Learning at Scale,2020,"ACL 2020, pp. 8440-8451",https://aclanthology.org/2020.acl-main.747/
+3,khanuja2021,MuRIL: Multilingual Representations for Indian Languages,2021,arXiv preprint arXiv:2103.10730,https://arxiv.org/abs/2103.10730
+4,aguilar2020,LinCE: A Centralized Benchmark for Linguistic Code-switching Evaluation,2020,"Twelfth Language Resources and Evaluation Conference (LREC 2020), pp. 1803-1813",https://aclanthology.org/2020.lrec-1.223/
+5,vijay2018,Corpus Creation and Emotion Prediction for Hindi-English Code-Mixed Social Media Text,2018,"NAACL-HLT 2018: Student Research Workshop, pp. 128-135",https://aclanthology.org/N18-4018/
+6,vaswani2017,Attention Is All You Need,2017,Advances in Neural Information Processing Systems 30 (NIPS 2017),https://papers.nips.cc/paper_files/paper/2017/hash/3f5ee243547dee91fbd053c1c4a845aa-Abstract.html
+7,pires2019,How Multilingual is Multilingual BERT?,2019,"ACL 2019, pp. 4996-5001",https://aclanthology.org/P19-1493/
+8,hu2020,XTREME: A Massively Multilingual Multi-task Benchmark for Evaluating Cross-lingual Generalisation,2020,"ICML 2020, Proceedings of Machine Learning Research 119, pp. 4411-4421",https://proceedings.mlr.press/v119/hu20b.html
+9,khanuja2020,GLUECoS: An Evaluation Benchmark for Code-Switched NLP,2020,"ACL 2020, pp. 3575-3585",https://aclanthology.org/2020.acl-main.329/
+10,patwa2020,SemEval-2020 Task 9: Overview of Sentiment Analysis of Code-Mixed Tweets,2020,"Fourteenth Workshop on Semantic Evaluation, pp. 774-790",https://aclanthology.org/2020.semeval-1.100/
+11,demszky2020,GoEmotions: A Dataset of Fine-Grained Emotions,2020,"ACL 2020, pp. 4040-4054",https://aclanthology.org/2020.acl-main.372/
+12,mohammad2018,SemEval-2018 Task 1: Affect in Tweets,2018,"12th International Workshop on Semantic Evaluation, pp. 1-17",https://aclanthology.org/S18-1001/
+13,felbo2017,"Using millions of emoji occurrences to learn any-domain representations for detecting sentiment, emotion and sarcasm",2017,"EMNLP 2017, pp. 1615-1625",https://aclanthology.org/D17-1169/
+14,kraljnovak2015,Sentiment of Emojis,2015,"PLOS ONE 10(12), article e0144296",https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0144296
+15,barbieri2018,SemEval 2018 Task 2: Multilingual Emoji Prediction,2018,"12th International Workshop on Semantic Evaluation, pp. 24-33",https://aclanthology.org/S18-1003/
+16,vanhee2018,SemEval-2018 Task 3: Irony Detection in English Tweets,2018,"12th International Workshop on Semantic Evaluation, pp. 39-50",https://aclanthology.org/S18-1005/
+17,aggarwal2020,“Did you really mean what you said?” : Sarcasm Detection in Hindi-English Code-Mixed Data using Bilingual Word Embeddings,2020,"Sixth Workshop on Noisy User-generated Text (W-NUT 2020), pp. 7-15",https://aclanthology.org/2020.wnut-1.2/
+18,ghosh2018,Sarcasm Analysis Using Conversation Context,2018,"Computational Linguistics 44(4), pp. 755-792",https://aclanthology.org/J18-4009/
+19,poria2019,MELD: A Multimodal Multi-Party Dataset for Emotion Recognition in Conversations,2019,"ACL 2019, pp. 527-536",https://aclanthology.org/P19-1050/
+20,kumar2024,SemEval 2024 - Task 10: Emotion Discovery and Reasoning its Flip in Conversation (EDiReF),2024,"18th International Workshop on Semantic Evaluation (SemEval-2024), pp. 1933-1946",https://aclanthology.org/2024.semeval-1.270/
+21,guo2017,On Calibration of Modern Neural Networks,2017,"ICML 2017, Proceedings of Machine Learning Research 70, pp. 1321-1330",https://proceedings.mlr.press/v70/guo17a.html
+22,ovadia2019,Can you trust your model's uncertainty? Evaluating predictive uncertainty under dataset shift,2019,Advances in Neural Information Processing Systems 32 (NeurIPS 2019),https://proceedings.neurips.cc/paper_files/paper/2019/hash/8558cb408c1d76621371888657d2eb1d-Abstract.html
+23,lakshminarayanan2017,Simple and Scalable Predictive Uncertainty Estimation using Deep Ensembles,2017,Advances in Neural Information Processing Systems 30 (NIPS 2017),https://papers.nips.cc/paper_files/paper/2017/hash/9ef2ed4b7fd2c810847ffa5fa85bce38-Abstract.html
+24,lin1991,Divergence measures based on the Shannon entropy,1991,"IEEE Transactions on Information Theory 37(1), pp. 145-151",https://ieeexplore.ieee.org/abstract/document/61115/authors
+25,geifman2017,Selective Classification for Deep Neural Networks,2017,Advances in Neural Information Processing Systems 30 (NIPS 2017),https://papers.nips.cc/paper_files/paper/2017/hash/4a8423d5e91fda00bb7e46540e2b0cf1-Abstract.html
+26,davani2022,Dealing with Disagreements: Looking Beyond the Majority Vote in Subjective Annotations,2022,"Transactions of the Association for Computational Linguistics 10, pp. 92-110",https://aclanthology.org/2022.tacl-1.6/
+27,plank2022,"The “Problem” of Human Label Variation: On Ground Truth in Data, Modeling and Evaluation",2022,"EMNLP 2022, pp. 10671-10682",https://aclanthology.org/2022.emnlp-main.731/
+28,gebru2021,Datasheets for Datasets,2021,"Communications of the ACM, December 2021; author manuscript arXiv:1803.09010v8",https://arxiv.org/abs/1803.09010
+29,bender2018,Data Statements for Natural Language Processing: Toward Mitigating System Bias and Enabling Better Science,2018,"Transactions of the Association for Computational Linguistics 6, pp. 587-604",https://aclanthology.org/Q18-1041/
+30,ribeiro2020,Beyond Accuracy: Behavioral Testing of NLP Models with CheckList,2020,"ACL 2020, pp. 4902-4912",https://aclanthology.org/2020.acl-main.442/
+31,dror2018,The Hitchhiker’s Guide to Testing Statistical Significance in Natural Language Processing,2018,"ACL 2018, Volume 1: Long Papers, pp. 1383-1392",https://aclanthology.org/P18-1128/

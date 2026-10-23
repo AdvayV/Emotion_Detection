@@ -15,6 +15,12 @@ available separately. The current training handoff covers all three encoders and
 See the [23 October review report](outputs/23OctReview%20AdvayV%20KaavishG%20CD.docx)
 for the system map, saved synthetic results and evidence limits.
 
+The [IEEE manuscript](outputs/23OctReview%20AdvayV%20KaavishG%20CD%20IEEE.docx)
+and [editable Overleaf project](outputs/23OctReview%20AdvayV%20KaavishG%20CD%20Overleaf.zip)
+include 31 verified references, a 20-paper implementation comparison, four module
+algorithms and the seven-emotion checkpoint specification. See
+[manuscript sources and editing instructions](docs/ieee_manuscript/README.md).
+
 ## Find the datasets and Colab files
 
 Start with [the dataset guide](data/README.md). The current combined-language

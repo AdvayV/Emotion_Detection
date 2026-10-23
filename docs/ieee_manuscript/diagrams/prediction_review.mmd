@@ -1,0 +1,14 @@
+flowchart TB
+  subgraph PRED[" "]
+    direction LR
+    IN["Text, task and language"] --> CHECK["Validate task and checkpoint"] --> MODEL["Local compatible model"] --> BASE["Base label and scores"]
+  end
+  subgraph REVIEW[" "]
+    direction LR
+    DIAG["Cue and truncation flags"] --> VIEW["Analyst view with source and scope"]
+    SCALE["Optional temperature scaling; class unchanged"] --> VIEW
+    QWEN["Optional local Qwen suggestion; separate"] --> VIEW
+  end
+  BASE --> DIAG
+  BASE --> SCALE
+  BASE --> QWEN

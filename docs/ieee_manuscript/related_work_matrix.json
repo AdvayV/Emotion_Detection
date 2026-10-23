@@ -1,0 +1,142 @@
+[
+  {
+    "key": "vaswani2017",
+    "prior_contribution": "Introduced attention-based Transformer sequence modeling.",
+    "our_extension": "Reuses Transformer encoders in local emotion inference with recorded checkpoint and preprocessing identity; introduces no new attention theory.",
+    "evidence_path": "hinglish_emotion/emotions.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "devlin2019",
+    "prior_contribution": "Established bidirectional pretraining followed by supervised task fine-tuning.",
+    "our_extension": "Adapts pretrained encoders to seven emotion labels with frozen partitions and recorded training/evaluation provenance.",
+    "evidence_path": "training/train_transformer.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "pires2019",
+    "prior_contribution": "Demonstrated multilingual BERT transfer and documented limitations across languages and settings.",
+    "our_extension": "Adds language-compatible checkpoint discovery and separates declared training coverage from verified evaluation coverage.",
+    "evidence_path": "hinglish_emotion/checkpoints.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "conneau2020",
+    "prior_contribution": "Introduced XLM-R and analyzed multilingual pretraining scale and capacity trade-offs.",
+    "our_extension": "Packages XLM-R fine-tuning on declared Hindi-English and French-English partitions while preserving the source-data and split contract.",
+    "evidence_path": "training/package_multilingual.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "khanuja2021",
+    "prior_contribution": "Designed MuRIL for Indian-language representations, including transliteration-related supervision.",
+    "our_extension": "Routes MuRIL only to Hindi-English and declines French-English emotion-checkpoint selection, preserving the supported language scope.",
+    "evidence_path": "hinglish_emotion/checkpoints.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "khanuja2020",
+    "prior_contribution": "Benchmarked code-switched NLP and investigated adaptation using generated code-switched data.",
+    "our_extension": "Adds explicit synthetic-data opt-in, dataset hashes, frozen split manifests and grouping checks to generated-data training.",
+    "evidence_path": "training/data_workflow.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "vijay2018",
+    "prior_contribution": "Created Hindi-English emotion data with linguistic annotations of emotional expression.",
+    "our_extension": "Carries language-pair identity and an explicit seven-emotion schema into validation and evaluation without inventing missing corpus labels.",
+    "evidence_path": "hinglish_emotion/emotion_data.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "felbo2017",
+    "prior_contribution": "Used emoji prediction as distant supervision for transferable affective representations.",
+    "our_extension": "Implements an optional learned text-emoji gate with sequence embeddings and an exact zero contribution when emoji are absent; its accuracy contribution is unevaluated.",
+    "evidence_path": "hinglish_emotion/fusion.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "barbieri2018",
+    "prior_contribution": "Defined a multilingual emoji prediction benchmark using English and Spanish tweets.",
+    "our_extension": "Adds paired emoji-removal diagnostics and explicit variant-label or invariance requirements before scoring changed inputs.",
+    "evidence_path": "hinglish_emotion/experiments.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "vanhee2018",
+    "prior_contribution": "Defined annotated binary and fine-grained irony detection tasks.",
+    "our_extension": "Separates auxiliary sarcasm supervision from emotion, masks unknown labels and prevents output from an untrained sarcasm head.",
+    "evidence_path": "hinglish_emotion/fusion.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "ghosh2018",
+    "prior_contribution": "Compared context-aware and isolated-utterance sarcasm analysis.",
+    "our_extension": "Implements bounded context encoding with current-message token priority and context-trained checkpoint capability checks.",
+    "evidence_path": "hinglish_emotion/fusion.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "kumar2024",
+    "prior_contribution": "Defined conversational emotion recognition and emotion-flip reasoning for Hindi-English and English dialogues.",
+    "our_extension": "Adds bounded prior-turn context and speaker-specific predicted-emotion change traces, without representing label changes as causal flip explanations.",
+    "evidence_path": "hinglish_emotion/conversation_lab.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "guo2017",
+    "prior_contribution": "Studied neural miscalibration and temperature scaling.",
+    "our_extension": "Adds validation/calibration-only fitting, checkpoint-bound profile validation, guarded overlap rejection and preserved class predictions.",
+    "evidence_path": "training/calibrate.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "ovadia2019",
+    "prior_contribution": "Showed uncertainty degradation under dataset shift.",
+    "our_extension": "Records calibration data scope and synthetic status and prevents application to a mismatched checkpoint; does not claim distribution-shift robustness.",
+    "evidence_path": "hinglish_emotion/calibration.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "lakshminarayanan2017",
+    "prior_contribution": "Evaluated predictive uncertainty from deep ensembles.",
+    "our_extension": "Provides sequential heterogeneous-checkpoint comparison for resource-constrained inspection, retaining each model distribution rather than claiming ensemble-calibration equivalence.",
+    "evidence_path": "hinglish_emotion/disagreement.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "lin1991",
+    "prior_contribution": "Introduced Shannon-entropy-based divergences including Jensen-Shannon divergence.",
+    "our_extension": "Applies base-2 Jensen-Shannon divergence and square-root distance to aligned seven-emotion checkpoint distributions.",
+    "evidence_path": "hinglish_emotion/disagreement.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "geifman2017",
+    "prior_contribution": "Formalized selective neural classification with a risk-coverage trade-off.",
+    "our_extension": "Provides inspectable reasons for selective review routing; configured thresholds remain operational heuristics without certified risk bounds.",
+    "evidence_path": "hinglish_emotion/routing.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "davani2022",
+    "prior_contribution": "Preserved individual subjective judgments through multi-annotator modeling.",
+    "our_extension": "Creates two blinded review sheets, keeps model suggestions separate, preserves reviewer information and requires reconciliation before correction export.",
+    "evidence_path": "training/review_workflow.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "gebru2021",
+    "prior_contribution": "Proposed systematic documentation of dataset creation, composition and use.",
+    "our_extension": "Creates audited correction exports that retain source and synthetic provenance, add accepted corrections to training only and protect frozen evaluation rows.",
+    "evidence_path": "training/review_workflow.py",
+    "comparison_kind": "implementation"
+  },
+  {
+    "key": "ribeiro2020",
+    "prior_contribution": "Introduced capability-oriented behavioral evaluation with CheckList.",
+    "our_extension": "Adds paired raw, normalized, emoji-removed and contextual input variants with row-level records, overlap checks and explicit label-validity rules.",
+    "evidence_path": "hinglish_emotion/experiments.py",
+    "comparison_kind": "implementation"
+  }
+]

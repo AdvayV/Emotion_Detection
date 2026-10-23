@@ -1,0 +1,21 @@
+flowchart TB
+  subgraph INPUTS[" "]
+    direction LR
+    DATA["Versioned data"] --> SPLIT["Frozen group splits"] --> GPU["Colab / Kaggle GPU"]
+  end
+  subgraph MODEL[" "]
+    direction LR
+    SELECT["Validation selects"] --> TEST["Frozen test metrics"] --> EXPORT["Export checkpoint"]
+  end
+  subgraph HUMAN[" "]
+    direction LR
+    COMPARE["Compare or queue"] --> SHEETS["Two blind reviewers"] --> DECIDE{"Labels agree?"}
+    DECIDE -->|Yes| AUDIT["Audit source and hashes"]
+    DECIDE -->|No| ADJ["Adjudicator notes"] --> AUDIT
+  end
+  subgraph ROLE[" "]
+    direction LR
+    CHECK["Train or evaluation?"] -->|Train| MERGE["Train-only corrections for next version"]
+    CHECK -->|Evaluation| HOLD["Remain test-only"]
+  end
+  INPUTS --> MODEL --> HUMAN --> ROLE

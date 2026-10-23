@@ -1,0 +1,761 @@
+{
+  "schema_version": 1,
+  "evidence_snapshot": "2026-10-23",
+  "study_status": "reanalysis_of_saved_runs_no_new_training",
+  "task": "seven-class emotion classification",
+  "classes": [
+    "joy",
+    "sadness",
+    "anger",
+    "fear",
+    "surprise",
+    "disgust",
+    "neutral"
+  ],
+  "primary_evidence_scope": "synthetic-only held-out test metrics; not independently human-labelled evaluation",
+  "models": {
+    "xlmr": {
+      "name": "XLM-R",
+      "base_model": "FacebookAI/xlm-roberta-base",
+      "metric_source": "models/xlmr_multilingual_emotion/metrics.json",
+      "hyperparameters_source": "models/xlmr_multilingual_emotion/metrics.json",
+      "checkpoint_metadata_source": "models/xlmr_multilingual_emotion/emotion_metadata.json",
+      "evaluation_scope": "synthetic_only",
+      "training_data_kind": "synthetic_only",
+      "dataset_sha256": "83430dd59167b6402cc2945f94f701e19eb5886c6ee7d3602227ad73d0159db0",
+      "split_sha256": "7b4c6c953d0ae6402250f82e94ebeabbb05605ddad9c2567a15e800414f5fd72",
+      "labels": [
+        "joy",
+        "sadness",
+        "anger",
+        "fear",
+        "surprise",
+        "disgust",
+        "neutral"
+      ],
+      "split_sizes": {
+        "train": 16000,
+        "validation": 2000,
+        "test": 2000
+      },
+      "hyperparameters": {
+        "seed": 42,
+        "split_seed": 42,
+        "batch_size": 2,
+        "gradient_accumulation": 8,
+        "learning_rate": 2e-05,
+        "class_weights": "balanced",
+        "freeze_encoder": false,
+        "precision": "fp16",
+        "patience": 2,
+        "allow_synthetic": true,
+        "device": "cuda",
+        "training_mode": "full_fine_tuning",
+        "max_length": 128,
+        "text_mode": "raw",
+        "preparation_version": 1,
+        "epochs_completed": 3
+      },
+      "test_overall": {
+        "rows": 2000,
+        "accuracy": 0.925,
+        "macro_f1": 0.9250594211769335,
+        "per_class": {
+          "joy": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 286
+          },
+          "sadness": {
+            "precision": 0.8984962406015038,
+            "recall": 0.8356643356643356,
+            "f1": 0.8659420289855072,
+            "support": 286
+          },
+          "anger": {
+            "precision": 1.0,
+            "recall": 0.8111888111888111,
+            "f1": 0.8957528957528956,
+            "support": 286
+          },
+          "fear": {
+            "precision": 0.7922437673130194,
+            "recall": 1.0,
+            "f1": 0.884080370942813,
+            "support": 286
+          },
+          "surprise": {
+            "precision": 0.8825622775800712,
+            "recall": 0.8671328671328671,
+            "f1": 0.8747795414462081,
+            "support": 286
+          },
+          "disgust": {
+            "precision": 0.9482758620689655,
+            "recall": 0.9615384615384616,
+            "f1": 0.9548611111111112,
+            "support": 286
+          },
+          "neutral": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 284
+          }
+        }
+      },
+      "test_by_language": {
+        "fr-en": {
+          "rows": 1000,
+          "accuracy": 0.894,
+          "macro_f1": 0.8937038364192301,
+          "per_class": {
+            "joy": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 143
+            },
+            "sadness": {
+              "precision": 0.8208955223880597,
+              "recall": 0.7692307692307693,
+              "f1": 0.7942238267148015,
+              "support": 143
+            },
+            "anger": {
+              "precision": 1.0,
+              "recall": 0.7552447552447552,
+              "f1": 0.8605577689243028,
+              "support": 143
+            },
+            "fear": {
+              "precision": 0.7009803921568627,
+              "recall": 1.0,
+              "f1": 0.824207492795389,
+              "support": 143
+            },
+            "surprise": {
+              "precision": 0.9459459459459459,
+              "recall": 0.7342657342657343,
+              "f1": 0.8267716535433071,
+              "support": 143
+            },
+            "disgust": {
+              "precision": 0.9050632911392406,
+              "recall": 1.0,
+              "f1": 0.9501661129568107,
+              "support": 143
+            },
+            "neutral": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 142
+            }
+          }
+        },
+        "hi-en": {
+          "rows": 1000,
+          "accuracy": 0.956,
+          "macro_f1": 0.9562988745707631,
+          "per_class": {
+            "joy": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 143
+            },
+            "sadness": {
+              "precision": 0.9772727272727273,
+              "recall": 0.9020979020979021,
+              "f1": 0.9381818181818181,
+              "support": 143
+            },
+            "anger": {
+              "precision": 1.0,
+              "recall": 0.8671328671328671,
+              "f1": 0.9288389513108614,
+              "support": 143
+            },
+            "fear": {
+              "precision": 0.910828025477707,
+              "recall": 1.0,
+              "f1": 0.9533333333333334,
+              "support": 143
+            },
+            "surprise": {
+              "precision": 0.8411764705882353,
+              "recall": 1.0,
+              "f1": 0.9137380191693291,
+              "support": 143
+            },
+            "disgust": {
+              "precision": 1.0,
+              "recall": 0.9230769230769231,
+              "f1": 0.9600000000000001,
+              "support": 143
+            },
+            "neutral": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 142
+            }
+          }
+        }
+      },
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.15166889538257602,
+          "validation_macro_f1": 0.9665953306589531
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.0002976660405402072,
+          "validation_macro_f1": 0.9639886634764893
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.00011797486576188022,
+          "validation_macro_f1": 0.9520315680765548
+        }
+      ],
+      "best_epoch": {
+        "epoch": 1,
+        "validation_macro_f1": 0.9665953306589531
+      }
+    },
+    "mbert": {
+      "name": "mBERT",
+      "base_model": "google-bert/bert-base-multilingual-cased",
+      "metric_source": "models/mbert_multilingual_emotion/metrics.json",
+      "hyperparameters_source": "models/mbert_multilingual_emotion/metrics.json",
+      "checkpoint_metadata_source": "models/mbert_multilingual_emotion/emotion_metadata.json",
+      "evaluation_scope": "synthetic_only",
+      "training_data_kind": "synthetic_only",
+      "dataset_sha256": "83430dd59167b6402cc2945f94f701e19eb5886c6ee7d3602227ad73d0159db0",
+      "split_sha256": "7b4c6c953d0ae6402250f82e94ebeabbb05605ddad9c2567a15e800414f5fd72",
+      "labels": [
+        "joy",
+        "sadness",
+        "anger",
+        "fear",
+        "surprise",
+        "disgust",
+        "neutral"
+      ],
+      "split_sizes": {
+        "train": 16000,
+        "validation": 2000,
+        "test": 2000
+      },
+      "hyperparameters": {
+        "seed": 42,
+        "split_seed": 42,
+        "batch_size": 2,
+        "gradient_accumulation": 8,
+        "learning_rate": 2e-05,
+        "class_weights": "balanced",
+        "freeze_encoder": false,
+        "precision": "fp16",
+        "patience": 2,
+        "allow_synthetic": true,
+        "device": "cuda",
+        "training_mode": "full_fine_tuning",
+        "max_length": 128,
+        "text_mode": "raw",
+        "preparation_version": 1,
+        "epochs_completed": 3
+      },
+      "test_overall": {
+        "rows": 2000,
+        "accuracy": 0.814,
+        "macro_f1": 0.8119204373299015,
+        "per_class": {
+          "joy": {
+            "precision": 0.9872881355932204,
+            "recall": 0.8146853146853147,
+            "f1": 0.8927203065134098,
+            "support": 286
+          },
+          "sadness": {
+            "precision": 0.7164750957854407,
+            "recall": 0.6538461538461539,
+            "f1": 0.6837294332723949,
+            "support": 286
+          },
+          "anger": {
+            "precision": 0.8237547892720306,
+            "recall": 0.7517482517482518,
+            "f1": 0.7861060329067642,
+            "support": 286
+          },
+          "fear": {
+            "precision": 0.7045454545454546,
+            "recall": 0.8671328671328671,
+            "f1": 0.7774294670846396,
+            "support": 286
+          },
+          "surprise": {
+            "precision": 0.8737864077669902,
+            "recall": 0.6293706293706294,
+            "f1": 0.7317073170731707,
+            "support": 286
+          },
+          "disgust": {
+            "precision": 0.7312661498708011,
+            "recall": 0.9895104895104895,
+            "f1": 0.8410104011887073,
+            "support": 286
+          },
+          "neutral": {
+            "precision": 0.9494949494949495,
+            "recall": 0.9929577464788732,
+            "f1": 0.9707401032702236,
+            "support": 284
+          }
+        }
+      },
+      "test_by_language": {
+        "fr-en": {
+          "rows": 1000,
+          "accuracy": 0.785,
+          "macro_f1": 0.770796074268007,
+          "per_class": {
+            "joy": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 143
+            },
+            "sadness": {
+              "precision": 0.7162162162162162,
+              "recall": 0.3706293706293706,
+              "f1": 0.48847926267281105,
+              "support": 143
+            },
+            "anger": {
+              "precision": 0.7569444444444444,
+              "recall": 0.7622377622377622,
+              "f1": 0.759581881533101,
+              "support": 143
+            },
+            "fear": {
+              "precision": 0.576036866359447,
+              "recall": 0.8741258741258742,
+              "f1": 0.6944444444444443,
+              "support": 143
+            },
+            "surprise": {
+              "precision": 0.7634408602150538,
+              "recall": 0.4965034965034965,
+              "f1": 0.6016949152542374,
+              "support": 143
+            },
+            "disgust": {
+              "precision": 0.8265895953757225,
+              "recall": 1.0,
+              "f1": 0.9050632911392404,
+              "support": 143
+            },
+            "neutral": {
+              "precision": 0.9038461538461539,
+              "recall": 0.9929577464788732,
+              "f1": 0.9463087248322147,
+              "support": 142
+            }
+          }
+        },
+        "hi-en": {
+          "rows": 1000,
+          "accuracy": 0.843,
+          "macro_f1": 0.8439217764041637,
+          "per_class": {
+            "joy": {
+              "precision": 0.967741935483871,
+              "recall": 0.6293706293706294,
+              "f1": 0.7627118644067797,
+              "support": 143
+            },
+            "sadness": {
+              "precision": 0.7165775401069518,
+              "recall": 0.9370629370629371,
+              "f1": 0.8121212121212121,
+              "support": 143
+            },
+            "anger": {
+              "precision": 0.905982905982906,
+              "recall": 0.7412587412587412,
+              "f1": 0.8153846153846155,
+              "support": 143
+            },
+            "fear": {
+              "precision": 0.9111111111111111,
+              "recall": 0.8601398601398601,
+              "f1": 0.8848920863309352,
+              "support": 143
+            },
+            "surprise": {
+              "precision": 0.9646017699115044,
+              "recall": 0.7622377622377622,
+              "f1": 0.8515625,
+              "support": 143
+            },
+            "disgust": {
+              "precision": 0.6542056074766355,
+              "recall": 0.9790209790209791,
+              "f1": 0.7843137254901961,
+              "support": 143
+            },
+            "neutral": {
+              "precision": 1.0,
+              "recall": 0.9929577464788732,
+              "f1": 0.9964664310954063,
+              "support": 142
+            }
+          }
+        }
+      },
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.12984434999373842,
+          "validation_macro_f1": 0.7722790820720162
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.00037233291331722286,
+          "validation_macro_f1": 0.7694132115327178
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.00013984860959590151,
+          "validation_macro_f1": 0.765933076354001
+        }
+      ],
+      "best_epoch": {
+        "epoch": 1,
+        "validation_macro_f1": 0.7722790820720162
+      }
+    },
+    "muril": {
+      "name": "MuRIL",
+      "base_model": "google/muril-base-cased",
+      "metric_source": "models/muril_hi_en_emotion/metrics.json",
+      "hyperparameters_source": "models/muril_hi_en_emotion/metrics.json",
+      "checkpoint_metadata_source": "models/muril_hi_en_emotion/emotion_metadata.json",
+      "evaluation_scope": "synthetic_only",
+      "training_data_kind": "synthetic_only",
+      "dataset_sha256": "0b0cd20738b34c46f32789105ef31e344ddd1315e0237904eb58f0fd6602a05c",
+      "split_sha256": "bd5ac69d00a55bd9c9cf8f94d202c849a3ef2ec4b102316334fcbbbb25e9d7ab",
+      "labels": [
+        "joy",
+        "sadness",
+        "anger",
+        "fear",
+        "surprise",
+        "disgust",
+        "neutral"
+      ],
+      "split_sizes": {
+        "train": 8000,
+        "validation": 1000,
+        "test": 1000
+      },
+      "hyperparameters": {
+        "seed": 42,
+        "split_seed": 42,
+        "batch_size": 2,
+        "gradient_accumulation": 8,
+        "learning_rate": 2e-05,
+        "class_weights": "balanced",
+        "freeze_encoder": false,
+        "precision": "fp16",
+        "patience": 2,
+        "allow_synthetic": true,
+        "device": "cuda",
+        "training_mode": "full_fine_tuning",
+        "max_length": 128,
+        "text_mode": "raw",
+        "preparation_version": 1,
+        "epochs_completed": 3
+      },
+      "test_overall": {
+        "rows": 1000,
+        "accuracy": 0.803,
+        "macro_f1": 0.8123164552869595,
+        "per_class": {
+          "joy": {
+            "precision": 1.0,
+            "recall": 0.48951048951048953,
+            "f1": 0.6572769953051644,
+            "support": 143
+          },
+          "sadness": {
+            "precision": 0.45980707395498394,
+            "recall": 1.0,
+            "f1": 0.6299559471365639,
+            "support": 143
+          },
+          "anger": {
+            "precision": 1.0,
+            "recall": 0.8461538461538461,
+            "f1": 0.9166666666666666,
+            "support": 143
+          },
+          "fear": {
+            "precision": 0.967032967032967,
+            "recall": 0.6153846153846154,
+            "f1": 0.7521367521367521,
+            "support": 143
+          },
+          "surprise": {
+            "precision": 0.8467741935483871,
+            "recall": 0.7342657342657343,
+            "f1": 0.7865168539325842,
+            "support": 143
+          },
+          "disgust": {
+            "precision": 0.950354609929078,
+            "recall": 0.9370629370629371,
+            "f1": 0.943661971830986,
+            "support": 143
+          },
+          "neutral": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 142
+          }
+        }
+      },
+      "test_by_language": {
+        "hi-en": {
+          "rows": 1000,
+          "accuracy": 0.803,
+          "macro_f1": 0.8123164552869595,
+          "per_class": {
+            "joy": {
+              "precision": 1.0,
+              "recall": 0.48951048951048953,
+              "f1": 0.6572769953051644,
+              "support": 143
+            },
+            "sadness": {
+              "precision": 0.45980707395498394,
+              "recall": 1.0,
+              "f1": 0.6299559471365639,
+              "support": 143
+            },
+            "anger": {
+              "precision": 1.0,
+              "recall": 0.8461538461538461,
+              "f1": 0.9166666666666666,
+              "support": 143
+            },
+            "fear": {
+              "precision": 0.967032967032967,
+              "recall": 0.6153846153846154,
+              "f1": 0.7521367521367521,
+              "support": 143
+            },
+            "surprise": {
+              "precision": 0.8467741935483871,
+              "recall": 0.7342657342657343,
+              "f1": 0.7865168539325842,
+              "support": 143
+            },
+            "disgust": {
+              "precision": 0.950354609929078,
+              "recall": 0.9370629370629371,
+              "f1": 0.943661971830986,
+              "support": 143
+            },
+            "neutral": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 142
+            }
+          }
+        }
+      },
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 1.3836432203799487,
+          "validation_macro_f1": 0.7712262196653745
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.2617789356634021,
+          "validation_macro_f1": 0.7659376690697497
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.03681137823872268,
+          "validation_macro_f1": 0.7708286600955329
+        }
+      ],
+      "best_epoch": {
+        "epoch": 1,
+        "validation_macro_f1": 0.7712262196653745
+      }
+    }
+  },
+  "mbert_colab_completed_metadata": {
+    "source": "colab/mbert_study/completed_metadata.json",
+    "matches_installed_metrics": true,
+    "fields": {
+      "base_model": "google-bert/bert-base-multilingual-cased",
+      "labels": [
+        "joy",
+        "sadness",
+        "anger",
+        "fear",
+        "surprise",
+        "disgust",
+        "neutral"
+      ],
+      "text_mode": "raw",
+      "preparation_version": 1,
+      "max_length": 128,
+      "trained_language_pairs": [
+        "fr-en",
+        "hi-en"
+      ],
+      "training_data_kind": "synthetic_only",
+      "evaluation_scope": "synthetic_only",
+      "training_status": "complete",
+      "dataset_sha256": "83430dd59167b6402cc2945f94f701e19eb5886c6ee7d3602227ad73d0159db0",
+      "split_sha256": "7b4c6c953d0ae6402250f82e94ebeabbb05605ddad9c2567a15e800414f5fd72"
+    }
+  },
+  "calibration_example": {
+    "source": "docs/oct23review/calibration_example.json",
+    "rows": 98,
+    "scope": "hi-en",
+    "status": "experimental_unreviewed",
+    "temperature": 2.646110905055132,
+    "metrics_before": {
+      "nll": 1.5043822603638652,
+      "brier": 0.4231668211347909,
+      "ece": 0.2165111365964462
+    },
+    "metrics_after": {
+      "nll": 0.7878709402481823,
+      "brier": 0.3577673949636659,
+      "ece": 0.0441497107694552
+    },
+    "accuracy_changed": false,
+    "independent_evaluation": false,
+    "data_selection": "98 existing synthetic Hindi-English validation rows,14 per emotion; random_state42; frozen train/test/evaluation hashes excluded"
+  },
+  "challenge_diagnostics": {
+    "source_file": "docs/oct23review/challenge_diagnostics.json",
+    "source": "Coordinator local CPU diagnostic calls using LocalEmotionClassifier and predict_dataset after the mBERT integration. No new weights or training.",
+    "label_scope": "Unreviewed assistant-draft or illustrative labels; not independent human evaluation.",
+    "records": [
+      {
+        "model": "mBERT",
+        "dataset": "Hindi-English challenge draft",
+        "file": "evaluation_set/hindi_english_100.csv",
+        "language_pair": "hi-en",
+        "rows": 100,
+        "correct": 50,
+        "accuracy": 0.5,
+        "file_sha256": "49febcd9e0116a93db7fff7c65cd107205ed5496b9900aace95ba70dd8e4e105"
+      },
+      {
+        "model": "mBERT",
+        "dataset": "English-French challenge draft",
+        "file": "evaluation_set/english_french_100.csv",
+        "language_pair": "fr-en",
+        "rows": 100,
+        "correct": 41,
+        "accuracy": 0.41,
+        "file_sha256": "25c00322642e55451a7f18002c8d654a2b77739508001b7e172a2b0d87a86f06"
+      },
+      {
+        "model": "mBERT",
+        "dataset": "Hindi-English demo subset",
+        "file": "data/demo/emotions/mixed_emotions_demo.csv",
+        "language_pair": "hi-en",
+        "rows": 42,
+        "correct": 24,
+        "accuracy": 0.5714285714285714,
+        "file_sha256": "603af42a7bfd66638b23d51d3699917056e7204a284ed092aeb92c920b17eae6"
+      },
+      {
+        "model": "MuRIL",
+        "dataset": "Hindi-English challenge draft",
+        "file": "evaluation_set/hindi_english_100.csv",
+        "language_pair": "hi-en",
+        "rows": 100,
+        "correct": 51,
+        "accuracy": 0.51,
+        "file_sha256": "49febcd9e0116a93db7fff7c65cd107205ed5496b9900aace95ba70dd8e4e105"
+      },
+      {
+        "model": "MuRIL",
+        "dataset": "Hindi-English demo subset",
+        "file": "data/demo/emotions/mixed_emotions_demo.csv",
+        "language_pair": "hi-en",
+        "rows": 42,
+        "correct": 25,
+        "accuracy": 0.5952380952380952,
+        "file_sha256": "603af42a7bfd66638b23d51d3699917056e7204a284ed092aeb92c920b17eae6"
+      }
+    ],
+    "not_measured": [],
+    "not_a_human_benchmark": true
+  },
+  "software_verification": {
+    "source": "coordinator-provided project verification record",
+    "tests_passed": 221,
+    "subtests_passed": 33,
+    "new_model_training_run": false
+  },
+  "metric_cross_checks": [
+    {
+      "files": [
+        "models/xlmr_multilingual_emotion/metrics.json",
+        "colab/mbert_study/xlmr_baseline_metrics.json"
+      ],
+      "matched": true,
+      "dataset_sha256": "83430dd59167b6402cc2945f94f701e19eb5886c6ee7d3602227ad73d0159db0",
+      "split_sha256": "7b4c6c953d0ae6402250f82e94ebeabbb05605ddad9c2567a15e800414f5fd72"
+    },
+    {
+      "files": [
+        "models/xlmr_multilingual_emotion/metrics.json",
+        "colab/muril_study/xlmr_baseline_metrics.json"
+      ],
+      "matched": true,
+      "dataset_sha256": "83430dd59167b6402cc2945f94f701e19eb5886c6ee7d3602227ad73d0159db0",
+      "split_sha256": "7b4c6c953d0ae6402250f82e94ebeabbb05605ddad9c2567a15e800414f5fd72"
+    },
+    {
+      "files": [
+        "models/mbert_multilingual_emotion/metrics.json",
+        "colab/mbert_study/completed_metrics.json"
+      ],
+      "matched": true,
+      "dataset_sha256": "83430dd59167b6402cc2945f94f701e19eb5886c6ee7d3602227ad73d0159db0",
+      "split_sha256": "7b4c6c953d0ae6402250f82e94ebeabbb05605ddad9c2567a15e800414f5fd72"
+    }
+  ],
+  "interpretation_limits": [
+    "XLM-R and mBERT use the same 16k/2k/2k bilingual synthetic split; MuRIL uses a distinct 8k/1k/1k Hindi-English synthetic split.",
+    "MuRIL results are Hindi-English only and are not included in bilingual overall or English-French comparisons.",
+    "Challenge diagnostics use assistant-authored or illustrative labels; they are not independent human evaluation and are not subtracted from held-out scores.",
+    "The 98-row calibration record is experimental and unreviewed; calibration changes score confidence but not predicted labels.",
+    "The software verification count is not a model-performance measure. No new training run was performed for this evidence snapshot."
+  ],
+  "figures": [
+    "figures/model_comparison.png",
+    "figures/training_history.png"
+  ]
+}

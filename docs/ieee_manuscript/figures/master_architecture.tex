@@ -1,0 +1,48 @@
+% Editable IEEE manuscript figure fragment. Requires tikz, positioning, arrows.meta.
+\begin{tikzpicture}[>=Stealth, font=\footnotesize, line width=0.55pt]
+\tikzset{
+  box/.style={draw=black, fill=white, rounded corners=1pt, align=center, text width=4.6cm, inner sep=2pt, minimum width=5.0cm, minimum height=8mm},
+  opt/.style={box, dashed},
+  edge/.style={->, draw=black, line width=0.55pt},
+  optedge/.style={->, dashed, draw=black, line width=0.55pt}
+}
+% Row 1: source data and GPU training.
+\node[box] (source) at (0,0) {Generated or human-reviewed data};
+\node[box] (split) at (5.7,0) {Frozen group partitions: train, validation and test};
+\node[box] (gpu) at (11.4,0) {Colab / Kaggle GPU training and checkpoint export};
+\draw[edge] (source.east)--(split.west); \draw[edge] (split.east)--(gpu.west);
+% Row 2: input, task and checkpoint selection.
+\node[box] (input) at (0,-2.7) {Phrase or CSV / XLSX input};
+\node[box] (task) at (5.7,-2.7) {Separate sentiment or emotion task};
+\node[box] (models) at (11.4,-2.7) {Original / combined XLM-R, mBERT, MuRIL for hi-en};
+\draw[edge] (gpu.south)--(models.north);
+\draw[edge] (input.east)--(task.west); \draw[edge] (task.east)--(models.west);
+% Row 3: preprocessing and local prediction, right to left.
+\node[box] (base) at (0,-5.4) {Base prediction and task scores};
+\node[box] (encoder) at (5.7,-5.4) {Local compatible encoder};
+\node[box] (prep) at (11.4,-5.4) {Selected language and saved normalization};
+\draw[edge] (models.south)--(prep.north);
+\draw[edge] (prep.west)--(encoder.east); \draw[edge] (encoder.west)--(base.east);
+% Row 4: separate output schemas.
+\node[box] (sent) at (0,-8.1) {Sentiment: positive, neutral, negative};
+\node[box] (scores) at (5.7,-8.1) {Output retains label, scores, source and warnings};
+\node[box] (emo) at (11.4,-8.1) {Emotion: joy, sadness, anger, fear, surprise, disgust, neutral};
+\draw[edge] (base.south)--(scores.north);
+\draw[edge] (scores.west)--(sent.east); \draw[edge] (scores.east)--(emo.west);
+% Row 5: research tools, diagnostics and optional architecture.
+\node[box] (research) at (0,-10.8) {File evaluation, model comparison, calibration, ablations, conversation and optional Qwen};
+\node[box] (diag) at (5.7,-10.8) {Disagreement and emoji / sarcasm diagnostics};
+\node[opt] (advanced) at (11.4,-10.8) {Implemented optional emoji gate; context / sarcasm heads require reviewed labels};
+\draw[edge] (scores.south)--(diag.north); \draw[edge] (scores.south west)--(research.north);
+\draw[optedge] (emo.south)--(advanced.north);
+% Row 6: human review and data safeguards.
+\node[box] (review) at (0,-13.5) {Two blind reviewers; adjudication when needed};
+\node[box] (audit) at (5.7,-13.5) {Hash-audited correction dataset};
+\node[box] (role) at (11.4,-13.5) {Train-only corrections; evaluation remains test};
+\draw[edge] (diag.south west)--(review.north east);
+\draw[edge] (review.east)--(audit.west); \draw[edge] (audit.east)--(role.west);
+% Row 7: versioned next training input and feedback route.
+\node[box] (next) at (5.7,-16.2) {Versioned dataset for next GPU run};
+\draw[edge] (role.south)--(next.north);
+\draw[edge] (next.south) -- ++(0,-1.6) -| (-3.0,-19.3) |- (source.west);
+\end{tikzpicture}

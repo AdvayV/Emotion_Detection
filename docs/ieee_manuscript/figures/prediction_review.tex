@@ -1,0 +1,25 @@
+% Editable IEEE manuscript figure fragment. Requires tikz, positioning, arrows.meta.
+\begin{tikzpicture}[>=Stealth, font=\footnotesize, line width=0.55pt]
+\tikzset{
+  box/.style={draw=black, fill=white, rounded corners=1pt, align=center, inner sep=3pt, text width=6.9cm, minimum height=8mm},
+  branch/.style={draw=black, fill=white, rounded corners=1pt, align=center, inner sep=2pt, text width=2.2cm, minimum height=10mm},
+  opt/.style={branch, dashed},
+  edge/.style={->, draw=black, line width=0.55pt},
+  optedge/.style={->, dashed, draw=black, line width=0.55pt}
+}
+\node[box] (input) at (0,0) {Phrase, task and selected language};
+\node[box] (check) at (0,-1.15) {Validate task, language and checkpoint metadata};
+\node[box] (model) at (0,-2.30) {Select a compatible local model and saved preprocessing};
+\node[box] (base) at (0,-3.45) {Base predicted label and scores};
+\draw[edge] (input.south)--(check.north); \draw[edge] (check.south)--(model.north); \draw[edge] (model.south)--(base.north);
+\node[branch] (diag) at (-2.8,-4.95) {Cue and truncation flags};
+\node[opt] (temp) at (0,-4.95) {Optional temperature scaling; class unchanged};
+\node[opt] (qwen) at (2.8,-4.95) {Optional local Qwen suggestion; kept separate};
+\node[box] (view) at (0,-6.65) {Analyst view preserves source, scope, base scores and optional suggestions};
+\draw[edge] (base.south west)--(diag.north);
+\draw[edge] (base.south)--(temp.north);
+\draw[edge] (base.south east)--(qwen.north);
+\draw[edge] (diag.south)--([xshift=-2.7cm]view.north);
+\draw[edge] (temp.south)--(view.north);
+\draw[edge] (qwen.south)--([xshift=2.7cm]view.north);
+\end{tikzpicture}

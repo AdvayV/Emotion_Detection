@@ -1,0 +1,28 @@
+% Editable IEEE manuscript figure fragment. Requires tikz, positioning, arrows.meta.
+\begin{tikzpicture}[>=Stealth, font=\footnotesize, line width=0.55pt]
+\tikzset{
+  box/.style={draw=black, fill=white, rounded corners=1pt, align=center, inner sep=3pt, text width=6.9cm, minimum height=8mm},
+  branch/.style={draw=black, fill=white, rounded corners=1pt, align=center, inner sep=2pt, text width=2.2cm, minimum height=10mm},
+  decision/.style={draw=black, fill=white, diamond, aspect=2.5, align=center, inner sep=1pt, text width=2.0cm},
+  edge/.style={->, draw=black, line width=0.55pt}
+}
+\node[box] (data) at (0,0) {Versioned data with frozen group-aware train, validation and test partitions};
+\node[box] (gpu) at (0,-1.05) {Colab or Kaggle GPU fine-tuning};
+\node[box] (select) at (0,-2.10) {Validation selects checkpoint; test remains held out};
+\node[box] (install) at (0,-3.15) {Export and install checkpoint};
+\node[box] (compare) at (0,-4.20) {Compare models or collect disagreement candidates};
+\node[box] (reviewers) at (0,-5.25) {Two independent blind reviewers};
+\node[decision] (agree) at (0,-6.45) {Labels agree and context is clear?};
+\node[branch] (adjudicate) at (-2.8,-7.90) {Distinct adjudicator with written notes};
+\node[branch] (audit) at (2.8,-7.90) {Audit row IDs, source, labels and hashes};
+\node[decision] (role) at (0,-9.35) {Training or evaluation role?};
+\node[branch] (train) at (-2.0,-10.95) {Train-only corrections for next version};
+\node[branch] (test) at (2.0,-10.95) {Evaluation rows remain test-only};
+\draw[edge] (data.south)--(gpu.north); \draw[edge] (gpu.south)--(select.north); \draw[edge] (select.south)--(install.north); \draw[edge] (install.south)--(compare.north); \draw[edge] (compare.south)--(reviewers.north); \draw[edge] (reviewers.south)--(agree.north);
+\draw[edge] (agree.south west)--node[left, font=\scriptsize]{No} (adjudicate.north);
+\draw[edge] (agree.south east)--node[right, font=\scriptsize]{Yes} (audit.north);
+\draw[edge] (adjudicate.east)--(audit.west);
+\draw[edge] (audit.south)--(role.north);
+\draw[edge] (role.south west)--node[left, font=\scriptsize]{Train} (train.north);
+\draw[edge] (role.south east)--node[right, font=\scriptsize]{Evaluation} (test.north);
+\end{tikzpicture}
