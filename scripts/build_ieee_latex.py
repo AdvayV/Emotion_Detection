@@ -21,7 +21,7 @@ OVERLEAF = BASE / "overleaf"
 MAIN_TEX = OVERLEAF / "main.tex"
 BIB_FILE = OVERLEAF / "references.bib"
 README = OVERLEAF / "README.md"
-OUTPUT_ZIP = ROOT / "outputs" / "23OctReview AdvayV KaavishG CD Overleaf.zip"
+OUTPUT_ZIP = ROOT / "outputs" / "23OctReview AdvayV KaavishG CD Overleaf Explained.zip"
 
 IMAGE_RE = re.compile(r"!\[([^\]]*)\]\(([^)]+)\)")
 LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
@@ -85,6 +85,11 @@ def latex_inline(text: str, known_keys: set[str]) -> str:
         elif token.startswith("*"):
             out.append(r"\emph{" + latex_inline(token[1:-1], known_keys) + "}")
         elif token.startswith("`"):
+            from ieee_equations import INLINE_LATEX
+            if token[1:-1] in INLINE_LATEX:
+                out.append(r"\(" + INLINE_LATEX[token[1:-1]] + r"\)")
+                cursor = match.end()
+                continue
             maths = {
                 "p(y|x) = softmax(W h + b)": r"\(\mathbf{p}(y\mid x)=\operatorname{softmax}(Wh+b)\)",
                 "p_T = softmax(log(p) / T)": r"\(\mathbf{p}_T=\operatorname{softmax}(\log\mathbf{p}/T)\)",
@@ -136,6 +141,9 @@ def render_bibtex(records: list[dict]) -> str:
     for record in records:
         fields = []
         authors = record.get("authors", record.get("author"))
+        if isinstance(authors, list):
+            family_names = {"Hal Daum\u00e9 III": "Daum\u00e9, III, Hal", "Petra Kralj Novak": "Kralj Novak, Petra", "Cynthia Van Hee": "Van Hee, Cynthia"}
+            authors = [family_names.get(name, name) for name in authors]
         if authors:
             fields.append(f"  author = {{{_bib_escape(authors)}}}")
         title = str(record["title"])
@@ -215,17 +223,10 @@ def _figure_latex(caption: str, target: str) -> str:
     caption_tex = latex_inline(caption, KNOWN_KEYS)
     label = re.sub(r"[^A-Za-z0-9:.-]+", "-", stem)
     if stem == "master_architecture":
-        if tikz_path:
-            visual = rf"\resizebox{{.96\textwidth}}{{!}}{{\input{{{tikz_path}}}}}"
-        else:
-            visual = rf"\includegraphics[width=.96\textwidth,height=.78\textheight,keepaspectratio]{{{image_ref}}}"
-        return (
-            "\\clearpage\n\\onecolumn\n\\thispagestyle{plain}\n"
-            "\\begin{center}\n" + visual + "\n\\end{center}\n"
-            "\\refstepcounter{figure}\\begin{center}\\footnotesize\\textbf{Fig. \\thefigure.} "
-            + caption_tex + "\\end{center}\n"
-            f"\\label{{fig:{label}}}\n\\clearpage\n\\twocolumn\n"
-        )
+        visual = (rf"\resizebox{{.96\textwidth}}{{!}}{{\input{{{tikz_path}}}}}" if tikz_path else
+                  rf"\includegraphics[width=.96\textwidth,height=.82\textheight,keepaspectratio]{{{image_ref}}}")
+        return ("\\begin{figure*}[p]\n\\centering\n" + visual + "\n" +
+                "\\caption{" + caption_tex + "}\\label{fig:" + label + "}\n\\end{figure*}\n")
     is_wide = stem in {"model_comparison", "training_history"}
     env = "figure*" if is_wide else "figure"
     width = ".88\\textwidth" if is_wide else ".98\\columnwidth"
@@ -305,7 +306,11 @@ def render_body(markdown: str, records: list[dict]) -> str:
         line = raw.strip()
         if FENCE_RE.match(line):
             if in_code:
-                output.append("\\begin{lstlisting}\n" + "\n".join(code_lines) + "\n\\end{lstlisting}")
+                listing = "\\begin{lstlisting}\n" + "\n".join(code_lines) + "\n\\end{lstlisting}"
+                if output and output[-1].startswith(r"\textbf{Algorithm"):
+                    heading = output.pop()
+                    listing = "\\noindent\\begin{minipage}{\\columnwidth}\n" + heading + "\n" + listing + "\n\\end{minipage}"
+                output.append(listing)
                 code_lines, in_code = [], False
             else:
                 in_code = True
@@ -356,6 +361,14 @@ def render_body(markdown: str, records: list[dict]) -> str:
             output.append(_heading(line[5:], 4))
             i += 1
             continue
+        equation = re.fullmatch(r"\[\[equation:([a-z_0-9]+)\]\]", line)
+        if equation:
+            from ieee_equations import LATEX
+            key = equation.group(1)
+            expression = LATEX[key]
+            output.append("\\begin{equation}\n" + expression + "\n\\label{eq:" + key + "}\n\\end{equation}")
+            i += 1
+            continue
         image = _figure(line)
         if image:
             caption, target = image
@@ -392,7 +405,7 @@ def render_body(markdown: str, records: list[dict]) -> str:
         i += 1
         while i < len(lines):
             nxt = lines[i].strip()
-            if not nxt or nxt.startswith(("#", "|", "![") ) or FENCE_RE.match(nxt) or re.match(r"^(?:[-*+]\s+|\d+[.)]\s+|>\s)", nxt):
+            if not nxt or nxt.startswith(("#", "|", "![", "[[equation:") ) or FENCE_RE.match(nxt) or re.match(r"^(?:[-*+]\s+|\d+[.)]\s+|>\s)", nxt):
                 break
             paragraph.append(nxt)
             i += 1
@@ -444,7 +457,7 @@ def render_main(records: list[dict], body: str) -> str:
 \usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit,calc}
 \usepackage{listings}
 \lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,columns=fullflexible,keepspaces=true,frame=single,framesep=3pt,showstringspaces=false}
-\title{CodeMood Multilingual Emotion Detection}
+\title{CodeMood: Multilingual Emotion Detection}
 \author{\IEEEauthorblockN{Advay Vivek\IEEEauthorrefmark{1} and Kaavish Gogia\IEEEauthorrefmark{1}}\\
 \IEEEauthorblockA{\IEEEauthorrefmark{1}VIT Vellore, Compiler Design}}
 \begin{document}
@@ -453,7 +466,7 @@ def render_main(records: list[dict], body: str) -> str:
 \thispagestyle{empty}
 \centering
 \vspace*{0.22\textheight}
-{\LARGE\bfseries CodeMood Multilingual Emotion Detection\par}
+{\LARGE\bfseries CodeMood: Multilingual Emotion Detection\par}
 \vspace{2.2cm}
 {\large Prepared by\par}
 \vspace{0.4cm}
@@ -461,7 +474,7 @@ def render_main(records: list[dict], body: str) -> str:
 \vspace{0.35cm}
 {\large Kaavish Gogia\\24BCT0103\par}
 \vspace{1.4cm}
-{\normalsize Guided by Suganthini C\\VIT Vellore\\Compiler Design\\23 October 2026\par}
+{\normalsize Guided by: Suganthini C\\VIT Vellore\\Compiler Design\\23 October 2026\par}
 \end{titlepage}
 \twocolumn
 \maketitle
@@ -523,7 +536,8 @@ def build():
 4. Click Recompile. Overleaf runs BibTeX for the numbered references.
 
 Edit `main.tex` for prose, `references.bib` for the 31 verified references, and
-`figures/*.tex` for the three editable TikZ diagrams. The included
+`figures/*.tex` for the three editable TikZ diagrams. Eighteen numbered equation
+blocks include nearby symbol definitions; edit them directly in main.tex. The included
 `related_work_comparison.csv` maps 20 papers to implemented extensions and code
 paths; `literature_sources.csv` lists all verified source links.
 

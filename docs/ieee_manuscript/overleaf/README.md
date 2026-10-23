@@ -6,7 +6,8 @@
 4. Click Recompile. Overleaf runs BibTeX for the numbered references.
 
 Edit `main.tex` for prose, `references.bib` for the 31 verified references, and
-`figures/*.tex` for the three editable TikZ diagrams. The included
+`figures/*.tex` for the three editable TikZ diagrams. Eighteen numbered equation
+blocks include nearby symbol definitions; edit them directly in main.tex. The included
 `related_work_comparison.csv` maps 20 papers to implemented extensions and code
 paths; `literature_sources.csv` lists all verified source links.
 

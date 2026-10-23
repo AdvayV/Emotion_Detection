@@ -54,7 +54,13 @@ The application contains seven workspaces: Overview, Analyze text, Emotion lab, 
 
 The normalizer handles common Romanized spellings conservatively, records elongated forms, and preserves negation. It retains both the original phrase and the normalized candidate. A checkpoint's metadata determines whether raw or normalized text reaches its tokenizer. This prevents a convenient interface transformation from silently changing the preprocessing used during training. Token-length limits are enforced, and truncation is surfaced with the result.
 
-The installed classifiers are a combined XLM-R checkpoint, a bilingual mBERT checkpoint, a Hindi-English MuRIL checkpoint and an original Hindi-English XLM-R checkpoint. Each consists of its tokenizer, encoder, trained classification head, label map and task metadata. An input token sequence produces a contextual vector h; the seven-way head computes `p(y|x) = softmax(W h + b)`. The displayed base label is the maximum-scoring class. The following seven-point specification is shared by training, inference, comparison and exported files.
+The installed classifiers are a combined XLM-R checkpoint, a bilingual mBERT checkpoint, a Hindi-English MuRIL checkpoint and an original Hindi-English XLM-R checkpoint. Each consists of its tokenizer, encoder, trained classification head, label map and task metadata. The encoder produces a contextual vector h. The classification head maps h to seven logits z using learned weights and bias. For class k, `p_k` is its normalized score, and y-hat is the selected emotion.
+
+[[equation:softmax]]
+
+[[equation:argmax]]
+
+The trained head assigns one logit to each emotion: joy, sadness, anger, fear, surprise, disgust and neutral. Softmax converts these logits into nonnegative scores that sum to one; the largest score determines the displayed base label. The maximum is neither measured emotion intensity nor independently verified correctness probability. The same seven-point specification is shared by training, inference and exported files.
 
 | Checkpoint output | Meaning in the task |
 |---|---|
@@ -90,7 +96,11 @@ Input: phrase x, language l, checkpoint c
 
 A separate diagnostic path extracts lexical polarity, elongation, negation and emoji cues. Word-only polarity is compared with emoji polarity to describe agreement, conflict or ambiguity. Sarcasm uses a labelled heuristic baseline unless an independently supervised sarcasm model is explicitly installed. Valence/arousal intensity and evidence words are shown as heuristic outputs; they are not presented as transformer attention or feature attribution.
 
-Uncertainty routing considers the top score, the gap between the two leading scores, truncation, contextual input, experimental language scope, emoji conflict and sarcasm cues. For the score rule, a top score below 0.55 or a margin below 0.15 marks an uncertain result. These thresholds are operational choices rather than calibrated error guarantees. An optional temperature profile rescales scores using `p_T = softmax(log(p) / T)`, where T is a positive fitted scalar. The transformation preserves the maximum-scoring label while changing score sharpness. We bind the profile to the checkpoint fingerprint, language scope and preprocessing identity [@guo2017].
+Uncertainty routing considers the top score, the gap between the two leading scores, truncation, contextual input, experimental language scope, emoji conflict and sarcasm cues. For the score rule, a top score below 0.55 or a margin below 0.15 marks an uncertain result. These thresholds are operational choices rather than calibrated error guarantees. A matching temperature profile rescales the stored scores. In the equation below, T is the fitted temperature and the denominator renormalizes all seven classes.
+
+[[equation:temperature]]
+
+Scaling stored probabilities is equivalent to softmax of log probabilities divided by temperature. Zero entries remain zero. A temperature above one generally softens the distribution, while a value below one sharpens it. Positive scalar scaling preserves class ordering; it changes confidence scores rather than repairing a wrong label. The implementation restricts T to the interval [0.05, 20] and fits it using validation or dedicated calibration data. The profile remains bound to its checkpoint, language and preparation settings [@guo2017].
 
 The local reviewer uses Ollama with Qwen3 0.6B. It receives the current phrase, earlier context when supplied, the base result and cue summaries. Structured output is checked for a valid emotion, sarcasm flag and evidence spans. The interface retains the base distribution alongside any reviewed suggestion. Reviewer failure is recorded without replacing the base result. A conversation trace stores turn order and speaker identity and tracks speaker-specific label changes. Existing text-only checkpoints still process each current phrase individually; optional context can influence the reviewer, while context-conditioned encoder inference is restricted to checkpoints trained for that input contract.
 
@@ -114,7 +124,17 @@ Input: base prediction p, text x, context h
 
 File evaluation accepts a text column, optional gold emotion labels, language identifiers and optional split metadata. With labels, it computes accuracy, macro-F1, per-class scores, confusion matrices and language slices. Without labels, it returns predictions and distributions rather than inventing accuracy. If a split column is supplied, the test partition is the default evaluation scope. Normalized text hashes are compared with frozen training and validation guards, and overlap is reported before interpretation.
 
-The disagreement view loads compatible checkpoints sequentially to reduce simultaneous memory use. Hindi-English can compare XLM-R, mBERT and MuRIL; English-French compares the two multilingual encoders. Top-label disagreement is distinct from low confidence. For distributions P and Q, the interface computes Jensen-Shannon divergence through their midpoint M: `JS(P,Q) = [KL(P||M) + KL(Q||M)] / 2`, using base-two logarithms [@lin1991]. It also shows the square-root distance. These describe output differences and do not reveal which model is correct.
+The disagreement view loads compatible checkpoints sequentially to reduce simultaneous memory use. Hindi-English can compare XLM-R, mBERT and MuRIL; English-French compares the two multilingual encoders. Top-label disagreement is distinct from low confidence. Let P and Q be the aligned seven-class score distributions from two checkpoints and M their midpoint. KL is Kullback-Leibler divergence; only terms with positive `P_k` are summed. The logarithm has base two [@lin1991].
+
+[[equation:js_mixture]]
+
+[[equation:kl]]
+
+[[equation:js]]
+
+[[equation:js_distance]]
+
+The comparison aligns the same seven labels and normalizes each nonnegative vector before forming its midpoint. Base-two logarithms make divergence interpretable on a bounded scale; zero-probability terms are omitted. Distance takes the square root, with a numerical floor guarding against round-off. Larger disagreement does not identify which checkpoint is correct. Zero divergence means identical distributions; the divergence and its square-root distance lie between zero and one.
 
 Controlled experiments compare raw text, normalized text and emoji-removed text, with optional context and no-context variants. A changed input receives accuracy only when its own label is supplied or label invariance is explicitly declared. Otherwise the reported measure is prediction stability. Reviewer modes compare no review, selective review and review-all, with the same-reviewed-subset before/after scores, review coverage and latency. Interactive runs are bounded to 200 phrases and five reviewer calls; the disagreement view is bounded to 20 phrases. These limits keep local demonstration costs understandable.
 
@@ -135,6 +155,14 @@ Input: phrases X, language l, checkpoints C
 ### 3.4 Module 4 Cloud training and audited annotation handoff
 
 Training runs on a cloud graphics processor, while the local application performs inference and analysis. The notebooks install the packaged source, verify dataset hashes, preserve frozen partitions and select a checkpoint by validation macro-F1. Each completed epoch stores model, optimizer and random-state recovery artifacts. The inference export includes weights, tokenizer, configuration and metadata, while excluding optimizer state and training rows. The local installer validates the export and preserves an existing model instead of overwriting it silently.
+
+For class c, `n_train` is the number of training rows and `n_c` is its training support. The class weight `w_c` and the weighted loss for microbatch B are defined below; `y_i` is the supplied class of phrase i.
+
+[[equation:class_weights]]
+
+[[equation:weighted_ce]]
+
+Class weights are computed from training labels only, increasing the relative contribution of less frequent classes. The count floor matches the implementation safeguard. Computed stably from logits, PyTorch takes a weighted mean: its denominator is the sum of target weights in the microbatch, not the number of rows. Gradient accumulation scales and averages these microbatch losses. Setting class weights to none gives the ordinary unweighted mean cross-entropy.
 
 Google Colab is the primary training environment, with a separate Kaggle notebook for the advanced XLM-R experiment. The operational sequence is to upload the notebook, choose a GPU runtime, run its cells in order, upload the matching source/data ZIP, configure persistent storage, and start the chosen training job. Validation is checked after each epoch; the best checkpoint is evaluated on the fixed test partition after model selection. The user then downloads the inference ZIP, installs it from the project root and selects the new checkpoint in Emotion lab. Recovery resumes from the latest completed epoch when the same data and settings are restored. Dataset and source manifests make these steps reproducible without training on the laptop.
 
@@ -226,7 +254,27 @@ Software verification covers preparation, label maps, file evaluation, leakage c
 
 ### 5.1 Accuracy and macro averaged F1
 
-Accuracy is the fraction of labelled rows whose predicted class matches the supplied target. Per-class precision is `TP / (TP + FP)`, recall is `TP / (TP + FN)`, and F1 is their harmonic mean. Macro-F1 averages the seven class F1 values equally, making weak classes visible even when another class is frequent. Confusion matrices retain the direction of errors rather than reducing them to one score.
+Each emotion is evaluated against the other six classes. A true positive is a correctly predicted instance of the selected emotion. A false positive assigns that emotion to another class, while a false negative misses a supplied instance of it. Counts depend on the supplied file's annotation quality and evaluation scope. For example, with sadness as the selected class, a joyful phrase predicted as sadness is a false positive; a sadness phrase predicted as neutral is a false negative.
+
+[[equation:precision]]
+
+[[equation:recall]]
+
+[[equation:f1]]
+
+Precision measures how often predictions of an emotion are correct; recall measures how many supplied instances of that emotion are recovered. F1 is their harmonic mean, so both kinds of error matter. The evaluator assigns zero whenever a denominator is zero. F1 summarizes classification outcomes over labelled rows: it is neither the confidence score of an individual phrase nor the fraction of all rows classified correctly. Both precision and recall, and therefore F1, range from zero to one; higher is better on the stated evaluation data.
+
+[[equation:macro_f1]]
+
+[[equation:accuracy]]
+
+Here k indexes the seven emotions, N is the number of labelled phrases, and I is an indicator equal to one for a correct prediction and zero otherwise. Macro-F1 gives every emotion equal weight, including a class whose F1 is zero. Accuracy instead gives each evaluated row equal weight. The two measures can therefore differ when classes have unequal support or errors concentrate in particular emotions. Reporting both with class support and a confusion matrix avoids hiding a weak class behind a strong overall average. A macro-F1 of 0.9251 is an average class score; it does not mean that 92.51% of individual phrases were classified correctly.
+
+**Worked example for sadness**
+
+Suppose a hypothetical evaluation contains eight correctly identified sadness instances, two other emotions incorrectly predicted as sadness, and four sadness instances missed. The classifier makes ten sadness predictions and recovers eight of twelve supplied sadness instances. Their harmonic mean is approximately 0.7273. This example explains the calculation and supplies no additional checkpoint measurement; it should not be substituted into the results tables. Precision is 8/10 = 0.80 and recall is 8/12 = 0.6667. Substituting TP = 8, FP = 2 and FN = 4 gives 16/(16 + 2 + 4) = 16/22:
+
+[[equation:worked_f1]]
 
 The following comparison uses the same 2,000 bilingual synthetic test rows for the lexical baseline, combined XLM-R and mBERT. This is the appropriate comparison between the existing rule methodology and the proposed system configured with a trained encoder. Optional reviewer or fusion branches are not credited with this result.
 
@@ -252,7 +300,21 @@ mBERT and MuRIL show a similar need for validation-based selection even though t
 
 ### 5.3 Interpreting effectiveness
 
-Confidence quality is measured with negative log-likelihood, Brier score and binned expected calibration error; prediction quality is measured with accuracy and macro-F1. Disagreement uses top-label differences and Jensen-Shannon distance. Reviewer experiments additionally record coverage and latency. Each measure answers a different question, so the interface does not combine them into an unsupported single effectiveness score.
+Confidence quality is evaluated separately from label correctness. In the following equations, p denotes the distribution being assessed: base scores, or rescaled scores after the chosen temperature profile. The expression `p_i,y_i` is the score assigned to the supplied target for phrase i, and N is the number of measured rows.
+
+[[equation:nll]]
+
+NLL penalizes low probability assigned to the supplied target, with a particularly large penalty for confident mistakes. The implementation uses the natural logarithm and floors only the target probability at 10 to the power minus 300 before taking its log. Lower values indicate better target-probability fit on the evaluated rows. Improvement on the temperature-fitting subset is not independent evidence of calibration on another distribution. The numerical floor is `epsilon_floor`.
+
+[[equation:brier]]
+
+Here `y_ik` is a one-hot target: one for the supplied emotion and zero for the other six classes. The Brier score compares the full predicted distribution with the one-hot target vector, penalizing squared errors across all seven classes. The implementation sums class errors and then averages across rows; it does not divide by seven. This convention matters when comparing numerical scores with other sources. Lower is better on the stated data, but a lower fitting-set score alone does not establish transfer calibration.
+
+[[equation:ece]]
+
+`B_b` is a confidence bin, |`B_b`| is its row count, `acc(B_b)` is its correctness fraction and `conf(B_b)` is its mean maximum score. Rows are grouped by their maximum rescaled score into ten equal-width intervals: [0, 0.1), [0.1, 0.2), and so on, with the final interval [0.9, 1] including one. Empty bins contribute nothing. ECE weights each bin's absolute accuracy-confidence gap by its share of rows. It is a bin-dependent summary of score reliability, not an individual phrase confidence or a distribution-free guarantee. A bin with mean score 0.90 and observed accuracy 0.70 contributes its row share multiplied by 0.20. Lower NLL, Brier and ECE are preferable within the same declared evaluation scope.
+
+Disagreement uses top-label differences and Jensen-Shannon distance. Reviewer experiments additionally record coverage and latency. Each measure answers a different question, so the interface does not combine them into an unsupported single effectiveness score.
 
 The strongest supported finding is that the combined XLM-R checkpoint fits the recorded bilingual synthetic task more effectively than the lexical baseline or mBERT configuration. The checking phrases reveal distribution sensitivity and confident mistakes. The calibration example shows improved fitting-set score calibration without correcting labels. Exact text guards, source metadata and annotation receipts improve experimental traceability but do not certify representative language coverage or label quality. No measured accuracy gain is assigned to optional fusion, human correction or contextual review without a corresponding controlled run.
 

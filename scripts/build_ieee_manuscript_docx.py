@@ -16,7 +16,7 @@ from urllib.parse import unquote
 from docx import Document
 from docx.enum.section import WD_SECTION
 from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
@@ -27,7 +27,7 @@ BASE = ROOT / "docs" / "ieee_manuscript"
 SOURCE = BASE / "manuscript.md"
 REFERENCES = BASE / "references.json"
 FIGURES = BASE / "figures"
-OUTPUT = ROOT / "outputs" / "23OctReview AdvayV KaavishG CD IEEE.docx"
+OUTPUT = ROOT / "outputs" / "23OctReview AdvayV KaavishG CD IEEE Explained.docx"
 
 LETTER_W, LETTER_H = 8.5, 11.0
 MARGIN = 0.75
@@ -241,6 +241,11 @@ def add_inline(paragraph, text: str, citations: dict[str, int] | None = None):
             run = paragraph.add_run(token[1:-1])
             run.italic = True
         elif token.startswith("`"):
+            from ieee_equations import INLINE_LATEX, append_inline_symbol
+            if token[1:-1] in INLINE_LATEX:
+                append_inline_symbol(paragraph, token[1:-1])
+                cursor = match.end()
+                continue
             run = paragraph.add_run(token[1:-1])
             _set_font(run, size=8.5, name="Consolas")
         elif token.startswith("[@"):
@@ -353,7 +358,7 @@ def _cover(doc: Document):
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p.paragraph_format.space_before = Pt(95)
     p.paragraph_format.space_after = Pt(26)
-    run = p.add_run("CodeMood Multilingual Emotion Detection")
+    run = p.add_run("CodeMood: Multilingual Emotion Detection")
     _set_font(run, size=24, bold=True)
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -368,7 +373,7 @@ def _cover(doc: Document):
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p.paragraph_format.space_before = Pt(24)
-    _set_font(p.add_run("Guided by Suganthini C"), size=12)
+    _set_font(p.add_run("Guided by:  Suganthini C"), size=12)
     for text in ("VIT Vellore", "Compiler Design", "23 October 2026"):
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -386,9 +391,26 @@ def _insert_page_number(doc: Document):
         p._p.append(field)
 
 
+def _add_display_equation(doc, key, number):
+    from ieee_equations import append_equation
+    p = doc.add_paragraph()
+    p.paragraph_format.space_before = Pt(5)
+    p.paragraph_format.space_after = Pt(5)
+    p.paragraph_format.keep_together = True
+    p.paragraph_format.keep_with_next = True
+    p.paragraph_format.line_spacing = 1.0
+    p.paragraph_format.tab_stops.add_tab_stop(Inches(COLUMN_W / 2), WD_TAB_ALIGNMENT.CENTER)
+    p.paragraph_format.tab_stops.add_tab_stop(Inches(COLUMN_W), WD_TAB_ALIGNMENT.RIGHT)
+    p.add_run("\t")
+    append_equation(p, key, font_size=8.5 if key in {"js", "ece", "weighted_ce", "nll"} else 9.0)
+    run=p.add_run("\t(" + str(number) + ")")
+    _set_font(run, size=8.5)
+
+
 def _render_main(doc: Document, lines: list[str], citations: dict[str, int], refs: list[dict]):
     in_code = False
     code_lines: list[str] = []
+    equation_number = 0
     i = 0
     while i < len(lines):
         raw = lines[i]
@@ -407,6 +429,12 @@ def _render_main(doc: Document, lines: list[str], citations: dict[str, int], ref
             i += 1
             continue
         if not line:
+            i += 1
+            continue
+        equation = re.fullmatch(r"\[\[equation:([a-z_0-9]+)\]\]", line)
+        if equation:
+            equation_number += 1
+            _add_display_equation(doc, equation.group(1), equation_number)
             i += 1
             continue
         image = _image_target(line)
@@ -472,6 +500,8 @@ def _render_main(doc: Document, lines: list[str], citations: dict[str, int], ref
             p = doc.add_paragraph()
             add_inline(p, line, citations)
             _set_paragraph_font(p, 10)
+            if line.startswith(("**Algorithm", "**Worked example")):
+                p.paragraph_format.keep_with_next = True
         i += 1
     if in_code:
         raise ValueError("Unclosed Markdown pseudocode fence")

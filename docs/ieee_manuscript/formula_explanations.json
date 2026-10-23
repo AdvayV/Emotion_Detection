@@ -1,0 +1,278 @@
+[
+  {
+    "key": "softmax_decision",
+    "section_anchor": "3.1 Module 1 Language preparation and seven emotion inference",
+    "equation_latex": "\\begin{aligned}p_{ic}&=\\frac{\\exp(z_{ic})}{\\sum_{k=1}^{7}\\exp(z_{ik})},\\\\\\widehat{y}_i&=\\operatorname*{arg\\,max}_{c\\in\\{1,\\ldots,7\\}}p_{ic}.\\end{aligned}",
+    "plain_label": "Seven-class probabilities and decision",
+    "explanation": "The trained head assigns one logit to each emotion: joy, sadness, anger, fear, surprise, disgust and neutral. Softmax converts these logits into nonnegative scores that sum to one; the largest score determines the displayed base label. The maximum is neither measured emotion intensity nor independently verified correctness probability.",
+    "symbols": [
+      {
+        "symbol": "i",
+        "meaning": "Phrase index."
+      },
+      {
+        "symbol": "c,k",
+        "meaning": "Seven emotion-class indices."
+      },
+      {
+        "symbol": "z_{ic}",
+        "meaning": "Class-c logit for phrase i."
+      },
+      {
+        "symbol": "p_{ic}",
+        "meaning": "Base softmax score."
+      },
+      {
+        "symbol": "\\widehat{y}_i",
+        "meaning": "Predicted class; deterministic tie order."
+      }
+    ]
+  },
+  {
+    "key": "temperature_scaling",
+    "section_anchor": "3.2 Module 2 Cue analysis confidence and contextual review",
+    "equation_latex": "p_{ic}^{(T)}=\\frac{p_{ic}^{1/T}}{\\sum_{k=1}^{7}p_{ik}^{1/T}},\\qquad T>0.",
+    "plain_label": "Temperature scaling of the stored distribution",
+    "explanation": "Scaling stored probabilities is equivalent to softmax of log probabilities divided by temperature. Zero entries remain zero. A temperature above one generally softens the distribution, while a value below one sharpens it. Positive scalar scaling preserves class ordering; it changes confidence scores rather than repairing a wrong label. The implementation restricts T to the interval [0.05, 20] and fits it using validation or dedicated calibration data.",
+    "symbols": [
+      {
+        "symbol": "T",
+        "meaning": "Fitted positive temperature."
+      },
+      {
+        "symbol": "p_{ic}^{(T)}",
+        "meaning": "Rescaled class score."
+      },
+      {
+        "symbol": "p_{ic}",
+        "meaning": "Original class score."
+      }
+    ]
+  },
+  {
+    "key": "jensen_shannon",
+    "section_anchor": "3.3 Module 3 Evaluation experiments and model disagreement",
+    "equation_latex": "\\begin{aligned}M_c&=\\tfrac12(P_c+Q_c),\\\\J(P,Q)&=\\tfrac12\\sum_{c:P_c>0}P_c\\log_2\\frac{P_c}{M_c}\\\\&\\quad+\\tfrac12\\sum_{c:Q_c>0}Q_c\\log_2\\frac{Q_c}{M_c},\\\\d_{\\mathrm{JS}}(P,Q)&=\\sqrt{\\max\\{0,J(P,Q)\\}}.\\end{aligned}",
+    "plain_label": "Jensen-Shannon divergence and distance",
+    "explanation": "The comparison aligns the same seven labels and normalizes each nonnegative vector before forming its midpoint. Base-two logarithms make divergence interpretable on a bounded scale; zero-probability terms are omitted. Distance takes the square root, with a numerical floor guarding against round-off. Larger disagreement does not identify which checkpoint is correct.",
+    "symbols": [
+      {
+        "symbol": "P,Q",
+        "meaning": "Normalized checkpoint distributions."
+      },
+      {
+        "symbol": "M_c",
+        "meaning": "Class-c midpoint probability."
+      },
+      {
+        "symbol": "J(P,Q)",
+        "meaning": "Base-two divergence."
+      },
+      {
+        "symbol": "d_{\\mathrm{JS}}",
+        "meaning": "Square-root distance."
+      }
+    ]
+  },
+  {
+    "key": "weighted_cross_entropy",
+    "section_anchor": "3.4 Module 4 Cloud training and audited annotation handoff",
+    "equation_latex": "\\begin{aligned}w_c&=\\frac{n_{\\mathrm{tr}}}{7\\max\\{n_c,1\\}},\\\\\\mathcal L_{\\mathcal B}&=-\\frac{\\sum_{i\\in\\mathcal B}w_{y_i}\\ln p_{i,y_i}}{\\sum_{i\\in\\mathcal B}w_{y_i}}.\\end{aligned}",
+    "plain_label": "Class-balanced training objective",
+    "explanation": "Class weights are computed from training labels only, increasing the relative contribution of less frequent classes. The count floor matches the implementation safeguard. Computed stably from logits, PyTorch takes a weighted mean: its denominator is the sum of target weights in the microbatch, not the number of rows. Gradient accumulation scales and averages these microbatch losses. Setting class weights to none gives the ordinary unweighted mean cross-entropy.",
+    "symbols": [
+      {
+        "symbol": "n_{\\mathrm{tr}}",
+        "meaning": "Training row count."
+      },
+      {
+        "symbol": "n_c",
+        "meaning": "Class-c training support."
+      },
+      {
+        "symbol": "w_c",
+        "meaning": "Class weight."
+      },
+      {
+        "symbol": "\\mathcal B",
+        "meaning": "Current microbatch."
+      },
+      {
+        "symbol": "y_i",
+        "meaning": "Supplied class label."
+      },
+      {
+        "symbol": "\\mathcal L_{\\mathcal B}",
+        "meaning": "Weighted microbatch loss."
+      }
+    ]
+  },
+  {
+    "key": "one_vs_rest_counts",
+    "section_anchor": "5.1 Accuracy and macro averaged F1",
+    "equation_latex": "\\begin{aligned}\\mathrm{TP}_c&=\\sum_{i=1}^{N}\\mathbb{1}[y_i=c\\land\\widehat y_i=c],\\\\\\mathrm{FP}_c&=\\sum_{i=1}^{N}\\mathbb{1}[y_i\\ne c\\land\\widehat y_i=c],\\\\\\mathrm{FN}_c&=\\sum_{i=1}^{N}\\mathbb{1}[y_i=c\\land\\widehat y_i\\ne c].\\end{aligned}",
+    "plain_label": "One-versus-rest counts for an emotion",
+    "explanation": "Each emotion is evaluated against the other six classes. A true positive is a correctly predicted instance of the selected emotion. A false positive assigns that emotion to another class, while a false negative misses a supplied instance of it. Counts depend on the supplied file's annotation quality and evaluation scope.",
+    "symbols": [
+      {
+        "symbol": "N",
+        "meaning": "Labelled evaluation row count."
+      },
+      {
+        "symbol": "y_i",
+        "meaning": "Supplied target."
+      },
+      {
+        "symbol": "\\widehat y_i",
+        "meaning": "Predicted label."
+      },
+      {
+        "symbol": "\\mathbb{1}[A]",
+        "meaning": "Indicator: one if true, otherwise zero."
+      },
+      {
+        "symbol": "\\mathrm{TP}_c,\\mathrm{FP}_c,\\mathrm{FN}_c",
+        "meaning": "Counts for class c."
+      }
+    ]
+  },
+  {
+    "key": "precision_recall_f1",
+    "section_anchor": "5.1 Accuracy and macro averaged F1",
+    "equation_latex": "\\begin{aligned}\\mathrm{Prec}_c&=\\frac{\\mathrm{TP}_c}{\\mathrm{TP}_c+\\mathrm{FP}_c},\\qquad\\mathrm{Rec}_c=\\frac{\\mathrm{TP}_c}{\\mathrm{TP}_c+\\mathrm{FN}_c},\\\\F_{1,c}&=\\frac{2\\,\\mathrm{Prec}_c\\,\\mathrm{Rec}_c}{\\mathrm{Prec}_c+\\mathrm{Rec}_c}.\\end{aligned}",
+    "plain_label": "Per-class precision, recall and F1",
+    "explanation": "Precision measures how often predictions of an emotion are correct; recall measures how many supplied instances of that emotion are recovered. F1 is their harmonic mean, so both kinds of error matter. The evaluator assigns zero whenever a denominator is zero. F1 summarizes classification outcomes over labelled rows: it is neither the confidence score of an individual phrase nor the fraction of all rows classified correctly.",
+    "symbols": [
+      {
+        "symbol": "\\mathrm{Prec}_c",
+        "meaning": "Precision for class c."
+      },
+      {
+        "symbol": "\\mathrm{Rec}_c",
+        "meaning": "Recall for class c."
+      },
+      {
+        "symbol": "F_{1,c}",
+        "meaning": "Class-specific F1."
+      }
+    ]
+  },
+  {
+    "key": "macro_f1_accuracy",
+    "section_anchor": "5.1 Accuracy and macro averaged F1",
+    "equation_latex": "\\begin{aligned}F_{1,\\mathrm{macro}}&=\\frac{1}{7}\\sum_{c=1}^{7}F_{1,c},\\\\\\mathrm{Accuracy}&=\\frac{1}{N}\\sum_{i=1}^{N}\\mathbb{1}[\\widehat y_i=y_i].\\end{aligned}",
+    "plain_label": "Seven-class macro-F1 and accuracy",
+    "explanation": "Macro-F1 gives every emotion equal weight, including a class whose F1 is zero. Accuracy instead gives each evaluated row equal weight. The two measures can therefore differ when classes have unequal support or errors concentrate in particular emotions. Reporting both with class support and a confusion matrix avoids hiding a weak class behind a strong overall average.",
+    "symbols": [
+      {
+        "symbol": "F_{1,\\mathrm{macro}}",
+        "meaning": "Mean of seven class F1 values."
+      },
+      {
+        "symbol": "N",
+        "meaning": "Labelled row count."
+      },
+      {
+        "symbol": "\\mathrm{Accuracy}",
+        "meaning": "Fraction of correctly labelled predictions."
+      }
+    ]
+  },
+  {
+    "key": "sadness_worked_example",
+    "section_anchor": "5.1 Accuracy and macro averaged F1",
+    "equation_latex": "\\begin{aligned}\\mathrm{Prec}_{\\mathrm{sad}}&=\\frac{8}{8+2}=0.8000,\\\\\\mathrm{Rec}_{\\mathrm{sad}}&=\\frac{8}{8+4}\\approx0.6667,\\\\F_{1,\\mathrm{sad}}&=\\frac{2(8)}{2(8)+2+4}\\approx0.7273.\\end{aligned}",
+    "plain_label": "Illustrative sadness calculation",
+    "explanation": "Suppose a hypothetical evaluation contains eight correctly identified sadness instances, two other emotions incorrectly predicted as sadness, and four sadness instances missed. The classifier makes ten sadness predictions and recovers eight of twelve supplied sadness instances. Their harmonic mean is approximately 0.7273. This example explains the calculation and supplies no additional checkpoint measurement; it should not be substituted into the results tables.",
+    "symbols": [
+      {
+        "symbol": "\\mathrm{TP}_{\\mathrm{sad}}=8",
+        "meaning": "Illustrative true positives."
+      },
+      {
+        "symbol": "\\mathrm{FP}_{\\mathrm{sad}}=2",
+        "meaning": "Illustrative false positives."
+      },
+      {
+        "symbol": "\\mathrm{FN}_{\\mathrm{sad}}=4",
+        "meaning": "Illustrative false negatives."
+      }
+    ],
+    "worked_example": "Illustrative counts only; not an observed result for any installed model."
+  },
+  {
+    "key": "negative_log_likelihood",
+    "section_anchor": "5.3 Interpreting effectiveness",
+    "equation_latex": "\\mathrm{NLL}(T)=-\\frac1N\\sum_{i=1}^{N}\\ln\\!\\left(\\max\\{p_{i,y_i}^{(T)},10^{-300}\\}\\right).",
+    "plain_label": "Negative log-likelihood with the implemented floor",
+    "explanation": "NLL penalizes low probability assigned to the supplied target, with a particularly large penalty for confident mistakes. The implementation uses the natural logarithm and floors only the target probability at 10 to the power minus 300 before taking its log. Lower values indicate better target-probability fit on the evaluated rows. Improvement on the temperature-fitting subset is not independent evidence of calibration on another distribution.",
+    "symbols": [
+      {
+        "symbol": "p_{i,y_i}^{(T)}",
+        "meaning": "Rescaled target probability."
+      },
+      {
+        "symbol": "N",
+        "meaning": "Measured row count."
+      },
+      {
+        "symbol": "10^{-300}",
+        "meaning": "Numerical logarithm floor."
+      },
+      {
+        "symbol": "\\ln",
+        "meaning": "Natural logarithm."
+      }
+    ]
+  },
+  {
+    "key": "multiclass_brier",
+    "section_anchor": "5.3 Interpreting effectiveness",
+    "equation_latex": "\\mathrm{Brier}(T)=\\frac1N\\sum_{i=1}^{N}\\sum_{c=1}^{7}\\left(p_{ic}^{(T)}-\\mathbb{1}[y_i=c]\\right)^2.",
+    "plain_label": "Multiclass Brier score using the class-sum convention",
+    "explanation": "The Brier score compares the full predicted distribution with the one-hot target vector, penalizing squared errors across all seven classes. The implementation sums class errors and then averages across rows; it does not divide by seven. This convention matters when comparing numerical scores with other sources. Lower is better on the stated data, but a lower fitting-set score alone does not establish transfer calibration.",
+    "symbols": [
+      {
+        "symbol": "p_{ic}^{(T)}",
+        "meaning": "Rescaled class probability."
+      },
+      {
+        "symbol": "\\mathbb{1}[y_i=c]",
+        "meaning": "One-hot target component."
+      },
+      {
+        "symbol": "N",
+        "meaning": "Measured row count."
+      }
+    ]
+  },
+  {
+    "key": "expected_calibration_error",
+    "section_anchor": "5.3 Interpreting effectiveness",
+    "equation_latex": "\\begin{aligned}a_b&=\\frac1{|E_b|}\\sum_{i\\in E_b}\\mathbb{1}[\\widehat y_i=y_i],\\\\q_b&=\\frac1{|E_b|}\\sum_{i\\in E_b}s_i,\\\\\\mathrm{ECE}&=\\sum_{b:|E_b|>0}\\frac{|E_b|}{N}|a_b-q_b|,\\qquad B=10.\\end{aligned}",
+    "plain_label": "Ten-bin expected calibration error",
+    "explanation": "Rows are grouped by their maximum rescaled score into ten equal-width intervals: [0, 0.1), [0.1, 0.2), and so on, with the final interval [0.9, 1] including one. Empty bins contribute nothing. ECE weights each bin's absolute accuracy-confidence gap by its share of rows. It is a bin-dependent summary of score reliability, not an individual phrase confidence or a distribution-free guarantee.",
+    "symbols": [
+      {
+        "symbol": "s_i=\\max_c p_{ic}^{(T)}",
+        "meaning": "Maximum rescaled score."
+      },
+      {
+        "symbol": "E_b",
+        "meaning": "Rows in confidence bin b."
+      },
+      {
+        "symbol": "a_b",
+        "meaning": "Bin correctness fraction."
+      },
+      {
+        "symbol": "q_b",
+        "meaning": "Bin mean confidence."
+      },
+      {
+        "symbol": "B=10",
+        "meaning": "Equal-width bin count."
+      }
+    ]
+  }
+]
