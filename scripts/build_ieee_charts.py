@@ -8,6 +8,7 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+plt.rcParams["pdf.fonttype"] = 42
 import numpy as np
 from matplotlib.ticker import PercentFormatter
 
@@ -148,9 +149,9 @@ def build_evidence() -> dict:
         "not_a_human_benchmark": True,
     }
     software_verification = {
-        "source": "coordinator-provided project verification record",
-        "tests_passed": 221,
-        "subtests_passed": 33,
+        "source": "docs/evaluation/software_verification.json",
+        "tests_passed": read_json("docs/evaluation/software_verification.json")["tests_passed"],
+        "subtests_passed": read_json("docs/evaluation/software_verification.json")["subtests_passed"],
         "new_model_training_run": False,
     }
     mbert_completed_metadata = read_json("colab/mbert_study/completed_metadata.json")
@@ -170,7 +171,7 @@ def build_evidence() -> dict:
         raise ValueError("mBERT completed metadata does not match installed metric artifact")
     return {
         "schema_version": 1,
-        "evidence_snapshot": "2026-10-23",
+        "evidence_snapshot": "2026-10-29",
         "study_status": "reanalysis_of_saved_runs_no_new_training",
         "task": "seven-class emotion classification",
         "classes": list(LABELS),
@@ -243,6 +244,7 @@ def build_model_comparison(models: dict):
              ha="left", va="top", fontsize=7.2, color="#333333", wrap=True)
     fig.tight_layout(rect=(0.015, 0.04, 0.995, 0.92), w_pad=1.0)
     fig.savefig(FIGURES / "model_comparison.png", dpi=300, bbox_inches="tight", pad_inches=0.08)
+    fig.savefig(FIGURES / "model_comparison.pdf", bbox_inches="tight", pad_inches=0.08)
     plt.close(fig)
 
 
@@ -286,6 +288,7 @@ def build_training_history(models: dict):
              ha="left", va="bottom", fontsize=7.2, color="#333333", wrap=True)
     fig.tight_layout(rect=(0.025, 0.065, 0.99, 0.94), h_pad=0.8)
     fig.savefig(FIGURES / "training_history.png", dpi=300, bbox_inches="tight", pad_inches=0.08)
+    fig.savefig(FIGURES / "training_history.pdf", bbox_inches="tight", pad_inches=0.08)
     plt.close(fig)
 
 

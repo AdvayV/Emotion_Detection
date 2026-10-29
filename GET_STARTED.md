@@ -34,6 +34,27 @@ new model. See the results and evaluation limits below.
 For the saved model review and implementation snapshot, open the
 [23 October report](Documents%20for%20review/Review%20reports/23OctReview%20AdvayV%20KaavishG%20CD.docx).
 
+## Current scope and safeguards
+
+The emotion-first dashboard has eight workspaces. Overview reads readiness from
+`dashboard/readiness.py` for three encoder families across two language profiles;
+four installed checkpoint directories represent those three families. XLM-R and
+mBERT support `hi-en` and `fr-en`; MuRIL supports `hi-en` only. The separate
+legacy sentiment task has three classes. The four module flows are live prediction,
+matched comparison, Colab training and human review.
+
+Known unsupported checkpoint language pairs are rejected for single, context and
+batch emotion prediction, and `evaluate-emotions` checks all pairs before scoring.
+Unknown coverage in legacy metadata remains experimental and warned. For CLI
+`predict-file`, `--allow-fallback` explicitly permits demo fallback; matched
+comparison never falls back.
+
+Training code is available separately from installed weights and measured
+effectiveness. No fusion, learned-context or supervised sarcasm weights are
+installed, and there is no reinforcement learning. Independent human-labelled
+accuracy and any Qwen benefit remain unmeasured. The revised IEEE report targets
+16 pages after the alignment revision.
+
 ## Predict phrases or score a file
 
 **Try a phrase:** choose an example or type your message and click Detect emotion.

@@ -110,13 +110,34 @@ def main():
         expected = "| " + label + " | " + " | ".join(f'{loaded[k]["test"]["per_class"][label]["f1"]:.4f}' for k in ("xlmr","mbert","muril")) + " |"
         assert expected in markdown, expected
     assert markdown.count("**Algorithm ") == 4
-    assert len(latex.IMAGE_RE.findall(markdown)) == 5
-    assert "## 2 Literature Survey" in markdown
+    assert len(latex.IMAGE_RE.findall(markdown)) == 7
+    assert "## 2 Related Work" in markdown
+    figures = {Path(target).stem for _, target in latex.IMAGE_RE.findall(markdown)}
+    table_labels = {label for label, _ in latex.TABLE_LAYOUTS.values()}
+    for kind, key in re.findall(r"\[\[(fig|tab|eq):([A-Za-z0-9_.-]+)\]\]", markdown):
+        assert key in {"fig": figures, "tab":table_labels, "eq":set(LATEX)}[kind], (kind,key)
+    replay = read("docs/evaluation/comparison_verification.json")
+    assert replay["scored_rows"]==1000 and replay["excluded_overlap_rows"]==0
+    replay_models={model["model"]:model for model in replay["models"]}
+    for key, model_name in [("xlmr","XLM-R"),("mbert","mBERT"),("muril","MuRIL")]:
+        actual=loaded[key]["test_by_language"]["hi-en"]
+        for metric in ("accuracy","macro_f1"): close(replay_models[model_name][metric],actual[metric],model_name+" replay "+metric)
+    for pair in replay["paired_comparisons"]:
+        assert sum(pair[k] for k in ("both_correct","left_only_correct","right_only_correct","both_wrong"))==1000
+        close(pair["both_correct"]+pair["left_only_correct"],replay_models[pair["left"]]["accuracy"]*1000,"paired left count")
+        close(pair["both_correct"]+pair["right_only_correct"],replay_models[pair["right"]]["accuracy"]*1000,"paired right count")
+    software=read("docs/evaluation/software_verification.json")
+    assert software["tests_passed"]>=240 and software["subtests_passed"]>=33
+    assert replay["implementation_revision"]==software["implementation_revision"]
+    assert software["implementation_revision"] in markdown
+    assert "{{" not in markdown
+    assert len(re.findall(r"(?m)^\|[^\n]*$", markdown)) > 10
+    assert "https://github.com/AdvayV/Emotion_Detection" in markdown
     calibration = read("docs/oct23review/calibration_example.json")
     assert calibration["rows"] == 98 and not calibration["accuracy_changed"] and not calibration["independent_evaluation"]
-    report = {"checked_on": str(date.today()), "status": "passed", "method": "Recomputed saved confusion-matrix metrics and checked metadata, Colab copies, diagnostic file hashes, citations and equation coverage; no new model training or inference.", "models": verified, "current_training_datasets":dataset_checks, "lexical_baseline": baseline_verified, "diagnostic_file_hashes_match": True, "colab_metric_copies_match": True, "citations": {"references":31,"all_cited":True,"source_links_previously_verified":True}, "equations":18, "algorithms":4, "figures":5, "corresponding_author": {"name":"Suganthini C","email":"suganthini.c@vit.ac.in","source":"user-provided identity, affiliation and contact"}, "scope_limits":["All model accuracy tables concern saved synthetic test sets.","MuRIL has a smaller Hindi-English training scope than bilingual XLM-R/mBERT.","The 98-row calibration measurements use their fitting set, not a new test set.","Optional fusion, contextual and sarcasm heads are implemented training capabilities, not measured accuracy gains.","The software test count describes the prior completed suite, not a fresh rerun for this formatting revision."]}
+    report = {"checked_on": str(date.today()), "status": "passed", "method": "Recomputed saved confusion-matrix metrics and checked metadata, Colab copies, diagnostic file hashes, citations and equation coverage; no new model training or inference.", "models": verified, "current_training_datasets":dataset_checks, "lexical_baseline": baseline_verified, "diagnostic_file_hashes_match": True, "colab_metric_copies_match": True, "citations": {"references":31,"all_cited":True,"source_links_previously_verified":True}, "equations":18, "algorithms":4, "figures":7, "tables":10, "matched_replay":replay, "software_verification":software, "corresponding_author": {"name":"Suganthini C","email":"suganthini.c@vit.ac.in","source":"user-provided identity, affiliation and contact"}, "scope_limits":["All model accuracy tables concern saved synthetic test sets.","MuRIL has a smaller Hindi-English training scope than bilingual XLM-R/mBERT.","The 98-row calibration measurements use their fitting set, not a new test set.","Optional fusion, contextual and sarcasm heads are implemented training capabilities, not measured accuracy gains.","The software test count describes the prior completed suite, not a fresh rerun for this formatting revision."]}
     (BASE/"verification_report.json").write_text(json.dumps(report,indent=2)+"\n",encoding="utf-8")
-    print(json.dumps({"status":"passed","models":verified,"references":31,"equations":18,"figures":5},indent=2))
+    print(json.dumps({"status":"passed","models":verified,"references":31,"equations":18,"figures":7},indent=2))
 
 if __name__ == "__main__":
     main()

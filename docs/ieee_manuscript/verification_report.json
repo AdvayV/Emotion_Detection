@@ -1,5 +1,5 @@
 {
-  "checked_on": "2026-10-28",
+  "checked_on": "2026-10-29",
   "status": "passed",
   "method": "Recomputed saved confusion-matrix metrics and checked metadata, Colab copies, diagnostic file hashes, citations and equation coverage; no new model training or inference.",
   "models": {
@@ -117,7 +117,101 @@
   },
   "equations": 18,
   "algorithms": 4,
-  "figures": 5,
+  "figures": 7,
+  "tables": 10,
+  "matched_replay": {
+    "checked_on": "2026-10-29",
+    "implementation_revision": "2885df0933143bb9ce17b2acce9165398ac4ec57",
+    "language_pair": "hi-en",
+    "source_dataset": "data/training/multilingual_bootstrap_v1/hindi_english/test.csv",
+    "input_file_sha256": "fddcc925c1894137ce5fdc4e420bef4be9a090d9a2cf72a6462fe6c50484bc85",
+    "dataset_sha256": "ce3800618f564fe2f3b3f0bacb9e0b093f892e47126898b48ce8be303f1d6300",
+    "scope": "synthetic-only held-out test; not an independent human-language benchmark",
+    "scored_rows": 1000,
+    "excluded_overlap_rows": 0,
+    "models": [
+      {
+        "model": "XLM-R",
+        "scored_rows": 1000,
+        "accuracy": 0.956,
+        "macro_f1": 0.9562988745707631,
+        "prediction_seconds": 151.0085548000061,
+        "load_seconds": 65.85321440000553,
+        "overlap_check_available": true,
+        "checkpoint_version_unchanged": true,
+        "matches_saved_language_test_metrics": true
+      },
+      {
+        "model": "mBERT",
+        "scored_rows": 1000,
+        "accuracy": 0.843,
+        "macro_f1": 0.8439217764041637,
+        "prediction_seconds": 145.0304220999824,
+        "load_seconds": 1.043499699968379,
+        "overlap_check_available": true,
+        "checkpoint_version_unchanged": true,
+        "matches_saved_language_test_metrics": true
+      },
+      {
+        "model": "MuRIL",
+        "scored_rows": 1000,
+        "accuracy": 0.803,
+        "macro_f1": 0.8123164552869595,
+        "prediction_seconds": 141.639188000001,
+        "load_seconds": 1.209638600004837,
+        "overlap_check_available": true,
+        "checkpoint_version_unchanged": true,
+        "matches_saved_language_test_metrics": true
+      }
+    ],
+    "paired_comparisons": [
+      {
+        "left": "XLM-R",
+        "right": "mBERT",
+        "scored_rows": 1000,
+        "both_correct": 818,
+        "left_only_correct": 138,
+        "right_only_correct": 25,
+        "both_wrong": 19,
+        "agreement_all_selected_rows": 0.818
+      },
+      {
+        "left": "XLM-R",
+        "right": "MuRIL",
+        "scored_rows": 1000,
+        "both_correct": 759,
+        "left_only_correct": 197,
+        "right_only_correct": 44,
+        "both_wrong": 0,
+        "agreement_all_selected_rows": 0.759
+      },
+      {
+        "left": "mBERT",
+        "right": "MuRIL",
+        "scored_rows": 1000,
+        "both_correct": 751,
+        "left_only_correct": 92,
+        "right_only_correct": 52,
+        "both_wrong": 105,
+        "agreement_all_selected_rows": 0.798
+      }
+    ],
+    "runtime": {
+      "device": "cpu",
+      "threads": 2,
+      "batch_size": 4
+    },
+    "comparison_note": "Same held-out rows; XLM-R/mBERT trained on16k bilingual examples,MuRIL on8khi-en examples; not an encoder-only causal comparison. No research weights or frozen data changed."
+  },
+  "software_verification": {
+    "verified_on": "2026-10-29",
+    "implementation_revision": "2885df0933143bb9ce17b2acce9165398ac4ec57",
+    "suite": "python -m pytest tests -q",
+    "tests_passed": 254,
+    "subtests_passed": 33,
+    "source_log_sha256": "aba8db06885359ceee70dfebed821ac57c123565e6528ee9254ad8ec0fc2cd2c",
+    "scope": "Software regression verification, not model accuracy. No research checkpoints or frozen datasets were changed."
+  },
   "corresponding_author": {
     "name": "Suganthini C",
     "email": "suganthini.c@vit.ac.in",
@@ -132,11 +226,81 @@
   ],
   "compiled_document": {
     "class": "IEEEtran journal",
-    "pages": 11,
+    "pages": 16,
+    "page_count_requirement": "15\u201318",
+    "figures": 7,
+    "tables": 10,
+    "equations": 18,
+    "references": 31,
     "all_pages_visually_reviewed": true,
-    "missing_glyphs": false,
-    "undefined_citations": false,
-    "overfull_boxes": false,
-    "pdf_sha256": "f01b672a458d3e46db62fba613d7e7b8fa2142fd608f6dc2b76869ec147db696"
+    "no_overfull_boxes": true,
+    "active_code_revision_link_checked": true,
+    "font_embedding": [
+      {
+        "font": "/IHAIZV+NimbusRomNo9L-Regu",
+        "embedded": true
+      },
+      {
+        "font": "/BZIVMZ+NimbusRomNo9L-MediItal",
+        "embedded": true
+      },
+      {
+        "font": "/IXFAWU+NimbusRomNo9L-Medi",
+        "embedded": true
+      },
+      {
+        "font": "/TQTHRL+NimbusRomNo9L-ReguItal",
+        "embedded": true
+      },
+      {
+        "font": "/YEUUOC+NimbusMonL-Regu",
+        "embedded": true
+      },
+      {
+        "font": "/AKHCZK+CMMI10",
+        "embedded": true
+      },
+      {
+        "font": "/VDVGTR+CMMI7",
+        "embedded": true
+      },
+      {
+        "font": "/CAFSZL+CMR10",
+        "embedded": true
+      },
+      {
+        "font": "/DDIEWW+CMMI5",
+        "embedded": true
+      },
+      {
+        "font": "/FKPJSN+CMEX10",
+        "embedded": true
+      },
+      {
+        "font": "/PVTTLK+CMR7",
+        "embedded": true
+      },
+      {
+        "font": "/JAGKKY+CMSY7",
+        "embedded": true
+      },
+      {
+        "font": "/NOMARO+CMSY10",
+        "embedded": true
+      },
+      {
+        "font": "/KPXLOM+MSBM10",
+        "embedded": true
+      },
+      {
+        "font": "/EVICAO+DejaVuSans-Bold",
+        "embedded": true
+      },
+      {
+        "font": "/BMQQDV+DejaVuSans",
+        "embedded": true
+      }
+    ],
+    "pdf_sha256": "20f3ca4d3b96d09d8a53450a8ca5240793383cd7d04dd1fe80d866eda18d4633"
   }
 }

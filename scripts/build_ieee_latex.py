@@ -26,9 +26,9 @@ OUTPUT_ZIP = ROOT / "Documents for review" / "Latest IEEE paper" / "CodeMood_IEE
 IMAGE_RE = re.compile(r"!\[([^\]]*)\]\(([^)]+)\)")
 LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 CITATION_RE = re.compile(r"\[@([^]]+)\]")
-INLINE_RE = re.compile(r"(\*\*.+?\*\*|(?<!\*)\*[^*]+\*(?!\*)|`[^`]+`|\[@[^]]+\]|\[[^\]]+\]\([^)]+\)|\$[^$]+\$)")
+INLINE_RE = re.compile(r"(\[\[(?:fig|tab|eq):[A-Za-z0-9_.-]+\]\]|\*\*.+?\*\*|(?<!\*)\*[^*]+\*(?!\*)|`[^`]+`|\[@[^]]+\]|\[[^\]]+\]\([^)]+\)|\$[^$]+\$)")
 FENCE_RE = re.compile(r"^```(?:[A-Za-z0-9_-]+)?\s*$", re.I)
-ASSET_EXTENSIONS = {".png", ".svg", ".mmd", ".tex", ".tikz"}
+ASSET_EXTENSIONS = {".png", ".pdf", ".svg", ".mmd", ".tex", ".tikz"}
 
 
 def read_references():
@@ -80,7 +80,12 @@ def latex_inline(text: str, known_keys: set[str]) -> str:
     for match in INLINE_RE.finditer(text):
         out.append(latex_escape(text[cursor:match.start()]))
         token = match.group(0)
-        if token.startswith("**"):
+        if token.startswith("[["):
+            kind, key = token[2:-2].split(":", 1)
+            if kind == "fig": out.append(r"Fig.~\ref{fig:" + key + "}")
+            elif kind == "tab": out.append(r"Table~\ref{tab:" + key + "}")
+            else: out.append(r"\eqref{eq:" + key + "}")
+        elif token.startswith("**"):
             out.append(r"\textbf{" + latex_inline(token[2:-2], known_keys) + "}")
         elif token.startswith("*"):
             out.append(r"\emph{" + latex_inline(token[1:-1], known_keys) + "}")
@@ -97,7 +102,8 @@ def latex_inline(text: str, known_keys: set[str]) -> str:
                 "TP / (TP + FP)": r"\(\mathrm{TP}/(\mathrm{TP}+\mathrm{FP})\)",
                 "TP / (TP + FN)": r"\(\mathrm{TP}/(\mathrm{TP}+\mathrm{FN})\)",
             }
-            out.append(maths.get(token[1:-1], r"\texttt{" + latex_escape(token[1:-1]) + "}"))
+            code = latex_escape(token[1:-1]).replace("/", r"/\allowbreak{}").replace(r"\_", r"\_\allowbreak{}")
+            out.append(maths.get(token[1:-1], r"\texttt{" + code + "}"))
         elif token.startswith("[@"):
             keys = _citation_keys(token)
             missing = [key for key in keys if key not in known_keys]
@@ -108,8 +114,14 @@ def latex_inline(text: str, known_keys: set[str]) -> str:
             # Keep inline math as LaTeX math rather than escaping its operators.
             out.append(token)
         else:
-            label, _target = LINK_RE.fullmatch(token).groups()
-            out.append(latex_escape(label))
+            label, target = LINK_RE.fullmatch(token).groups()
+            if target.startswith(("https://", "http://")):
+                if label == target:
+                    out.append(r"\url{" + target + "}")
+                else:
+                    out.append(r"\href{" + target.replace("#", r"\#").replace("%", r"\%") + "}{" + latex_escape(label) + "}")
+            else:
+                out.append(latex_escape(label))
         cursor = match.end()
     out.append(latex_escape(text[cursor:]))
     return "".join(out)
@@ -156,7 +168,7 @@ def render_bibtex(records: list[dict]) -> str:
             "davani2022": ("Transactions of the Association for Computational Linguistics", "10", ""),
             "bender2018": ("Transactions of the Association for Computational Linguistics", "6", ""),
             "kraljnovak2015": ("PLOS ONE", "10", "12"),
-            "gebru2021": ("Communications of the ACM", "", ""),
+            "gebru2021": ("Communications of the ACM", "64", "12"),
         }
         key = record["key"]
         if key in journals:
@@ -214,7 +226,7 @@ def render_bibtex(records: list[dict]) -> str:
             if record.get(key):
                 fields.append(f"  {key} = {{{_bib_escape(record[key])}}}")
         if record.get("url"):
-            fields.append(f"  url = {{{_bib_escape(record['url'])}}}")
+            fields.append(f"  url = {{{record['url']}}}")
         entries.append(f"@{entry_type}{{{record['key']},\n" + ",\n".join(fields) + "\n}")
     return "\n\n".join(entries) + "\n"
 
@@ -246,7 +258,9 @@ def _figure_assets(target: str) -> tuple[str, str | None, Path]:
                 break
         if tex:
             break
-    return f"figures/{png.name}", tex, png
+    vector_pdf = png.with_suffix(".pdf")
+    image_ref = f"figures/{vector_pdf.name}" if vector_pdf.is_file() else f"figures/{png.name}"
+    return image_ref, tex, png
 
 
 def _figure_latex(caption: str, target: str) -> str:
@@ -254,15 +268,15 @@ def _figure_latex(caption: str, target: str) -> str:
     stem = Path(target).stem
     caption = re.sub(r"^(?:Fig(?:ure)?\.?\s*)\d+\s*[.:]\s*", "", caption.strip(), flags=re.I)
     caption_tex = latex_inline(caption, KNOWN_KEYS)
-    label = re.sub(r"[^A-Za-z0-9:.-]+", "-", stem)
+    label = re.sub(r"[^A-Za-z0-9_:.-]+", "-", stem)
     if stem == "master_architecture":
         visual = (rf"\resizebox{{.96\textwidth}}{{!}}{{\input{{{tikz_path}}}}}" if tikz_path else
                   rf"\includegraphics[width=.96\textwidth,height=.82\textheight,keepaspectratio]{{{image_ref}}}")
         return ("\\begin{figure*}[p]\n\\centering\n" + visual + "\n" +
                 "\\caption{" + caption_tex + "}\\label{fig:" + label + "}\n\\end{figure*}\n")
-    is_wide = stem in {"model_comparison", "training_history"}
+    is_wide = stem in {"model_comparison", "training_history", "encoder_adaptation", "matched_evaluation"}
     env = "figure*" if is_wide else "figure"
-    width = ".88\\textwidth" if is_wide else ".98\\columnwidth"
+    width = ".84\\textwidth" if stem == "encoder_adaptation" else ".94\\textwidth" if is_wide else ".98\\columnwidth"
     max_h = ".38\\textheight" if is_wide else ".34\\textheight"
     visual = rf"\resizebox{{{width}}}{{!}}{{\input{{{tikz_path}}}}}" if tikz_path else rf"\includegraphics[width={width},height={max_h},keepaspectratio]{{{image_ref}}}"
     return (
@@ -282,16 +296,30 @@ def _table_rows(lines: list[str]) -> list[list[str]]:
     return [row + [""] * (count - len(row)) for row in rows]
 
 
-TABLE_TITLES = ["Seven emotion checkpoint outputs", "Dataset resources and partitions", "Per class F1 within each model test scope", "Validation subset confidence scaling", "Checking phrase diagnostics", "Matched bilingual synthetic test comparison"]
+TABLE_LAYOUTS = {
+    "capability": ("feature_traceability", "Capability, Implementation Location, and Evidence Status"),
+    "encoder": ("encoder_properties", "Installed Encoder Properties and Tokenizers"),
+    "checkpoint output": ("emotion_labels", "Seven-Emotion Label Definitions"),
+    "data resource": ("dataset_partitions", "Dataset Resources and Frozen Partitions"),
+    "emotion": ("class_f1", "Per-Class F1 in Each Recorded Test Scope"),
+    "confidence measure": ("calibration_fit", "Probability Quality Before and After Temperature Scaling"),
+    "model": ("matched_scores", "Matched Hindi-English Replay on 1,000 Synthetic Test Rows"),
+    "model pair": ("paired_errors", "Paired Correctness on the Shared Hindi-English Scoring Set"),
+    "checking set": ("checking_diagnostics", "Unreviewed Checking-Phrase Diagnostics"),
+    "method on bilingual test": ("bilingual_scores", "Matched Bilingual Synthetic Test Comparison"),
+}
 TABLE_COUNTER = 0
 
 def _table_latex(lines: list[str]) -> str:
     global TABLE_COUNTER
-    title = TABLE_TITLES[TABLE_COUNTER]
     TABLE_COUNTER += 1
     rows = _table_rows(lines)
     if not rows:
         return ""
+    key = rows[0][0].casefold()
+    if key not in TABLE_LAYOUTS:
+        raise ValueError(f"Table header needs a caption/label mapping: {rows[0][0]}")
+    label, title = TABLE_LAYOUTS[key]
     columns = len(rows[0])
     # X columns wrap long descriptors; right-aligned X is used for numeric data.
     specs = []
@@ -301,7 +329,10 @@ def _table_latex(lines: list[str]) -> str:
         alignment = r"\raggedleft" if numeric and len(rows[0][ci]) <= 18 else r"\raggedright"
         specs.append(r">{" + alignment + r"\arraybackslash}X")
     spec = "@{}" + "".join(specs) + "@{}"
-    rendered = ["\\begin{table}[!t]", "\\caption{" + title + "}", "\\centering", "\\footnotesize", rf"\begin{{tabularx}}{{\columnwidth}}{{{spec}}}", "\\toprule"]
+    wide = label in {"feature_traceability", "encoder_properties"}
+    environment = "table*" if wide else "table"
+    table_width = r"\textwidth" if wide else r"\columnwidth"
+    rendered = [f"\\begin{{{environment}}}[!t]", "\\caption{" + title + "}\\label{tab:" + label + "}", "\\centering", "\\footnotesize", rf"\begin{{tabularx}}{{{table_width}}}{{{spec}}}", "\\toprule"]
     for ri, row in enumerate(rows):
         cells = [latex_inline(value, KNOWN_KEYS) for value in row]
         if ri == 0:
@@ -309,7 +340,7 @@ def _table_latex(lines: list[str]) -> str:
         rendered.append(" & ".join(cells) + r" \\")
         if ri == 0:
             rendered.append("\\midrule")
-    rendered.extend(["\\bottomrule", "\\end{tabularx}", "\\end{table}"])
+    rendered.extend(["\\bottomrule", "\\end{tabularx}", f"\\end{{{environment}}}"])
     return "\n".join(rendered) + "\n"
 
 
@@ -327,7 +358,7 @@ def _heading(text: str, level: int) -> str:
 def render_body(markdown: str, records: list[dict]) -> str:
     global KNOWN_KEYS
     KNOWN_KEYS = {record["key"] for record in records}
-    markdown = re.sub(r"(?m)^\*\*Keywords:\*\*\s*(.+)$", r"## Keywords\n\n\1", markdown)
+    markdown = re.sub(r"(?m)^\*\*(?:Keywords|Index Terms):\*\*\s*(.+)$", r"## Keywords\n\n\1", markdown)
     lines = markdown.splitlines()
     output = []
     in_abstract = False
@@ -343,7 +374,7 @@ def render_body(markdown: str, records: list[dict]) -> str:
                 listing = "\\begin{lstlisting}\n" + "\n".join(code_lines) + "\n\\end{lstlisting}"
                 if output and output[-1].startswith(r"\textbf{Algorithm"):
                     heading = output.pop()
-                    listing = "\\noindent\\begin{minipage}{\\columnwidth}\n" + heading + "\n" + listing + "\n\\end{minipage}"
+                    listing = "\\par\\smallskip\\noindent\\begin{minipage}[t]{\\columnwidth}\n" + heading + "\n" + listing + "\n\\end{minipage}\\par\\smallskip"
                 output.append(listing)
                 code_lines, in_code = [], False
             else:
@@ -472,10 +503,10 @@ def _bib_for(record: dict) -> str:
     return f"@misc{{{record['key']},\n" + ",\n".join(fields) + "\n}\n"
 
 
-def render_main(records: list[dict], body: str) -> str:
+def render_main(records: list[dict], body: str, title: str) -> str:
     if not records:
         raise ValueError("At least one reference is required")
-    return r"""\documentclass[journal]{IEEEtran}
+    template = r"""\documentclass[journal]{IEEEtran}
 % Generic IEEE journal manuscript; apply the selected venue's extra requirements.
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb}
@@ -487,13 +518,19 @@ def render_main(records: list[dict], body: str) -> str:
 \usepackage{listings}
 \usepackage[hidelinks]{hyperref}
 \lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,columns=fullflexible,keepspaces=true,frame=single,framesep=3pt,showstringspaces=false}
-\title{CodeMood: Multilingual Emotion Detection}
+\title{__PAPER_TITLE__}
 \input{authors}
+\hypersetup{pdftitle={__PAPER_TITLE__},pdfauthor={Advay Vivek, Kaavish Gogia, Suganthini C}}
 \begin{document}
 \bstctlcite{IEEEcontrol}
 \raggedbottom
+% Permit the dedicated architecture page without deferring the figure queue.
+\renewcommand{\dblfloatpagefraction}{0.6}
+\renewcommand{\floatpagefraction}{0.6}
 \maketitle
 """ + body + r"""
+% Balance the final reference columns in this expanded edition.
+\IEEEtriggeratref{20}
 \begingroup
 \interlinepenalty=10000
 \bibliographystyle{IEEEtran}
@@ -501,6 +538,7 @@ def render_main(records: list[dict], body: str) -> str:
 \endgroup
 \end{document}
 """
+    return template.replace("__PAPER_TITLE__", latex_escape(title))
 
 
 def _copy_assets(destination: Path):
@@ -528,13 +566,16 @@ def build():
     records = read_references()
     global KNOWN_KEYS
     KNOWN_KEYS = {record["key"] for record in records}
+    global TABLE_COUNTER
+    TABLE_COUNTER = 0
     body = render_body(markdown, records)
+    title = markdown.splitlines()[0].removeprefix("# ").strip()
     OVERLEAF.mkdir(parents=True, exist_ok=True)
-    MAIN_TEX.write_text(render_main(records, body), encoding="utf-8")
+    MAIN_TEX.write_text(render_main(records, body, title), encoding="utf-8")
     (OVERLEAF / "authors.tex").write_text(r"""% Author identities and correspondence supplied by the project team.
 \author{Advay~Vivek, Kaavish~Gogia, and Suganthini~C%
 \thanks{\textit{Corresponding author: Suganthini C.}}%
-\thanks{The authors are with Vellore Institute of Technology, Vellore, Tamil Nadu, India (e-mail: \href{mailto:suganthini.c@vit.ac.in}{suganthini.c@vit.ac.in}).}}
+\thanks{The authors are with Vellore Institute of Technology, Katpadi--Thiruvalam Road, Vellore, Tamil Nadu 632014, India (e-mail: \href{mailto:suganthini.c@vit.ac.in}{suganthini.c@vit.ac.in}).}}
 """, encoding="utf-8")
     BIB_FILE.write_text(render_bibtex(records), encoding="utf-8")
     copied = _copy_assets(OVERLEAF)
@@ -576,7 +617,15 @@ No model was retrained for this manuscript revision.
 
 This is a generic IEEE journal manuscript, not a template certified for a specific
 journal. Check the chosen journal's page limits, anonymization and submission
-requirements before upload. The earlier project-cover ZIP is preserved separately.
+requirements before upload. The earlier journal PDF/ZIP is preserved in Documents for review/Previous versions.
+
+The GitHub repository and pinned evaluated source revision appear in Code Availability.
+The current affiliation address was verified against VIT's official mandatory disclosure:
+https://vit.ac.in/sites/default/files/iqac/VIT-Vellore-Mandatory-Disclosure.pdf
+Author names and corresponding email were supplied by the team. No ORCID, department,
+funding or acceptance dates have been invented. Venue selection and author ORCIDs
+are still administrative submission tasks; independent natural-message evaluation
+is an empirical limitation, not a formatting issue.
 """
     README.write_text(readme, encoding="utf-8")
     audit = BASE / "verification_report.json"

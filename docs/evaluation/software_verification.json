@@ -1,0 +1,9 @@
+{
+  "verified_on": "2026-10-29",
+  "implementation_revision": "2885df0933143bb9ce17b2acce9165398ac4ec57",
+  "suite": "python -m pytest tests -q",
+  "tests_passed": 254,
+  "subtests_passed": 33,
+  "source_log_sha256": "aba8db06885359ceee70dfebed821ac57c123565e6528ee9254ad8ec0fc2cd2c",
+  "scope": "Software regression verification, not model accuracy. No research checkpoints or frozen datasets were changed."
+}

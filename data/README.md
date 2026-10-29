@@ -13,7 +13,7 @@ Use `templates/labelled_example.csv` to try file accuracy and
 `templates/unlabelled_example.csv` to try prediction without expected labels.
 These are illustrative format examples; they are not the training corpus.
 
-## The dataset used for the current trained model
+## Earlier Hindi-English XLM-R training dataset
 
 Open **[training/synthetic_hinglish_8000](training/synthetic_hinglish_8000)**.
 This is the working copy of the Hindi-English dataset used for the first XLM-R
@@ -68,7 +68,7 @@ Regenerate only the sentiment demonstration workbook with
 - **Recorded training results:** `../outputs/training/xlmr_synthetic_8000`.
   Its frozen manifest and predictions are original run evidence, not a second
   working training set.
-- **Weights used by the dashboard:** `../models/xlmr_emotion`.
+- **Original Hindi-English weights:** `../models/xlmr_emotion`. The default combined XLM-R is `../models/xlmr_multilingual_emotion`; mBERT and MuRIL are separate installed families.
 - **Historical files and approved cleanup records:** `../archives`. Redundant
   download ZIPs were deleted after the installed model and datasets were verified.
 

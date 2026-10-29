@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "evidence_snapshot": "2026-10-23",
+  "evidence_snapshot": "2026-10-29",
   "study_status": "reanalysis_of_saved_runs_no_new_training",
   "task": "seven-class emotion classification",
   "classes": [
@@ -713,8 +713,8 @@
     "not_a_human_benchmark": true
   },
   "software_verification": {
-    "source": "coordinator-provided project verification record",
-    "tests_passed": 221,
+    "source": "docs/evaluation/software_verification.json",
+    "tests_passed": 254,
     "subtests_passed": 33,
     "new_model_training_run": false
   },

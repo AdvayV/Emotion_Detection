@@ -1,7 +1,9 @@
 {
   "checked_on": "2026-10-29",
+  "implementation_revision": "2885df0933143bb9ce17b2acce9165398ac4ec57",
   "language_pair": "hi-en",
   "source_dataset": "data/training/multilingual_bootstrap_v1/hindi_english/test.csv",
+  "input_file_sha256": "fddcc925c1894137ce5fdc4e420bef4be9a090d9a2cf72a6462fe6c50484bc85",
   "dataset_sha256": "ce3800618f564fe2f3b3f0bacb9e0b093f892e47126898b48ce8be303f1d6300",
   "scope": "synthetic-only held-out test; not an independent human-language benchmark",
   "scored_rows": 1000,
@@ -12,9 +14,10 @@
       "scored_rows": 1000,
       "accuracy": 0.956,
       "macro_f1": 0.9562988745707631,
-      "prediction_seconds": 136.52850089999265,
-      "load_seconds": 34.43457749998197,
+      "prediction_seconds": 151.0085548000061,
+      "load_seconds": 65.85321440000553,
       "overlap_check_available": true,
+      "checkpoint_version_unchanged": true,
       "matches_saved_language_test_metrics": true
     },
     {
@@ -22,9 +25,10 @@
       "scored_rows": 1000,
       "accuracy": 0.843,
       "macro_f1": 0.8439217764041637,
-      "prediction_seconds": 97.98277200001758,
-      "load_seconds": 0.8339388000022154,
+      "prediction_seconds": 145.0304220999824,
+      "load_seconds": 1.043499699968379,
       "overlap_check_available": true,
+      "checkpoint_version_unchanged": true,
       "matches_saved_language_test_metrics": true
     },
     {
@@ -32,9 +36,10 @@
       "scored_rows": 1000,
       "accuracy": 0.803,
       "macro_f1": 0.8123164552869595,
-      "prediction_seconds": 71.68447760000709,
-      "load_seconds": 0.7673861000221223,
+      "prediction_seconds": 141.639188000001,
+      "load_seconds": 1.209638600004837,
       "overlap_check_available": true,
+      "checkpoint_version_unchanged": true,
       "matches_saved_language_test_metrics": true
     }
   ],
@@ -75,5 +80,5 @@
     "threads": 2,
     "batch_size": 4
   },
-  "comparison_note": "Identical test rows; XLM-R and mBERT trained on 16k bilingual rows, MuRIL on 8k hi-en rows. This does not isolate encoder architecture."
+  "comparison_note": "Same held-out rows; XLM-R/mBERT trained on16k bilingual examples,MuRIL on8khi-en examples; not an encoder-only causal comparison. No research weights or frozen data changed."
 }

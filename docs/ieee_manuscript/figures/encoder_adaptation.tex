@@ -1,0 +1,21 @@
+% Editable TikZ fragment; intended figure width about 16 cm, height about 10 cm.
+% Foundation encoders and their tokenizers are obtained from prior pretraining.
+\begin{tikzpicture}[>=Stealth, font=\footnotesize, line width=0.55pt]
+\tikzset{box/.style={draw=black, fill=white, rounded corners=1pt, align=center, inner sep=3pt, minimum height=9mm}, edge/.style={->, draw=black, line width=0.55pt}}
+\node[font=\footnotesize\bfseries] at (7.5,0.5) {Previously pretrained foundation models and tokenizers};
+\node[box, text width=4.0cm] (bert) at (2.2,-0.35) {mBERT + tokenizer\\hi--en and fr--en};
+\node[box, text width=4.0cm] (muril) at (7.5,-0.35) {MuRIL + tokenizer\\hi--en only};
+\node[box, text width=4.0cm] (xlmr) at (12.8,-0.35) {XLM-R + tokenizer\\hi--en and fr--en};
+\node[box, text width=13.8cm] (adapt) at (7.5,-2.1) {Fine-tune each encoder separately in Colab: train split updates encoder and classification-head weights};
+\draw[edge] (bert.south) -- (bert.south |- adapt.north);
+\draw[edge] (muril.south) -- (adapt.north);
+\draw[edge] (xlmr.south) -- (xlmr.south |- adapt.north);
+\node[box, text width=6.2cm] (validation) at (3.6,-3.9) {Validation split selects the checkpoint};
+\node[box, text width=6.2cm] (test) at (11.4,-3.9) {Frozen test split: held out from updates and selection};
+\draw[edge] (adapt.south west) -- (validation.north);
+\node[box, text width=13.8cm] (export) at (7.5,-5.8) {Export selected local checkpoint and tokenizer / preprocessing metadata};
+\draw[edge] (validation.south) -- (validation.south |- export.north);
+\draw[edge] (export.north east) -- (test.south);
+\node[box, text width=13.8cm] (output) at (7.5,-7.5) {Seven emotion outputs: joy, sadness, anger, fear, surprise, disgust, neutral};
+\draw[edge] (export.south) -- (output.north);
+\end{tikzpicture}

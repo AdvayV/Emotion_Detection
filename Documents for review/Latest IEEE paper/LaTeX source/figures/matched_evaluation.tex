@@ -1,0 +1,19 @@
+% Editable TikZ fragment; intended figure width about 16 cm, height about 12 cm.
+\begin{tikzpicture}[>=Stealth, font=\footnotesize, line width=0.55pt]
+\tikzset{box/.style={draw=black, fill=white, rounded corners=1pt, align=center, inner sep=3pt, minimum height=9mm}, edge/.style={->, draw=black, line width=0.55pt}}
+\node[box, text width=13.8cm] (input) at (7.5,0) {One CSV / XLSX dataset; select language and test scope};
+\node[box, text width=13.8cm] (models) at (7.5,-1.5) {Run compatible local checkpoints sequentially on the same selected rows};
+\node[box, text width=13.8cm] (retain) at (7.5,-3.0) {Retain aligned predictions, scores and guard flags for every model};
+\draw[edge] (input.south)--(models.north); \draw[edge] (models.south)--(retain.north);
+\node[box, text width=6.1cm] (overlap) at (3.6,-4.7) {Shared union of model training/validation-overlap flags; exclude flagged rows when enabled};
+\node[box, text width=6.1cm] (prediction) at (11.4,-4.7) {Prediction-only route: unlabelled rows remain available for inspection};
+\draw[edge] (retain.south west) -- (overlap.north);
+\draw[edge] (retain.south east) -- (prediction.north);
+\node[box, text width=6.1cm] (eligible) at (3.6,-6.5) {Identical labelled eligible rows for every scorer};
+\draw[edge] (overlap.south)--(eligible.north);
+\node[box, text width=6.1cm] (metrics) at (3.6,-8.2) {Accuracy and macro-F1\\Confusion matrices and paired errors};
+\draw[edge] (eligible.south)--(metrics.north);
+\node[box, text width=6.1cm] (exports) at (11.4,-8.2) {Session state and exports: predictions, flags, scope and comparison results};
+\draw[edge] (prediction.south)--(exports.north);
+\draw[edge] (metrics.east)--(exports.west);
+\end{tikzpicture}

@@ -26,7 +26,7 @@
 25,geifman2017,Selective Classification for Deep Neural Networks,2017,Advances in Neural Information Processing Systems 30 (NIPS 2017),https://papers.nips.cc/paper_files/paper/2017/hash/4a8423d5e91fda00bb7e46540e2b0cf1-Abstract.html
 26,davani2022,Dealing with Disagreements: Looking Beyond the Majority Vote in Subjective Annotations,2022,"Transactions of the Association for Computational Linguistics 10, pp. 92-110",https://aclanthology.org/2022.tacl-1.6/
 27,plank2022,"The “Problem” of Human Label Variation: On Ground Truth in Data, Modeling and Evaluation",2022,"EMNLP 2022, pp. 10671-10682",https://aclanthology.org/2022.emnlp-main.731/
-28,gebru2021,Datasheets for Datasets,2021,"Communications of the ACM, December 2021; author manuscript arXiv:1803.09010v8",https://arxiv.org/abs/1803.09010
+28,gebru2021,Datasheets for Datasets,2021,Communications of the ACM,https://arxiv.org/abs/1803.09010
 29,bender2018,Data Statements for Natural Language Processing: Toward Mitigating System Bias and Enabling Better Science,2018,"Transactions of the Association for Computational Linguistics 6, pp. 587-604",https://aclanthology.org/Q18-1041/
 30,ribeiro2020,Beyond Accuracy: Behavioral Testing of NLP Models with CheckList,2020,"ACL 2020, pp. 4902-4912",https://aclanthology.org/2020.acl-main.442/
 31,dror2018,The Hitchhiker’s Guide to Testing Statistical Significance in Natural Language Processing,2018,"ACL 2018, Volume 1: Long Papers, pp. 1383-1392",https://aclanthology.org/P18-1128/

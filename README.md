@@ -24,6 +24,27 @@ algorithms, the seven-emotion checkpoint specification and 18 explained editable
 equations with a worked F1 example. See
 [manuscript sources and editing instructions](docs/ieee_manuscript/README.md).
 
+## Current dashboard and evidence
+
+The emotion-first dashboard has eight workspaces. **Overview** derives readiness
+from `dashboard/readiness.py` across three encoder families and two language
+profiles. Four installed checkpoint directories represent three families: XLM-R
+and mBERT support Hindi-English and English-French; MuRIL supports Hindi-English
+only. Three-class sentiment remains a separate legacy task. Four module flows
+cover live prediction, matched comparison, Colab training and human review.
+
+Training code, installed weights and effectiveness are distinct. Existing emotion
+weights are installed, but fusion, learned context and supervised sarcasm weights
+are not; there is no reinforcement learning. Accuracy on independently labelled
+human messages and any Qwen review gain remain unmeasured. The revised IEEE
+report contains 16 pages after the verified alignment revision.
+
+A checkpoint with known unsupported `trained_language_pairs` is rejected for
+single, context and batch emotion prediction; `evaluate-emotions` preflights all
+language pairs. Legacy checkpoints with unknown coverage remain experimental and
+warned. CLI `predict-file` allows fallback only when explicitly requested via
+`--allow-fallback`; matched comparison never falls back.
+
 ## Compare XLM-R, mBERT and MuRIL in one place
 
 Open **Model comparison** in the Streamlit sidebar. Select **Hindi-English** to
@@ -172,8 +193,9 @@ encoders for training does require internet access.
   balance, sarcasm rate and message-length distributions.
 - **Research workbench:** bounded experiments, confidence calibration, blind
   human review and versioned corrections, conversation traces, and GPU handoff.
-- **Overview:** current pipeline, proposed improvements and the distinction
-  between implemented baselines and experiments requiring training.
+- **Model comparison:** matched evaluation with aligned outputs and common scoring exclusions.
+- **Model disagreement:** compare outputs and collect explicitly reviewed candidates.
+- **Overview:** current encoder readiness, pipeline and evidence limits.
 
 Recent live analyses stay in Streamlit session state and can be downloaded as
 CSV. They are not automatically written to the dataset. Sentiment starts with
