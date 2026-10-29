@@ -23,7 +23,7 @@ from hinglish_emotion.tasks import LANGUAGE_PAIRS
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SAMPLE_DATA = PROJECT_ROOT / "data" / "demo" / "sentiment" / "hinglish_emotion_phrases.xlsx"
-PAGES = ["Emotion lab", "Model disagreement", "Analyze text", "Model effectiveness", "Dataset explorer", "Research workbench", "Overview"]
+PAGES = ["Emotion lab", "Model comparison", "Model disagreement", "Analyze text", "Model effectiveness", "Dataset explorer", "Research workbench", "Overview"]
 EXAMPLES = {
     "Positive with emphasis": "movie acchaaa thi 😊",
     "Negation": "service acchi nahi thi 😞",
@@ -84,8 +84,25 @@ def navigate_to(page: str) -> None:
     st.session_state.workspace = page
 
 
+SIDEBAR_DEFAULTS = {
+    "encoder_choice": "Rule-based baseline",
+    "sentiment_custom_path": "",
+    "sentiment_qwen_enabled": False,
+    "sentiment_ollama_model": DEFAULT_OLLAMA_MODEL,
+}
+
+
+def remember_sidebar_settings() -> None:
+    # Widget keys are removed when another workspace hides their controls.
+    # Keep preferences in a separate, non-widget session value.
+    preferences = dict(st.session_state.get("sentiment_preferences", {}))
+    preferences.update({key: st.session_state[key] for key in SIDEBAR_DEFAULTS if key in st.session_state})
+    st.session_state.sentiment_preferences = preferences
+
+
 def select_baseline() -> None:
     st.session_state.encoder_choice = "Rule-based baseline"
+    remember_sidebar_settings()
 
 
 def load_example() -> None:
@@ -114,9 +131,11 @@ def render_sidebar() -> tuple[str, str, bool, str]:
         st.title("💬 Hinglish Lab")
         st.caption("A local workspace for model exploration")
         page = st.radio("Workspace", PAGES, key="workspace")
-        if page in {"Emotion lab", "Model disagreement"}:
+        if page in {"Emotion lab", "Model comparison", "Model disagreement"}:
             st.divider()
             st.info("Seven emotions for Hindi–English and English–French. The selected language determines which trained checkpoint is available.")
+            if page != "Model comparison":
+                st.button("Compare all emotion models", on_click=navigate_to, args=("Model comparison",), key="sidebar_model_comparison")
             st.subheader("Seven-emotion settings")
             st.caption("Choose the language mix and emotion checkpoint in the workspace. Sentiment checkpoints use a different label set; Qwen review supports both tasks.")
             return page, "", False, DEFAULT_OLLAMA_MODEL
@@ -127,16 +146,19 @@ def render_sidebar() -> tuple[str, str, bool, str]:
             return page, "", False, DEFAULT_OLLAMA_MODEL
         st.divider()
         st.subheader("Sentiment settings")
+        preferences = st.session_state.get("sentiment_preferences", {})
+        for key, default in SIDEBAR_DEFAULTS.items():
+            st.session_state[key] = preferences.get(key, st.session_state.get(key, default))
         encoder_choice = st.selectbox(
             "Primary classifier",
             ["Rule-based baseline", *(encoder.name for encoder in ENCODERS), "Custom checkpoint"],
-            key="encoder_choice",
+            key="encoder_choice", on_change=remember_sidebar_settings,
             help="This model predicts positive, neutral or negative sentiment.",
         )
         st.caption(MODEL_DESCRIPTIONS[encoder_choice])
         model_path = ""
         if encoder_choice == "Custom checkpoint":
-            custom = st.text_input("Local transformer folder", placeholder="models/my_checkpoint")
+            custom = st.text_input("Local transformer folder", placeholder="models/my_checkpoint", key="sentiment_custom_path", on_change=remember_sidebar_settings)
             if custom.strip():
                 path = Path(custom.strip())
                 model_path = str(path if path.is_absolute() else PROJECT_ROOT / path)
@@ -148,22 +170,24 @@ def render_sidebar() -> tuple[str, str, bool, str]:
         elif not model_path or checkpoint_ready(model_path):
             st.success("Ready to analyze", icon="✅")
         else:
-            st.warning(f"{encoder_choice} is not trained here yet.", icon="⚠️")
+            st.warning(f"{encoder_choice} sentiment checkpoint is not trained here yet. Installed seven-emotion encoders are available in Emotion lab.", icon="⚠️")
             st.button("Use rule-based baseline", on_click=select_baseline, width="stretch")
 
         st.divider()
         use_reviewer = st.toggle(
-            "Ask Qwen for a second opinion", value=False,
+            "Ask Qwen for a second opinion", key="sentiment_qwen_enabled", on_change=remember_sidebar_settings,
             help="Only uncertain or conflicting messages are sent to your local Ollama model.",
         )
         st.caption("Optional · runs locally through Ollama. CPU review may take a little longer.")
         with st.expander("Advanced model settings"):
-            ollama_model = st.text_input("Ollama model", value=DEFAULT_OLLAMA_MODEL)
+            ollama_model = st.text_input("Ollama model", key="sentiment_ollama_model", on_change=remember_sidebar_settings)
             if model_path:
                 st.caption("Selected checkpoint")
                 st.code(model_path, language=None)
+        st.caption("Selections stay saved when you switch workspaces. Changes apply the next time you run analysis or evaluation.")
         if use_reviewer:
-            ready, message = OllamaReviewer(model=ollama_model).availability()
+            with st.spinner("Checking local Ollama..."):
+                ready, message = OllamaReviewer(model=ollama_model).availability()
             (st.success if ready else st.warning)(message)
         st.divider()
         st.caption("Private by default · live analysis stays in this browser session.")
@@ -578,6 +602,9 @@ def render_model_panel(evaluation: ModelEvaluation) -> None:
 def render_evaluation(model_path: str, use_reviewer: bool, ollama_model: str) -> None:
     page_header("Model effectiveness", "Check predictions against labelled messages, then see which labels the model gets right and where it struggles.")
     st.caption("This view evaluates three-class sentiment. For seven-emotion XLM-R accuracy on a CSV/XLSX file, open Emotion lab → Predict and evaluate a file.")
+    left, right = st.columns(2)
+    left.button("Open seven-emotion evaluation", on_click=navigate_to, args=("Emotion lab",), key="effectiveness_to_emotions")
+    right.button("Compare seven-emotion model outputs", on_click=navigate_to, args=("Model comparison",), key="effectiveness_to_disagreement")
     with st.container(border=True):
         st.markdown("**1. Choose the labelled messages**")
         uploaded = st.file_uploader("Evaluation dataset (CSV or XLSX)", type=["csv", "xlsx"], key="evaluation_dataset", help="Leave empty to use the demo workbook.")
@@ -599,6 +626,8 @@ def render_evaluation(model_path: str, use_reviewer: bool, ollama_model: str) ->
     digest = hashlib.sha256(frame.to_csv(index=False).encode("utf-8")).hexdigest()
     signature = (source, digest, selected, model_path, use_reviewer, ollama_model)
     if st.button("Run model evaluation", type="primary"):
+        st.session_state.pop("model_evaluations", None)
+        st.session_state.pop("model_evaluation_signature", None)
         try:
             models, notices = evaluation_models(model_path, use_reviewer, ollama_model)
             for notice in notices:
@@ -621,7 +650,8 @@ def render_evaluation(model_path: str, use_reviewer: bool, ollama_model: str) ->
             st.write("Select **Run model evaluation** to measure accuracy and inspect actual mistakes.")
         return
     if st.session_state.get("model_evaluation_signature") != signature:
-        st.warning("These results use previous data or settings. Run evaluation again to refresh them.")
+        st.info("Data or model settings changed. Run evaluation again to see matching results.")
+        return
     st.divider()
     st.subheader("Results on the selected messages")
     summary = pd.DataFrame([item.summary for item in evaluations])
@@ -651,6 +681,9 @@ def main() -> None:
     elif page == "Emotion lab":
         from dashboard.emotions import render_emotion_lab
         render_emotion_lab(page_header, style_chart)
+    elif page == "Model comparison":
+        from dashboard.comparison import render_model_comparison
+        render_model_comparison(page_header, style_chart, clear_sentiment_cache=local_classifier.clear)
     elif page == "Model disagreement":
         from dashboard.disagreement import render_disagreement_lab
         render_disagreement_lab(page_header, style_chart)

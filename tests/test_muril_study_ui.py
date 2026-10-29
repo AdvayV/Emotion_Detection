@@ -18,7 +18,7 @@ if str(PROJECT_ROOT) not in sys.path:
 STREAMLIT_AVAILABLE = importlib.util.find_spec("streamlit") is not None
 CONTRACT_FILE = PROJECT_ROOT / "colab" / "muril_study" / "study_contract.json"
 BASELINE_FILE = PROJECT_ROOT / "colab" / "muril_study" / "xlmr_baseline_metrics.json"
-COMPARISON_ARCHIVE = PROJECT_ROOT / "muril_hi_en_comparison.zip"
+COMPARISON_ARCHIVE = PROJECT_ROOT / "Documents for review/Supporting results/muril_hi_en_comparison.zip"
 
 
 @unittest.skipUnless(STREAMLIT_AVAILABLE, "Dashboard dependencies are optional")
@@ -134,7 +134,9 @@ class MurilStudyUITests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             self.install_study(root, contract, baseline)
-            shutil.copyfile(COMPARISON_ARCHIVE, root / "muril_hi_en_comparison.zip")
+            target=root / "Documents for review/Supporting results/muril_hi_en_comparison.zip"
+            target.parent.mkdir(parents=True)
+            shutil.copyfile(COMPARISON_ARCHIVE, target)
             app = self.render(root)
 
         self.assertEqual(len(app.exception), 0)

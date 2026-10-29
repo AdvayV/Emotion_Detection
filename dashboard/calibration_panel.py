@@ -53,6 +53,18 @@ def render_calibration_panel(root, style_chart):
     elif "split" in frame and frame["split"].astype(str).str.strip().str.lower().isin({"train", "test"}).any():
         st.error("Declared train or test rows cannot be used for calibration.")
         return
+    if "language_pair" in frame:
+        from hinglish_emotion.batch import language_pair
+        try:
+            pairs = frame["language_pair"].map(language_pair)
+        except ValueError as exc:
+            st.error(f"Invalid language column: {exc}")
+            return
+        frame = frame[pairs.eq(pair)].copy()
+        st.caption(f"Selected {LANGUAGE_PAIRS[pair]}: {len(frame)} matching rows.")
+        if frame.empty:
+            st.error("No calibration rows match the selected language mix.")
+            return
     limit = st.select_slider("Maximum phrases processed", options=[500, 2000], value=500, key="cal_limit")
     if len(frame) > limit:
         st.warning(f"Only the first {limit} declared calibration rows will be used.")
@@ -71,7 +83,7 @@ def render_calibration_panel(root, style_chart):
     if overlap_count:
         st.error(f"{overlap_count} phrase(s) match frozen test/evaluation data. This file cannot be used for calibration.")
         return
-    reviewed = "human_reviewed" in frame and frame["human_reviewed"].astype(str).str.strip().str.lower().isin({"true", "yes", "1"}).all()
+    reviewed = bool("human_reviewed" in frame and frame["human_reviewed"].astype(str).str.strip().str.lower().isin({"true", "yes", "1"}).all())
     if not reviewed and not allow_synthetic:
         st.warning("The file does not establish that labels were human reviewed. Enable the explicit experimental option to continue.")
     model_path = available[model_key]
@@ -82,20 +94,22 @@ def render_calibration_panel(root, style_chart):
                  split, pair, limit, bool(allow_synthetic))
     run = st.button("Fit calibration", type="primary", disabled=((synthetic or not reviewed) and not allow_synthetic), key="fit_calibration")
     if run:
+        st.session_state.pop("calibration_profile", None)
         try:
-            checkpoint = model_path
-            classifier = LocalEmotionClassifier(checkpoint, device="cpu")
-            texts = frame["text"].astype(str).tolist()
-            results = classifier.predict_batch(texts, batch_size=16)
-            probabilities = [result.probabilities for result in results]
-            profile = fit_temperature(probabilities, frame[label_col].astype(str).tolist(),
-                model_identity={"model_path": str(checkpoint), "labels": list(EMOTION_LABELS),
-                    "checkpoint_version": checkpoint_version(checkpoint), "text_mode": classifier.metadata.get("text_mode"),
-                    "preparation_version": classifier.metadata.get("preparation_version"), "scope": pair},
-                split=split, scope=pair, synthetic=synthetic, allow_synthetic=allow_synthetic,
-                human_reviewed=reviewed, allow_unreviewed=allow_synthetic)
-            st.session_state["calibration_profile"] = {"profile": profile, "probabilities": probabilities,
-                "labels": label_values, "signature": signature}
+            with st.spinner(f"Fitting confidence on {len(frame)} phrases; this can take time on CPU..."):
+                checkpoint = model_path
+                classifier = LocalEmotionClassifier(checkpoint, device="cpu")
+                texts = frame["text"].astype(str).tolist()
+                results = classifier.predict_batch(texts, batch_size=16)
+                probabilities = [result.probabilities for result in results]
+                profile = fit_temperature(probabilities, frame[label_col].astype(str).tolist(),
+                    model_identity={"model_path": str(checkpoint), "labels": list(EMOTION_LABELS),
+                        "checkpoint_version": checkpoint_version(checkpoint), "text_mode": classifier.metadata.get("text_mode"),
+                        "preparation_version": classifier.metadata.get("preparation_version"), "scope": pair},
+                    split=split, scope=pair, synthetic=synthetic, allow_synthetic=allow_synthetic,
+                    human_reviewed=reviewed, allow_unreviewed=allow_synthetic)
+                st.session_state["calibration_profile"] = {"profile": profile, "probabilities": probabilities,
+                    "labels": label_values, "signature": signature}
         except (ValueError, RuntimeError, OSError) as exc:
             st.error(f"Calibration could not be fitted: {exc}")
     saved = st.session_state.get("calibration_profile")

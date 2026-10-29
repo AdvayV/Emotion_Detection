@@ -17,8 +17,8 @@ def render_file_predictions(root, choice, current_pair, resolver, chart_style):
         "Demo examples": root / "data/demo/emotions/mixed_emotions_demo.csv",
         "Current Hinglish synthetic test": root / "data/training/synthetic_hinglish_8000/test.csv",
         "Multilingual synthetic test": root / "data/training/multilingual_bootstrap_v1/test.csv",
-        "Hindi?English challenge draft": root / "evaluation_set/hindi_english_100.csv",
-        "English?French challenge draft": root / "evaluation_set/english_french_100.csv",
+        "Hindi-English challenge draft": root / "evaluation_set/hindi_english_100.csv",
+        "English-French challenge draft": root / "evaluation_set/english_french_100.csv",
     }
     if upload:
         content, name = upload.getvalue(), upload.name

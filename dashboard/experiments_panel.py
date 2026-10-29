@@ -60,7 +60,8 @@ def render_experiments_panel(root: Path, style_chart=None):
     selected_version = checkpoint_version(selected_checkpoint) if selected_checkpoint else "demo-rules"
     signature = (digest, source, model_name, str(selected_checkpoint or ""), selected_version,
                  language, int(limit), tuple(variants), reviewer_mode, "qwen3:0.6b", min(5, int(limit)))
-    if st.button("Run experiments", type="primary", disabled=not variants, key="run_experiments"):
+    if st.button("Run experiments", type="primary", disabled=not variants or frame.empty, key="run_experiments"):
+        st.session_state.pop("experiment_result", None)
         try:
             if model_name == "Demo lexical rules": predictor = EmotionDetector()
             else:

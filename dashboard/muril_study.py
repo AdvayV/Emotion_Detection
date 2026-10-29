@@ -14,7 +14,7 @@ BASELINE_PATH = Path("colab/muril_study/xlmr_baseline_metrics.json")
 CONTRACT_PATH = Path("colab/muril_study/study_contract.json")
 MURIL_PATH = Path("models/muril_hi_en_emotion/metrics.json")
 MATCHED_PATH = Path("models/xlmr_hi_en_emotion/metrics.json")
-COMPARISON_EXPORT = Path("muril_hi_en_comparison.zip")
+COMPARISON_EXPORT = Path("Documents for review/Supporting results/muril_hi_en_comparison.zip")
 MURIL_CHECKPOINT = Path("models/muril_hi_en_emotion")
 
 
@@ -143,6 +143,8 @@ def render_muril_study(root: Path, chart_style) -> None:
 
     if muril is None:
         export_path = root / COMPARISON_EXPORT
+        if not export_path.is_file():
+            export_path = root / "muril_hi_en_comparison.zip"  # Older project layouts.
         if export_path.is_file():
             try:
                 from training.muril_study import load_comparison_export

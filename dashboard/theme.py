@@ -45,6 +45,10 @@ def apply_theme() -> None:
         [data-testid="stAlert"] { border-radius: 12px; }
         div.stButton > button[kind="primary"] { background: var(--lab-teal); border-color: var(--lab-teal); }
         div.stButton > button { border-radius: 10px; min-height: 2.7rem; }
+        div.stButton > button:disabled {
+          background: #E3E9EC !important; border-color: #CFD9E0 !important;
+          color: #6B7888 !important; cursor: not-allowed; opacity: .75;
+        }
         input, textarea, [data-baseweb="select"] > div { border-radius: 9px; }
         @media (max-width: 760px) {
           [data-testid="stAppViewContainer"] > .main .block-container { padding: 1.25rem 1rem 2.25rem; }

@@ -283,9 +283,11 @@ def render_emotion_lab(header, chart_style):
                 if file.is_file(): st.download_button(label,file.read_bytes(),file_name=name,mime=mime)
         st.caption("The bootstrap dataset is synthetic, not research validation. Replace it with reviewed labels for final claims. The selected checkpoint’s trained language mixes and saved test results are shown above.")
         with st.expander("How this extends Team 5 G2"):
-            st.write("The base paper describes BERT/RoBERTa sentiment classification. This extension adds seven emotions, language-aware checkpoints, labelled-file evaluation, leakage checks and reproducible Colab training. A supervised sarcasm training workflow is available, but trained sarcasm weights are not provided. Emotion/emoji fusion is not implemented; emoji cues are shown separately.")
-            paper=ROOT/"Team 5 - G2.docx"
-            if paper.is_file(): st.download_button("Download base paper",paper.read_bytes(),file_name=paper.name,mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            st.write("The base paper describes BERT/RoBERTa sentiment classification. This extension adds seven emotions, language-aware checkpoints, labelled-file evaluation, leakage checks and reproducible Colab training. A supervised sarcasm training workflow is available, but trained sarcasm weights are not provided. A trainable text/emoji fusion architecture is available through Research workbench. The installed text encoders use separate emoji diagnostics.")
+            paper=ROOT/"Documents for review/Base paper/Team 5 - G2.docx"
+            if not paper.is_file(): paper=ROOT/"Team 5 - G2.docx"
+            if paper.is_file(): st.download_button("Download base paper",paper.read_bytes(),file_name=paper.name,mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",on_click="ignore")
+            else: st.info("The base paper is not available in Documents for review/Base paper.")
     with results_tab:
         from dashboard.encoder_results import render_encoder_results
         render_encoder_results(ROOT, chart_style)
