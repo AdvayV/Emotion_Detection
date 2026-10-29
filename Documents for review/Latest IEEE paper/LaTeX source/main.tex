@@ -1,47 +1,32 @@
-\documentclass[conference]{IEEEtran}
-\usepackage[utf8]{inputenc}
+\documentclass[journal]{IEEEtran}
+% Generic IEEE journal manuscript; apply the selected venue's extra requirements.
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
-\usepackage{tabularx}
-\usepackage{booktabs}
-\usepackage{array}
-\usepackage{url}
-\usepackage{cite}
-\usepackage{placeins}
+\usepackage{tabularx,booktabs,array}
+\usepackage{url,cite,placeins}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit,calc}
 \usepackage{listings}
+\usepackage[hidelinks]{hyperref}
 \lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,columns=fullflexible,keepspaces=true,frame=single,framesep=3pt,showstringspaces=false}
 \title{CodeMood: Multilingual Emotion Detection}
-\author{\IEEEauthorblockN{Advay Vivek\IEEEauthorrefmark{1} and Kaavish Gogia\IEEEauthorrefmark{1}}\\
-\IEEEauthorblockA{\IEEEauthorrefmark{1}VIT Vellore, Compiler Design}}
+\input{authors}
 \begin{document}
-\onecolumn
-\begin{titlepage}
-\thispagestyle{empty}
-\centering
-\vspace*{0.22\textheight}
-{\LARGE\bfseries CodeMood: Multilingual Emotion Detection\par}
-\vspace{2.2cm}
-{\large Prepared by\par}
-\vspace{0.4cm}
-{\large Advay Vivek\\24BCT0136\par}
-\vspace{0.35cm}
-{\large Kaavish Gogia\\24BCT0103\par}
-\vspace{1.4cm}
-{\normalsize Guided by: Suganthini C\\VIT Vellore\\Compiler Design\\23 October 2026\par}
-\end{titlepage}
-\twocolumn
+\bstctlcite{IEEEcontrol}
+\raggedbottom
 \maketitle
-\nocite{devlin2019,conneau2020,khanuja2021,aguilar2020,vijay2018,vaswani2017,pires2019,hu2020,khanuja2020,patwa2020,demszky2020,mohammad2018,felbo2017,kraljnovak2015,barbieri2018,vanhee2018,aggarwal2020,ghosh2018,poria2019,kumar2024,guo2017,ovadia2019,lakshminarayanan2017,lin1991,geifman2017,davani2022,plank2022,gebru2021,bender2018,ribeiro2020,dror2018}
 \begin{abstract}
 
 Informal mixed-language messages combine spelling variation, language switching, emoji and context-dependent meaning, making emotion classification difficult to interpret and evaluate. We present CodeMood, a local system for seven-class emotion detection in Hindi-English and English-French text. The system connects language-compatible transformer checkpoints, conservative text preparation, emoji and sarcasm diagnostics, optional local language-model review, and file-based evaluation. A research interface adds sequential encoder comparison, disagreement analysis, confidence scaling, controlled input experiments and an audited human-review-to-training workflow. Training is separated from local inference through reproducible graphics-processor notebooks with frozen data partitions, checkpoint selection and inference exports. On 2,000 held-out synthetic bilingual phrases, the combined cross-lingual encoder obtains 92.5\% accuracy and 0.9251 macro-averaged F1, compared with 81.4\% and 0.8119 for multilingual BERT on the same partition. The Indian-language encoder obtains 80.3\% accuracy on its 1,000-phrase Hindi-English test partition. Separate checking phrases expose substantial distribution sensitivity, while a 98-row validation experiment demonstrates confidence scaling without changing predicted labels. The contribution is an integrated, inspectable workflow whose results retain model identity, data scope and review provenance. The reported scores characterize the generated evaluation sets rather than population-level accuracy on naturally written messages.
 
-\textbf{Keywords:} code-mixed emotion recognition, multilingual encoders, model disagreement, confidence calibration, reproducible training.
-
 \end{abstract}
+
+\begin{IEEEkeywords}
+
+code-mixed emotion recognition, multilingual encoders, model disagreement, confidence calibration, reproducible training.
+
+\end{IEEEkeywords}
 
 \section{Introduction}
 
@@ -375,7 +360,7 @@ Hindi-English drafts & MuRIL & 51 / 100 \\
 \end{table}
 
 
-A manually inspected happy phrase, "Aaj main bahut khush hoon," receives a sadness prediction from mBERT with approximately 99.94\% base score. In the disagreement view, other installed encoders can return joy for this same example. This illustrates the value of exposing alternatives and score distributions; it is not a statistical estimate of which encoder will win on a new population. The experiment interface further allows normalization, emoji removal and reviewer policies to be compared on the same supplied rows without treating changed-input labels as automatically valid.
+A manually inspected happy phrase, "Aaj main bahut khush hoon!" receives a sadness prediction from mBERT with approximately 99.94\% base score. In the disagreement view, other installed encoders can return joy for this same example. This illustrates the value of exposing alternatives and score distributions; it is not a statistical estimate of which encoder will win on a new population. The experiment interface further allows normalization, emoji removal and reviewer policies to be compared on the same supplied rows without treating changed-input labels as automatically valid.
 
 \subsection{Module 4 Training export and workflow verification}
 
@@ -420,7 +405,7 @@ Here k indexes the seven emotions, N is the number of labelled phrases, and I is
 
 \textbf{Worked example for sadness}
 
-Suppose a hypothetical evaluation contains eight correctly identified sadness instances, two other emotions incorrectly predicted as sadness, and four sadness instances missed. The classifier makes ten sadness predictions and recovers eight of twelve supplied sadness instances. Their harmonic mean is approximately 0.7273. This example explains the calculation and supplies no additional checkpoint measurement; it should not be substituted into the results tables. Precision is 8/10 = 0.80 and recall is 8/12 = 0.6667. Substituting TP = 8, FP = 2 and FN = 4 gives 16/(16 + 2 + 4) = 16/22:
+For illustration, suppose sadness has eight true positives, two false positives and four false negatives. Precision is 8/10 = 0.80, while recall is 8/12 = 0.6667. Substituting these counts into the F1 formula gives 16/(16 + 2 + 4) = 16/22, approximately 0.7273. This hypothetical calculation explains the metric and is not an additional checkpoint result.
 
 \begin{equation}
 F_{1,\mathrm{sad}}=\frac{16}{22}\approx0.7273

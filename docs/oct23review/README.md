@@ -1,6 +1,6 @@
 # 23 October project review
 
-The final Word report is [23OctReview AdvayV KaavishG CD.docx](../../outputs/23OctReview%20AdvayV%20KaavishG%20CD.docx).
+The final Word report is [23OctReview AdvayV KaavishG CD.docx](../../Documents%20for%20review/Review%20reports/23OctReview%20AdvayV%20KaavishG%20CD.docx).
 It has 15 pages, six architecture/workflow diagrams and two scientific chart figures.
 Team: Advay Vivek (24BCT0136) and Kaavish Gogia (24BCT0103).
 

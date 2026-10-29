@@ -27,7 +27,7 @@ BASE = ROOT / "docs" / "ieee_manuscript"
 SOURCE = BASE / "manuscript.md"
 REFERENCES = BASE / "references.json"
 FIGURES = BASE / "figures"
-OUTPUT = ROOT / "outputs" / "23OctReview AdvayV KaavishG CD IEEE Explained.docx"
+OUTPUT = ROOT / "Documents for review" / "Review reports" / "23OctReview AdvayV KaavishG CD IEEE Explained.docx"
 
 LETTER_W, LETTER_H = 8.5, 11.0
 MARGIN = 0.75

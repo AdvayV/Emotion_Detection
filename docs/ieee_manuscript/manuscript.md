@@ -242,7 +242,7 @@ The file evaluator reproduces mBERT's complete 2,000-row synthetic test result o
 | English-French drafts | mBERT | 41 / 100 |
 | Hindi-English drafts | MuRIL | 51 / 100 |
 
-A manually inspected happy phrase, "Aaj main bahut khush hoon," receives a sadness prediction from mBERT with approximately 99.94% base score. In the disagreement view, other installed encoders can return joy for this same example. This illustrates the value of exposing alternatives and score distributions; it is not a statistical estimate of which encoder will win on a new population. The experiment interface further allows normalization, emoji removal and reviewer policies to be compared on the same supplied rows without treating changed-input labels as automatically valid.
+A manually inspected happy phrase, "Aaj main bahut khush hoon!" receives a sadness prediction from mBERT with approximately 99.94% base score. In the disagreement view, other installed encoders can return joy for this same example. This illustrates the value of exposing alternatives and score distributions; it is not a statistical estimate of which encoder will win on a new population. The experiment interface further allows normalization, emoji removal and reviewer policies to be compared on the same supplied rows without treating changed-input labels as automatically valid.
 
 ### 4.5 Module 4 Training export and workflow verification
 
@@ -272,7 +272,7 @@ Here k indexes the seven emotions, N is the number of labelled phrases, and I is
 
 **Worked example for sadness**
 
-Suppose a hypothetical evaluation contains eight correctly identified sadness instances, two other emotions incorrectly predicted as sadness, and four sadness instances missed. The classifier makes ten sadness predictions and recovers eight of twelve supplied sadness instances. Their harmonic mean is approximately 0.7273. This example explains the calculation and supplies no additional checkpoint measurement; it should not be substituted into the results tables. Precision is 8/10 = 0.80 and recall is 8/12 = 0.6667. Substituting TP = 8, FP = 2 and FN = 4 gives 16/(16 + 2 + 4) = 16/22:
+For illustration, suppose sadness has eight true positives, two false positives and four false negatives. Precision is 8/10 = 0.80, while recall is 8/12 = 0.6667. Substituting these counts into the F1 formula gives 16/(16 + 2 + 4) = 16/22, approximately 0.7273. This hypothetical calculation explains the metric and is not an additional checkpoint result.
 
 [[equation:worked_f1]]
 

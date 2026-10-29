@@ -17,11 +17,11 @@ SOURCE = BASE / "manuscript.md"
 REFERENCES = BASE / "references.json"
 FIGURES = BASE / "figures"
 DIAGRAMS = BASE / "diagrams"
-OVERLEAF = BASE / "overleaf"
+OVERLEAF = ROOT / "Documents for review" / "Latest IEEE paper" / "LaTeX source"
 MAIN_TEX = OVERLEAF / "main.tex"
 BIB_FILE = OVERLEAF / "references.bib"
 README = OVERLEAF / "README.md"
-OUTPUT_ZIP = ROOT / "outputs" / "23OctReview AdvayV KaavishG CD Overleaf Explained.zip"
+OUTPUT_ZIP = ROOT / "Documents for review" / "Latest IEEE paper" / "CodeMood_IEEE_Journal_Overleaf.zip"
 
 IMAGE_RE = re.compile(r"!\[([^\]]*)\]\(([^)]+)\)")
 LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
@@ -137,8 +137,41 @@ def _bib_escape(value) -> str:
 
 
 def render_bibtex(records: list[dict]) -> str:
-    entries = []
-    for record in records:
+    entries = [r"""@IEEEtranBSTCTL{IEEEcontrol,
+  CTLuse_forced_etal = {yes},
+  CTLmax_names_forced_etal = {6},
+  CTLnames_show_etal = {1}
+}"""]
+    for original in records:
+        record = dict(original)
+        # Separate bibliographic fields instead of italicizing page ranges as venues.
+        venue = str(record.get("venue", ""))
+        pages = re.search(r", pp\. ([0-9]+)-([0-9]+)", venue)
+        if pages:
+            record["pages"] = pages[1] + "--" + pages[2]
+            venue = venue[:pages.start()]
+        journals = {
+            "ghosh2018": ("Computational Linguistics", "44", "4"),
+            "lin1991": ("IEEE Transactions on Information Theory", "37", "1"),
+            "davani2022": ("Transactions of the Association for Computational Linguistics", "10", ""),
+            "bender2018": ("Transactions of the Association for Computational Linguistics", "6", ""),
+            "kraljnovak2015": ("PLOS ONE", "10", "12"),
+            "gebru2021": ("Communications of the ACM", "", ""),
+        }
+        key = record["key"]
+        if key in journals:
+            venue, volume, issue = journals[key]
+            record.update(entry_type="article", volume=volume, number=issue)
+            if key == "kraljnovak2015": record["pages"] = "e0144296"
+        elif key in {"vaswani2017", "ovadia2019", "lakshminarayanan2017", "geifman2017"}:
+            venue = "Advances in Neural Information Processing Systems"
+            record.update(entry_type="inproceedings", volume="32" if key=="ovadia2019" else "30")
+        elif key in {"hu2020", "guo2017"}:
+            venue = "Proc. ICML"
+            record.update(entry_type="inproceedings", series="Proceedings of Machine Learning Research", volume="119" if key=="hu2020" else "70")
+        elif key != "khanuja2021":
+            record["entry_type"] = "inproceedings"
+        record["venue"] = venue
         fields = []
         authors = record.get("authors", record.get("author"))
         if isinstance(authors, list):
@@ -177,7 +210,7 @@ def render_bibtex(records: list[dict]) -> str:
         venue_field = {"article": "journal", "inproceedings": "booktitle", "book": "publisher", "misc": "howpublished"}[entry_type]
         if venue:
             fields.append(f"  {venue_field} = {{{_bib_escape(venue)}}}")
-        for key in ("year", "volume", "number", "pages", "doi"):
+        for key in ("series", "year", "volume", "number", "pages", "doi"):
             if record.get(key):
                 fields.append(f"  {key} = {{{_bib_escape(record[key])}}}")
         if record.get("url"):
@@ -294,6 +327,7 @@ def _heading(text: str, level: int) -> str:
 def render_body(markdown: str, records: list[dict]) -> str:
     global KNOWN_KEYS
     KNOWN_KEYS = {record["key"] for record in records}
+    markdown = re.sub(r"(?m)^\*\*Keywords:\*\*\s*(.+)$", r"## Keywords\n\n\1", markdown)
     lines = markdown.splitlines()
     output = []
     in_abstract = False
@@ -439,46 +473,27 @@ def _bib_for(record: dict) -> str:
 
 
 def render_main(records: list[dict], body: str) -> str:
-    keys = ",".join(record["key"] for record in records)
-    if not keys:
+    if not records:
         raise ValueError("At least one reference is required")
-    return r"""\documentclass[conference]{IEEEtran}
-\usepackage[utf8]{inputenc}
+    return r"""\documentclass[journal]{IEEEtran}
+% Generic IEEE journal manuscript; apply the selected venue's extra requirements.
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
-\usepackage{tabularx}
-\usepackage{booktabs}
-\usepackage{array}
-\usepackage{url}
-\usepackage{cite}
-\usepackage{placeins}
+\usepackage{tabularx,booktabs,array}
+\usepackage{url,cite,placeins}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit,calc}
 \usepackage{listings}
+\usepackage[hidelinks]{hyperref}
 \lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,columns=fullflexible,keepspaces=true,frame=single,framesep=3pt,showstringspaces=false}
 \title{CodeMood: Multilingual Emotion Detection}
-\author{\IEEEauthorblockN{Advay Vivek\IEEEauthorrefmark{1} and Kaavish Gogia\IEEEauthorrefmark{1}}\\
-\IEEEauthorblockA{\IEEEauthorrefmark{1}VIT Vellore, Compiler Design}}
+\input{authors}
 \begin{document}
-\onecolumn
-\begin{titlepage}
-\thispagestyle{empty}
-\centering
-\vspace*{0.22\textheight}
-{\LARGE\bfseries CodeMood: Multilingual Emotion Detection\par}
-\vspace{2.2cm}
-{\large Prepared by\par}
-\vspace{0.4cm}
-{\large Advay Vivek\\24BCT0136\par}
-\vspace{0.35cm}
-{\large Kaavish Gogia\\24BCT0103\par}
-\vspace{1.4cm}
-{\normalsize Guided by: Suganthini C\\VIT Vellore\\Compiler Design\\23 October 2026\par}
-\end{titlepage}
-\twocolumn
+\bstctlcite{IEEEcontrol}
+\raggedbottom
 \maketitle
-""" + rf"\nocite{{{keys}}}" + "\n" + body + r"""
+""" + body + r"""
 \begingroup
 \interlinepenalty=10000
 \bibliographystyle{IEEEtran}
@@ -516,6 +531,11 @@ def build():
     body = render_body(markdown, records)
     OVERLEAF.mkdir(parents=True, exist_ok=True)
     MAIN_TEX.write_text(render_main(records, body), encoding="utf-8")
+    (OVERLEAF / "authors.tex").write_text(r"""% Author identities and correspondence supplied by the project team.
+\author{Advay~Vivek, Kaavish~Gogia, and Suganthini~C%
+\thanks{\textit{Corresponding author: Suganthini C.}}%
+\thanks{The authors are with Vellore Institute of Technology, Vellore, Tamil Nadu, India (e-mail: \href{mailto:suganthini.c@vit.ac.in}{suganthini.c@vit.ac.in}).}}
+""", encoding="utf-8")
     BIB_FILE.write_text(render_bibtex(records), encoding="utf-8")
     copied = _copy_assets(OVERLEAF)
     import csv
@@ -528,28 +548,40 @@ def build():
     with (OVERLEAF / "related_work_comparison.csv").open("w", newline="", encoding="utf-8-sig") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(matrix[0]))
         writer.writeheader(); writer.writerows(matrix)
-    readme = """# CodeMood IEEE-style Overleaf project
+    readme = """# CodeMood IEEE journal manuscript - editable Overleaf source
 
-1. Open Overleaf and choose New Project > Upload Project.
-2. Upload the supplied Overleaf ZIP.
-3. Set `main.tex` as Main document and choose pdfLaTeX as Compiler.
-4. Click Recompile. Overleaf runs BibTeX for the numbered references.
+1. In Overleaf choose New Project > Upload Project and upload the supplied ZIP.
+2. Select main.tex as the main document and pdfLaTeX as the compiler.
+3. Recompile; Overleaf runs BibTeX for the numbered IEEE references.
 
-Edit `main.tex` for prose, `references.bib` for the 31 verified references, and
-`figures/*.tex` for the three editable TikZ diagrams. Eighteen numbered equation
-blocks include nearby symbol definitions; edit them directly in main.tex. The included
-`related_work_comparison.csv` maps 20 papers to implemented extensions and code
-paths; `literature_sources.csv` lists all verified source links.
+The source uses the standard IEEEtran journal class, with the title, three authors,
+affiliation, corresponding-author footnote, abstract and Index Terms on page one.
+There is no separate coursework cover. Suganthini C is the corresponding author;
+her supplied contact is suganthini.c@vit.ac.in. Edit authors.tex to update contact
+or affiliation details. No unprovided academic title or IEEE membership is asserted.
 
- The source uses the standard
-`IEEEtran` conference class and editable LaTeX, BibTeX, tables, and pseudocode.
+Edit main.tex for prose and eighteen numbered equations, references.bib for the
+31 references, and figures/*.tex for three editable vector TikZ diagrams. The
+full-system architecture occupies a separate figure page. Tables, algorithms,
+plots and diagrams remain black and white. Additional Mermaid/SVG sources are
+included when available. literature_sources.csv and related_work_comparison.csv
+record the source links and the implemented extensions discussed in the survey.
 
-The cover page and the full-page architecture insert are project-specific
-presentation choices. The manuscript is IEEE style and is not represented as a
-certified IEEE conference template. Mermaid, SVG, and TikZ sources are included
-where available; raster PNGs provide portable figure fallbacks.
+verification_report.json records arithmetic, metadata, citation and data-file
+checks against saved local artifacts. Model scores concern synthetic held-out
+sets only. XLM-R and mBERT share the 16k/2k/2k bilingual split; MuRIL uses the
+8k/1k/1k Hindi-English scope. Calibration scores are fitting-set diagnostics.
+Optional fusion/context/sarcasm training paths are not credited with encoder gains.
+No model was retrained for this manuscript revision.
+
+This is a generic IEEE journal manuscript, not a template certified for a specific
+journal. Check the chosen journal's page limits, anonymization and submission
+requirements before upload. The earlier project-cover ZIP is preserved separately.
 """
     README.write_text(readme, encoding="utf-8")
+    audit = BASE / "verification_report.json"
+    if audit.is_file():
+        shutil.copy2(audit, OVERLEAF / audit.name)
     OUTPUT_ZIP.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(OUTPUT_ZIP, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(OVERLEAF.rglob("*")):

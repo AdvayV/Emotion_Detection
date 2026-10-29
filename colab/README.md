@@ -33,7 +33,7 @@ After a completed GPU run, download the inference ZIP and install it from the
 project root with `python -m training.install_checkpoint`. The new profile is
 available only after export and installation. Existing trained checkpoints stay
 available. For the evidence snapshot and limits, see the
-[23 October report](../outputs/23OctReview%20AdvayV%20KaavishG%20CD.docx).
+[23 October report](../Documents%20for%20review/Review%20reports/23OctReview%20AdvayV%20KaavishG%20CD.docx).
 
 The [xlmr_multilingual](xlmr_multilingual/START_HERE.md) folder remains an
 alternative XLM-R-only workflow with shared or separate language models.

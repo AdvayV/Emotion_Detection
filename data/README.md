@@ -69,7 +69,7 @@ Regenerate only the sentiment demonstration workbook with
   Its frozen manifest and predictions are original run evidence, not a second
   working training set.
 - **Weights used by the dashboard:** `../models/xlmr_emotion`.
-- **Historical files and approved cleanup records:** `../archive`. Redundant
+- **Historical files and approved cleanup records:** `../archives`. Redundant
   download ZIPs were deleted after the installed model and datasets were verified.
 
 Rebuild the Colab upload with `python -m training.package_synthetic --overwrite`.

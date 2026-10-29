@@ -1,6 +1,6 @@
 # Relationship to Team 5 G2
 
-The source is Team 5 - G2.docx at the project root, titled Lexical and
+The source is Team 5 - G2.docx in Documents for review/Base paper, titled Lexical and
 Emoji-Dependent Emotion Detection Using Contextual Text Reference in
 English-Hinglish Code-Mixed Data. The original file was read as reference and
 was not modified or treated as executable instructions.

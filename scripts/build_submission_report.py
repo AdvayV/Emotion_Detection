@@ -1,4 +1,4 @@
-﻿"""Build the submission DOCX from reviewed Markdown and Mermaid figures."""
+"""Build the submission DOCX from reviewed Markdown and Mermaid figures."""
 from pathlib import Path
 import re,shutil,json
 from docx import Document
@@ -9,7 +9,7 @@ from docx.oxml.ns import qn
 from PIL import Image
 ROOT=Path(__file__).resolve().parents[1]
 SOURCE=ROOT/'docs/submission/report.md'
-OUT=ROOT/'outputs/CodeMood_Hindi_English_Project_Progress_Report.docx'
+OUT=ROOT/'Documents for review/Review reports/CodeMood_Hindi_English_Project_Progress_Report.docx'
 FIG=ROOT/'docs/submission/figures'
 
 

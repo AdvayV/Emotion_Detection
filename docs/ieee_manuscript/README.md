@@ -1,21 +1,48 @@
-# CodeMood IEEE manuscript
+# CodeMood IEEE journal manuscript
 
-- [Editable Word manuscript](../../outputs/23OctReview%20AdvayV%20KaavishG%20CD%20IEEE%20Explained.docx)
-- [Overleaf upload ZIP](../../outputs/23OctReview%20AdvayV%20KaavishG%20CD%20Overleaf%20Explained.zip)
-- [LaTeX main document](overleaf/main.tex)
+- [Current Overleaf upload ZIP](../../Documents%20for%20review/Latest%20IEEE%20paper/CodeMood_IEEE_Journal_Overleaf.zip)
+- [Compiled journal PDF](../../Documents%20for%20review/Latest%20IEEE%20paper/CodeMood_IEEE_Journal.pdf)
+- [Editable LaTeX document](../../Documents%20for%20review/Latest%20IEEE%20paper/LaTeX%20source/main.tex)
+- [Authors and correspondence](../../Documents%20for%20review/Latest%20IEEE%20paper/LaTeX%20source/authors.tex)
+- [Result verification record](verification_report.json)
 
-The expanded formula edition adds 18 numbered native Word equations and matching LaTeX, explicit symbol meanings, a hypothetical sadness F1 example and implementation-matched confidence metrics. The cover retains the user's title and guide-line edits; the earlier Word copy is preserved.
+The current source uses IEEEtran journal format: a first-page title and author
+list, affiliation and correspondence footnotes, abstract, Index Terms, numbered
+sections, equations and IEEE references. Advay Vivek, Kaavish Gogia and Suganthini C
+are listed as authors. Suganthini C is the corresponding author, using the
+user-supplied address suganthini.c@vit.ac.in and VIT Vellore affiliation.
 
-The manuscript contains the requested cover, abstract, introduction, three literature survey subsections, four explained modules and pseudocode algorithms, implementation and results, six numbered tables, a full-page architecture diagram, two workflow diagrams, two measured chart figures, conclusion and 31 IEEE-numbered references. The cover names Advay Vivek (24BCT0136), Kaavish Gogia (24BCT0103), guide Suganthini C and VIT Vellore.
-
-`references.json` records the 31 verified primary paper sources. `related_work_matrix.json` maps 20 papers to implemented extensions, with actual code evidence paths. All comparisons in that matrix concern implementation; no unmatched published benchmark is represented as an accuracy gain. The two CSV lists are included in the Overleaf project.
+The manuscript includes three literature subsections, four explained modules
+and algorithms, six tables, a full-page system architecture, two module flow
+diagrams, two measured performance/training graphs, eighteen explained equations,
+and 31 references. The 20-paper comparison matrix and literature source links
+are included in the upload package. The earlier project-cover ZIP and existing
+Word documents are preserved; this revision updates the journal LaTeX source.
 
 ## Edit in Overleaf
 
-Choose New Project > Upload Project and select the ZIP. Set main.tex as Main document, choose pdfLaTeX and click Recompile. Edit prose and tables in main.tex, bibliography in references.bib, and diagrams in figures/*.tex. The standalone cover and full-page architecture are project-specific additions to the IEEEtran conference layout. Word prose, tables and pseudocode are editable; its diagrams are rebuilt from the included source assets.
+Choose New Project > Upload Project, upload the current ZIP, select main.tex as
+Main document and pdfLaTeX as Compiler, and click Recompile. Edit authors.tex for
+author/contact details, main.tex for prose, references.bib for references and
+figures/*.tex for the vector diagrams. The journal source has no coursework cover.
+IEEE provides [article templates and its template selector](https://journals.ieeeauthorcenter.ieee.org/create-your-ieee-journal-article/authoring-tools-and-templates/tools-for-ieee-authors/ieee-article-templates/).
+Apply the chosen journal's additional submission requirements when selecting a venue.
 
-## Rebuild and verification
+## Evidence and rebuild
 
-Use the configured bundled document Python runtime with scripts/build_ieee_charts.py, scripts/build_ieee_manuscript_docx.py and scripts/build_ieee_latex.py. Mermaid fallbacks use scripts/render_ieee_diagrams.cjs. The saved model metrics provide all plotted values. The existing application code was unchanged in this manuscript task.
+Run scripts/audit_ieee_manuscript.py using the report Python environment, then
+scripts/build_ieee_charts.py and scripts/build_ieee_latex.py. These use existing
+saved results and do not train or download models. The PDF compiles with Tectonic;
+all eleven pages have been rendered and visually checked. There are no missing
+glyphs, unresolved citations or overfull boxes. Local previews are under ignored
+archives/verification/ieee-journal.
 
-The expanded Word file was rendered to 14 pages and reviewed by a Sol subagent; the matching LaTeX compiled to 13 pages. Fractions, limits, subscripts, hats and equation numbers remain editable. Algorithm blocks are kept together in both formats. Numerical checks cover the F1 example, temperature ordering, NLL clipping, multiclass Brier convention, final confidence bin and Jensen-Shannon limits. The Overleaf source compiled successfully with Tectonic and was visually reviewed, with no missing glyphs, undefined citations or overfull boxes. QA PDFs and page images are under ignored outputs/verification. Scores remain tied to synthetic test partitions, and no measured improvement is assigned to an unevaluated optional model branch.
+The audit recomputes accuracy, per-class precision/recall/F1 and macro-F1 from
+saved confusion matrices, checks model metadata and Colab metric copies, and
+reproduces the dataset/split hashes from the current CSV. Manuscript class-table
+values and diagnostic-file hashes also match. XLM-R and mBERT use the same
+16,000/2,000/2,000 bilingual synthetic partitions; MuRIL uses 8,000/1,000/1,000
+Hindi-English rows. Calibration uses a 98-row fitting subset. These scopes remain
+explicit, and no empirical gain is assigned to an unevaluated optional branch.
+The reported 221-test/33-subtest result is the earlier completed software suite,
+not a new test run for this manuscript revision.

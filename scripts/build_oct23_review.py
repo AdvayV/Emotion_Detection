@@ -21,7 +21,7 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "docs" / "oct23review" / "report.md"
 FIGURES = ROOT / "docs" / "oct23review" / "figures"
-OUTPUT = ROOT / "outputs" / "23OctReview AdvayV KaavishG CD.docx"
+OUTPUT = ROOT / "Documents for review" / "Review reports" / "23OctReview AdvayV KaavishG CD.docx"
 PAGE_WIDTH = 8.5
 SIDE_MARGIN = 0.75
 CONTENT_WIDTH = PAGE_WIDTH - SIDE_MARGIN * 2

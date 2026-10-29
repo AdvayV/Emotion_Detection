@@ -1,0 +1,142 @@
+{
+  "checked_on": "2026-10-28",
+  "status": "passed",
+  "method": "Recomputed saved confusion-matrix metrics and checked metadata, Colab copies, diagnostic file hashes, citations and equation coverage; no new model training or inference.",
+  "models": {
+    "xlmr": {
+      "overall": {
+        "rows": 2000,
+        "correct": 1850,
+        "accuracy": 0.925,
+        "macro_f1": 0.9250594211769335
+      },
+      "by_language": {
+        "fr-en": {
+          "rows": 1000,
+          "correct": 894,
+          "accuracy": 0.894,
+          "macro_f1": 0.8937038364192301
+        },
+        "hi-en": {
+          "rows": 1000,
+          "correct": 956,
+          "accuracy": 0.956,
+          "macro_f1": 0.956298874570763
+        }
+      },
+      "split_sizes": {
+        "train": 16000,
+        "validation": 2000,
+        "test": 2000
+      },
+      "best_epoch": 1,
+      "metadata_matches": true,
+      "metric_sha256": "b56e4c7b4c034b08100f52931f231f831bfe13e025c4a96f8dba0f5df5b2ce91"
+    },
+    "mbert": {
+      "overall": {
+        "rows": 2000,
+        "correct": 1628,
+        "accuracy": 0.814,
+        "macro_f1": 0.8119204373299015
+      },
+      "by_language": {
+        "fr-en": {
+          "rows": 1000,
+          "correct": 785,
+          "accuracy": 0.785,
+          "macro_f1": 0.770796074268007
+        },
+        "hi-en": {
+          "rows": 1000,
+          "correct": 843,
+          "accuracy": 0.843,
+          "macro_f1": 0.8439217764041634
+        }
+      },
+      "split_sizes": {
+        "train": 16000,
+        "validation": 2000,
+        "test": 2000
+      },
+      "best_epoch": 1,
+      "metadata_matches": true,
+      "metric_sha256": "72a983ab3d3de244b94475e1ab7d297a4d07801e91fc54dd640bf9898f42666d"
+    },
+    "muril": {
+      "overall": {
+        "rows": 1000,
+        "correct": 803,
+        "accuracy": 0.803,
+        "macro_f1": 0.8123164552869595
+      },
+      "by_language": {
+        "hi-en": {
+          "rows": 1000,
+          "correct": 803,
+          "accuracy": 0.803,
+          "macro_f1": 0.8123164552869595
+        }
+      },
+      "split_sizes": {
+        "train": 8000,
+        "validation": 1000,
+        "test": 1000
+      },
+      "best_epoch": 1,
+      "metadata_matches": true,
+      "metric_sha256": "dfda9ad376ece5aab8c80f48ce3ac27e6976232ebc4b2591834e1eaf1b28e2b9"
+    }
+  },
+  "current_training_datasets": {
+    "xlmr": {
+      "dataset_sha256": "83430dd59167b6402cc2945f94f701e19eb5886c6ee7d3602227ad73d0159db0",
+      "split_sha256": "7b4c6c953d0ae6402250f82e94ebeabbb05605ddad9c2567a15e800414f5fd72",
+      "rows": 20000,
+      "current_csv_matches_training_identity": true
+    },
+    "muril": {
+      "dataset_sha256": "0b0cd20738b34c46f32789105ef31e344ddd1315e0237904eb58f0fd6602a05c",
+      "split_sha256": "bd5ac69d00a55bd9c9cf8f94d202c849a3ef2ec4b102316334fcbbbb25e9d7ab",
+      "rows": 10000,
+      "current_csv_matches_training_identity": true
+    }
+  },
+  "lexical_baseline": {
+    "rows": 2000,
+    "correct": 751,
+    "accuracy": 0.3755,
+    "macro_f1": 0.37645747194972046
+  },
+  "diagnostic_file_hashes_match": true,
+  "colab_metric_copies_match": true,
+  "citations": {
+    "references": 31,
+    "all_cited": true,
+    "source_links_previously_verified": true
+  },
+  "equations": 18,
+  "algorithms": 4,
+  "figures": 5,
+  "corresponding_author": {
+    "name": "Suganthini C",
+    "email": "suganthini.c@vit.ac.in",
+    "source": "user-provided identity, affiliation and contact"
+  },
+  "scope_limits": [
+    "All model accuracy tables concern saved synthetic test sets.",
+    "MuRIL has a smaller Hindi-English training scope than bilingual XLM-R/mBERT.",
+    "The 98-row calibration measurements use their fitting set, not a new test set.",
+    "Optional fusion, contextual and sarcasm heads are implemented training capabilities, not measured accuracy gains.",
+    "The software test count describes the prior completed suite, not a fresh rerun for this formatting revision."
+  ],
+  "compiled_document": {
+    "class": "IEEEtran journal",
+    "pages": 11,
+    "all_pages_visually_reviewed": true,
+    "missing_glyphs": false,
+    "undefined_citations": false,
+    "overfull_boxes": false,
+    "pdf_sha256": "f01b672a458d3e46db62fba613d7e7b8fa2142fd608f6dc2b76869ec147db696"
+  }
+}

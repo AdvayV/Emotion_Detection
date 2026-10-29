@@ -1,6 +1,6 @@
 # Submission report and editable diagrams
 
-The latest report is [the project submission DOCX](../../outputs/CodeMood_Hindi_English_Project_Progress_Report.docx).
+The latest report is [the project submission DOCX](../../Documents%20for%20review/Review%20reports/CodeMood_Hindi_English_Project_Progress_Report.docx).
 It contains one full-page master architecture plus four module diagrams:
 seven-emotion inference, Colab training/export, file evaluation and model disagreement with human review.
 Team details are retained. mBERT is installed for both language mixes; its synthetic test results were reproduced locally.
