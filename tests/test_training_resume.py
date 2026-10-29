@@ -73,7 +73,11 @@ class TrainingResumeTests(unittest.TestCase):
                 self.assertEqual(classifier.metadata["text_mode"], "raw")
                 self.assertEqual(classifier.metadata["evaluation_scope"], "synthetic_only")
                 self.assertEqual(classifier.max_length, 16)
-                result = EmotionDetector(classifier).predict("Je suis TRÈS triste 👩🏽‍💻 acchaaa", "fr-en")
+                with self.assertRaisesRegex(ValueError, "trained language coverage"):
+                    EmotionDetector(classifier).predict("Je suis triste", "fr-en")
+                # The tokenizer adapter remains Unicode-safe; this fixture declares
+                # Hindi-English only, so direct text encoding is not a French task claim.
+                result = classifier.predict_text("Je suis TRÈS triste 👩🏽‍💻 acchaaa")
                 self.assertEqual(set(result.probabilities), set(EMOTION_LABELS))
                 self.assertTrue(result.experimental)
                 self.assertTrue(result.needs_context)

@@ -160,39 +160,48 @@ class EmotionDetector:
         self.classifier = classifier or RuleEmotionClassifier()
         self.normalizer = HinglishNormalizer()
 
+    def validate_language_pairs(self, language_pairs: list[str]) -> None:
+        """Reject known out-of-scope pairs before any classifier work."""
+        trained = getattr(self.classifier, "metadata", {}).get("trained_language_pairs") or []
+        for pair in language_pairs:
+            if pair not in LANGUAGE_PAIRS:
+                raise ValueError("Language mix must be hi-en or fr-en")
+            if trained and pair not in trained:
+                raise ValueError(f"{LANGUAGE_PAIRS[pair]} is outside this checkpoint's trained language coverage.")
+
+    def _mark_language_scope(self, result: EmotionResult, pair: str) -> EmotionResult:
+        metadata = getattr(self.classifier, "metadata", {})
+        warnings = []
+        if not metadata.get("trained_language_pairs"):
+            warnings.append("Checkpoint training language coverage is unknown.")
+        if pair not in (metadata.get("validated_language_pairs") or []):
+            warnings.append(f"{LANGUAGE_PAIRS[pair]} has no verified seven-class test coverage for this checkpoint.")
+        return replace(result, experimental=True, warnings=(*result.warnings, *warnings)) if warnings else result
+
     def predict(self, text: str, language_pair: str = "hi-en") -> EmotionResult:
         if not text.strip():
             raise ValueError("Enter a non-empty phrase")
-        if language_pair not in LANGUAGE_PAIRS:
-            raise ValueError("Language mix must be hi-en or fr-en")
+        self.validate_language_pairs([language_pair])
         if hasattr(self.classifier, "predict_text"):
-            result = self.classifier.predict_text(text)
-            verified = self.classifier.metadata.get("validated_language_pairs", [])
-            if language_pair not in verified:
-                message = f"{LANGUAGE_PAIRS[language_pair]} has no verified seven-class test coverage for this checkpoint."
-                result = replace(result, experimental=True, warnings=(*result.warnings, message))
-            return result
+            return self._mark_language_scope(self.classifier.predict_text(text), language_pair)
         result = self.classifier.predict(self.normalizer.normalize(text))
         if language_pair == "fr-en":
-            result = replace(result, experimental=True, warnings=("French–English is experimental until bilingual review is available.",))
+            result = replace(result, experimental=True, warnings=(*result.warnings, "French–English is experimental until bilingual review is available."))
         return result
 
     def predict_context(self, text: str, language_pair: str = "hi-en", context: str = "") -> EmotionResult:
-        if not text.strip() or language_pair not in LANGUAGE_PAIRS:
+        if not text.strip():
             raise ValueError("Use a non-empty phrase and supported language mix")
+        self.validate_language_pairs([language_pair])
         if not context.strip() or not hasattr(self.classifier, "predict_with_context"):
             return self.predict(text, language_pair)
-        result = self.classifier.predict_with_context(text, context)
-        if language_pair not in self.classifier.metadata.get("validated_language_pairs", []):
-            result = replace(result, experimental=True, warnings=(*result.warnings,
-                f"{LANGUAGE_PAIRS[language_pair]} has no verified seven-class test coverage for this checkpoint."))
-        return result
+        return self._mark_language_scope(self.classifier.predict_with_context(text, context), language_pair)
 
     def predict_many(self, texts: list[str], language_pairs: list[str], batch_size: int = 8) -> list[EmotionResult]:
-        if len(texts) != len(language_pairs) or any(pair not in LANGUAGE_PAIRS for pair in language_pairs):
+        if len(texts) != len(language_pairs):
             raise ValueError("Every phrase needs a supported language mix")
+        self.validate_language_pairs(language_pairs)
         if not hasattr(self.classifier, "predict_batch"):
             return [self.predict(text, pair) for text, pair in zip(texts, language_pairs)]
         results = self.classifier.predict_batch(texts, batch_size)
-        verified = self.classifier.metadata.get("validated_language_pairs", [])
-        return [replace(result, experimental=True, warnings=(*result.warnings, f"{LANGUAGE_PAIRS[pair]} has no verified seven-class test coverage for this checkpoint.")) if pair not in verified else result for result, pair in zip(results, language_pairs)]
+        return [self._mark_language_scope(result, pair) for result, pair in zip(results, language_pairs)]

@@ -55,6 +55,8 @@ def evaluation_rows(rows: list[dict]) -> tuple[list[dict], str]:
 def evaluate_emotions(rows: list[dict], detector) -> dict[str, object]:
     rows = validate_emotion_rows(rows)
     rows, scope = evaluation_rows(rows)
+    if hasattr(detector, "validate_language_pairs"):
+        detector.validate_language_pairs([row["language_pair"] for row in rows])
     records = []
     for row in rows:
         result = detector.predict(row["text"], row["language_pair"])

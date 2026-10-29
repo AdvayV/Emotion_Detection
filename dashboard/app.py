@@ -377,55 +377,59 @@ def render_analysis(model_path: str, use_reviewer: bool, ollama_model: str) -> N
 
 
 def render_overview() -> None:
-    page_header("How the project works", "A local workflow for Hinglish sentiment, spelling variation, emoji and difficult messages.")
-    ready_encoders = sum(checkpoint_ready(checkpoint_path(encoder, PROJECT_ROOT / "models")) for encoder in ENCODERS)
-    columns = st.columns(3)
-    columns[0].metric("Default classifier", "Ready", help="The rule-based baseline runs without downloading model weights.", border=True)
-    columns[1].metric("Trained sentiment encoders", f"{ready_encoders} / 3", help="Three-class checkpoints only; the seven-emotion XLM-R checkpoint is counted separately below.", border=True)
-    columns[2].metric("Review option", "Local Qwen", help="An optional second opinion for uncertain messages through Ollama.", border=True)
-    emotion_models = [
-        f"{encoder.name} · {LANGUAGE_PAIRS[pair]}"
-        for pair in LANGUAGE_PAIRS
-        for encoder in ENCODERS
-        if emotion_checkpoint(PROJECT_ROOT / "models", pair, encoder.key) is not None
-    ]
-    st.caption("Installed seven-emotion checkpoints: " + (", ".join(emotion_models) or "none found"))
-    st.button("Open seven-emotion prediction and file evaluation", on_click=navigate_to, args=("Emotion lab",), key="overview_to_emotions")
-    st.write("")
-    first, second = st.columns(2)
-    with first, st.container(border=True):
-        st.subheader("Try one message")
-        st.write("Start with an example. Inspect sentiment, spelling changes and review signals.")
-        st.button("Open text analysis", on_click=navigate_to, args=("Analyze text",), width="stretch", type="primary")
-    with second, st.container(border=True):
-        st.subheader("Check the model's performance")
-        st.write("Compare predictions with labelled phrases and inspect the mistakes.")
-        st.button("Open model evaluation", on_click=navigate_to, args=("Model effectiveness",), width="stretch")
-    with st.container(border=True):
-        st.subheader("From message to result")
-        st.graphviz_chart(
-            r"""digraph { graph [bgcolor=transparent, rankdir=LR, nodesep=0.45, pad=0.2];
-            node [shape=box, style="rounded,filled", fillcolor="#F1F2FC", color="#CBCDE9", fontname="Arial", fontcolor="#313651"];
-            edge [color="#8A91B5", fontname="Arial", fontsize=10];
-            input [label="Your message"]; normalize [label="Clean spelling\nkeep emphasis + negation"];
-            classify [label="Predict sentiment"]; route [label="Check uncertainty\nemoji + sarcasm"];
-            review [label="Qwen second opinion"]; result [label="Final result"];
-            input -> normalize -> classify -> route;
-            route -> review [label="Needs review + Qwen on"]; review -> result;
-            route -> result [label="No review / Qwen off"]; }""",
-            width="stretch",
-        )
-        st.caption("Qwen is consulted only when a review is triggered and the reviewer is enabled.")
-    st.subheader("The five improvements")
-    features = [
-        ("Hinglish-aware encoders", "mBERT, MuRIL and XLM-R training and checkpoint selection", "Train on the real labelled dataset"),
-        ("Spelling and emphasis", "Normalize variants while retaining elongation and negation", "Measure consistency across spelling variants"),
-        ("Emoji and sarcasm", "Rule-based conflict and sarcasm signals", "Train contextual emoji and sarcasm components"),
-        ("Local Qwen review", "Optional review of uncertain messages", "Measure when the second opinion helps"),
-        ("Stronger evaluation", "Live metrics, error analysis and shared training splits", "Evaluate on an independent held-out benchmark"),
-    ]
-    st.dataframe(pd.DataFrame(features, columns=["Improvement", "Available in the code", "Next research step"]), width="stretch", hide_index=True)
-    st.info("The bundled 75 phrases are demo data. Research accuracy requires an independently labelled, held-out dataset.")
+    from dashboard.readiness import overview_readiness
+    page_header("How the project works", "Seven-emotion recognition in Hindi-English and English-French, with matched evaluation and a separate cloud-training workflow.")
+    readiness=overview_readiness(PROJECT_ROOT)
+    columns=st.columns(3)
+    columns[0].metric("Installed emotion encoders",f"{readiness['installed_families']} / 3",help="Encoder families with complete compatible emotion checkpoints; original and combined XLM-R are one family.",border=True)
+    columns[1].metric("Configured language mixes","2",help="Hindi-English and English-French; MuRIL is limited to Hindi-English.",border=True)
+    columns[2].metric("Contextual review","Optional Qwen",help="Ollama and qwen3:0.6b must be running; this is inference, not training.",border=True)
+    st.dataframe(pd.DataFrame(readiness['models']),hide_index=True,width="stretch")
+    st.caption("Readiness comes from installed files and checkpoint metadata without loading neural weights. Installed does not mean independently validated on natural messages.")
+    first,second=st.columns(2)
+    first.button("Open seven-emotion prediction and file evaluation",on_click=navigate_to,args=("Emotion lab",),key="overview_to_emotions",type="primary",width="stretch")
+    second.button("Compare all emotion models",on_click=navigate_to,args=("Model comparison",),key="overview_to_comparison",width="stretch")
+    st.subheader("Four connected modules")
+    st.write("1. Language-aware preparation and checkpoint inference. 2. Cue analysis and optional contextual review. 3. Matched evaluation and disagreement. 4. Cloud training and audited annotation handoff.")
+    live,evaluation,training=st.tabs(["Live prediction","Matched evaluation","Cloud training and review"])
+    style='graph [bgcolor=transparent, rankdir=TB, pad=0.15]; node [shape=box, style="rounded,filled", fillcolor="#EEF4F4", color="#B4C7CE", fontname="Arial", fontcolor="#183047"]; edge [color="#607589"];'
+    with live:
+        st.graphviz_chart('digraph {'+style+r'''
+        input [label="Phrase + selected language"]; prep [label="Saved raw / normalized preprocessing\nPreserve negation and emphasis cues"];
+        model [label="Compatible trained checkpoint\nor explicitly selected demo rules"];
+        base [label="Seven base emotion scores + label\nModel identity, warnings and truncation"];
+        review [label="Separate cue diagnostics\nOptional calibration and Qwen review"];
+        output [label="Base scores retained beside any suggestion\nSession history and explicit exports"];
+        input -> prep -> model -> base -> review -> output; }''',width="stretch")
+        st.caption("Known unsupported trained languages are rejected before inference. Unknown legacy coverage is experimental. Review and prediction do not update weights.")
+    with evaluation:
+        st.graphviz_chart('digraph {'+style+r'''
+        file [label="One CSV / XLSX + expected labels\nChoose language and test partition"];
+        selected [label="Identical selected phrases\nRun compatible encoders sequentially"];
+        guards [label="Shared training/validation-overlap exclusions\nOne common eligible labelled scoring set"];
+        scores [label="Accuracy, macro-F1, class metrics\nConfusion matrices and paired mistakes"];
+        exports [label="Aligned outputs + all seven scores\nCSV / JSON with source and checkpoint identity"];
+        file -> selected -> guards -> scores -> exports; }''',width="stretch")
+        st.caption("No labels means predictions only, not accuracy. Qwen and demo fallback are not part of matched comparison. Agreement is not correctness.")
+    with training:
+        st.graphviz_chart('digraph {'+style+r'''
+        data [label="Versioned dataset + frozen partitions"];
+        gpu [label="Explicit Colab / Kaggle GPU run\nTrain updates; validation selects; test evaluates"];
+        export [label="Export checkpoint + tokenizer + metadata"];
+        local [label="Install for local inference and comparison"];
+        review [label="Two blind human reviews\nAdjudication and provenance audit"];
+        next [label="Eligible training-only corrections\nNew dataset version, never automatic retraining"];
+        data -> gpu -> export -> local -> review -> next;
+        next -> data [label="explicit next training cycle"]; }''',width="stretch")
+        st.caption("Training code, installed weights and measured effectiveness are separate states. Frozen evaluation rows do not become training corrections.")
+    st.subheader("Available capability and evidence")
+    st.dataframe(pd.DataFrame(readiness['capabilities']),hide_index=True,width="stretch")
+    st.info("The current model study uses synthetic data. Independent human-labelled testing is required for real-world claims. There is no reinforcement-learning or automatic model-update loop.")
+    with st.expander("Separate three-class sentiment tools"):
+        st.write("Positive / neutral / negative sentiment is a separate task. Its rule baseline remains available; seven-emotion checkpoints are not sentiment checkpoints.")
+        left,right=st.columns(2)
+        left.button("Open text analysis",on_click=navigate_to,args=("Analyze text",),key="overview_legacy_analysis")
+        right.button("Open model evaluation",on_click=navigate_to,args=("Model effectiveness",),key="overview_legacy_evaluation")
 
 
 def load_dataset(uploaded_file: object | None) -> tuple[pd.DataFrame, str]:
