@@ -7,4 +7,6 @@ textColor = "#182638"
 font = "sans serif"
 
 [server]
+# Avoid inspecting lazy Transformers modules after local checkpoint loads.
+fileWatcherType = "none"
 maxUploadSize = 25
