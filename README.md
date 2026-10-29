@@ -5,6 +5,8 @@ mixed-language phrases, with optional transformer checkpoints and local Qwen
 review. Training runs separately in a GPU notebook; the dashboard loads the
 resulting checkpoint for prediction.
 
+**Review documents:** [Documents for review](Documents%20for%20review/README.md).
+
 **Start here:** [Run, file evaluation and Colab instructions](GET_STARTED.md).
 The current emotion workspace supports Hindi-English and English-French, CSV/XLSX
 prediction and labelled-file scoring. The installed combined XLM-R checkpoint
@@ -12,15 +14,58 @@ covers both language pairs while the original Hindi-English checkpoint remains
 available separately. The current training handoff covers all three encoders and a separate sarcasm task:
 [colab/project_training](colab/project_training/START_HERE.md).
 
-See the [23 October review report](outputs/23OctReview%20AdvayV%20KaavishG%20CD.docx)
+See the [23 October review report](Documents%20for%20review/Review%20reports/23OctReview%20AdvayV%20KaavishG%20CD.docx)
 for the system map, saved synthetic results and evidence limits.
 
-The [IEEE manuscript](outputs/23OctReview%20AdvayV%20KaavishG%20CD%20IEEE%20Explained.docx)
-and [editable Overleaf project](outputs/23OctReview%20AdvayV%20KaavishG%20CD%20Overleaf%20Explained.zip)
+The [IEEE journal manuscript](Documents%20for%20review/Latest%20IEEE%20paper/CodeMood_IEEE_Journal.pdf)
+and [editable Overleaf project](Documents%20for%20review/Latest%20IEEE%20paper/CodeMood_IEEE_Journal_Overleaf.zip)
 include 31 verified references, a 20-paper implementation comparison, four module
 algorithms, the seven-emotion checkpoint specification and 18 explained editable
 equations with a worked F1 example. See
 [manuscript sources and editing instructions](docs/ieee_manuscript/README.md).
+
+## Compare XLM-R, mBERT and MuRIL in one place
+
+Open **Model comparison** in the Streamlit sidebar. Select **Hindi-English** to
+score all three installed emotion encoders together; **English-French** compares
+XLM-R and mBERT because MuRIL has no supported French checkpoint.
+
+1. Upload one CSV/XLSX, or choose a bundled test/checking dataset.
+2. Map the phrase, expected emotion and language columns if needed.
+3. Keep test-only selection and shared training-overlap exclusion enabled.
+4. Click **Run and score selected models** once. Models load sequentially on CPU.
+5. Inspect the **Scoreboard**, **All model outputs**, **Per-emotion metrics**,
+   **Paired mistakes** and **Run details** tabs. Download the aligned CSV and JSON
+   report to retain the same predictions, labels, model versions and settings.
+
+Every selected model receives identical phrases and is scored on the same eligible
+labelled rows. If any selected model flags a phrase as training/validation overlap,
+the default policy excludes it from every score. Missing overlap guards are shown
+explicitly. Without expected labels the page shows outputs and disagreement, with
+no fabricated accuracy or F1. No Qwen review, demo fallback or consensus vote is
+mixed into these encoder scores.
+
+Use accuracy alongside seven-class macro-F1 (the mean balance of precision and
+recall across the seven emotions), per-emotion F1 and confusion matrices. Model
+agreement and a high phrase confidence are not evidence that a label is correct.
+Synthetic and unreviewed checking labels remain marked as diagnostic data.
+See the [comparison guide](docs/MODEL_COMPARISON.md) for schema, interpretation,
+CPU settings, exports and reproducible verification.
+
+The 29 October 2026 local replay used all 1,000 shared Hindi-English synthetic
+test rows, with no detected training/validation overlap. All three results matched
+their saved language-specific test metrics:
+
+| Model | Accuracy | Seven-class macro-F1 |
+| --- | ---: | ---: |
+| XLM-R | 95.6% | 0.9563 |
+| mBERT | 84.3% | 0.8439 |
+| MuRIL | 80.3% | 0.8123 |
+
+These are configuration results on synthetic held-out rows; training scope differs
+between MuRIL and the two bilingual models. See the
+[replay evidence](docs/evaluation/comparison_verification.json) for counts,
+paired mistakes, runtime settings and the dataset fingerprint.
 
 ## Find the datasets and Colab files
 
@@ -40,13 +85,15 @@ Colab uploads are under [colab](colab/README.md), trained weights are under
 `models/`, and the downloaded run reports are under
 `outputs/training/xlmr_synthetic_8000`. Small UI fixtures live under `data/demo`;
 they are separate from the training set. Historical working files and cleanup
-records are under `archive`; redundant downloads were removed with approval.
+records are under `archives`; the latest organisation retained downloaded ZIPs,
+previews and caches without deletion.
 
 ## What works today
 
 | Capability | Implementation and current limits |
 | --- | --- |
 | Three-class sentiment | Positive, neutral and negative; always-available rule baseline and optional local transformer |
+| Shared-data model comparison | One scoring run for compatible XLM-R/mBERT/MuRIL checkpoints; aligned predictions, shared overlap exclusions, accuracy/macro-F1, per-class results, paired mistakes and CSV/JSON exports |
 | Seven-emotion detection | Joy (happy), sadness, anger, fear, surprise, disgust and neutral; demo rules or a trained seven-class checkpoint |
 | Language scope | Hindi-English and English-French; XLM-R routes to language-compatible installed weights and labels any explicit demo fallback |
 | Expressive spelling | Conservative normalization, negation preservation and elongation cues such as `acchaaa` |
@@ -87,7 +134,7 @@ frozen 20,000-row source or the installed guards, but their assistant-proposed
 labels are unreviewed. They are not a human benchmark. They are selectable in
 Emotion lab's file evaluation tab and stay separate from all training packages.
 
-The [submission report](outputs/CodeMood_Hindi_English_Project_Progress_Report.docx)
+The [submission report](Documents%20for%20review/Review%20reports/CodeMood_Hindi_English_Project_Progress_Report.docx)
 has a full-page architecture and four module diagrams. Editable Mermaid sources
 and SVG artwork are in [docs/submission](docs/submission/README.md). Saved results
 remain synthetic-only; current live inference still makes confident mistakes.
@@ -166,7 +213,7 @@ Open **Research workbench** and choose a workflow from its navigation:
 
 Start with [GET_STARTED.md](GET_STARTED.md), the
 [advanced GPU guide](colab/advanced_training/START_HERE.md), or the
-[23 October review report](outputs/23OctReview%20AdvayV%20KaavishG%20CD.docx).
+[23 October review report](Documents%20for%20review/Review%20reports/23OctReview%20AdvayV%20KaavishG%20CD.docx).
 
 For optional sentiment review, install Ollama separately and run:
 
@@ -357,7 +404,8 @@ colab/              Ready-to-upload notebook and ZIP, plus research source bundl
 models/             Trained checkpoints used by local prediction
 outputs/            Project documents and original training-run reports
 scripts/            Dataset workbook builder
-archive/            Original downloads and historical working files
+archives/           Retained model downloads, previews and historical files
+Documents for review/ Papers, Word reports and editable LaTeX sources
 tests/              Core, dashboard, data, packaging and recovery checks
 ```
 

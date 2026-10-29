@@ -1,0 +1,79 @@
+{
+  "checked_on": "2026-10-29",
+  "language_pair": "hi-en",
+  "source_dataset": "data/training/multilingual_bootstrap_v1/hindi_english/test.csv",
+  "dataset_sha256": "ce3800618f564fe2f3b3f0bacb9e0b093f892e47126898b48ce8be303f1d6300",
+  "scope": "synthetic-only held-out test; not an independent human-language benchmark",
+  "scored_rows": 1000,
+  "excluded_overlap_rows": 0,
+  "models": [
+    {
+      "model": "XLM-R",
+      "scored_rows": 1000,
+      "accuracy": 0.956,
+      "macro_f1": 0.9562988745707631,
+      "prediction_seconds": 136.52850089999265,
+      "load_seconds": 34.43457749998197,
+      "overlap_check_available": true,
+      "matches_saved_language_test_metrics": true
+    },
+    {
+      "model": "mBERT",
+      "scored_rows": 1000,
+      "accuracy": 0.843,
+      "macro_f1": 0.8439217764041637,
+      "prediction_seconds": 97.98277200001758,
+      "load_seconds": 0.8339388000022154,
+      "overlap_check_available": true,
+      "matches_saved_language_test_metrics": true
+    },
+    {
+      "model": "MuRIL",
+      "scored_rows": 1000,
+      "accuracy": 0.803,
+      "macro_f1": 0.8123164552869595,
+      "prediction_seconds": 71.68447760000709,
+      "load_seconds": 0.7673861000221223,
+      "overlap_check_available": true,
+      "matches_saved_language_test_metrics": true
+    }
+  ],
+  "paired_comparisons": [
+    {
+      "left": "XLM-R",
+      "right": "mBERT",
+      "scored_rows": 1000,
+      "both_correct": 818,
+      "left_only_correct": 138,
+      "right_only_correct": 25,
+      "both_wrong": 19,
+      "agreement_all_selected_rows": 0.818
+    },
+    {
+      "left": "XLM-R",
+      "right": "MuRIL",
+      "scored_rows": 1000,
+      "both_correct": 759,
+      "left_only_correct": 197,
+      "right_only_correct": 44,
+      "both_wrong": 0,
+      "agreement_all_selected_rows": 0.759
+    },
+    {
+      "left": "mBERT",
+      "right": "MuRIL",
+      "scored_rows": 1000,
+      "both_correct": 751,
+      "left_only_correct": 92,
+      "right_only_correct": 52,
+      "both_wrong": 105,
+      "agreement_all_selected_rows": 0.798
+    }
+  ],
+  "runtime": {
+    "device": "cpu",
+    "threads": 2,
+    "batch_size": 4
+  },
+  "comparison_note": "Identical test rows; XLM-R and mBERT trained on 16k bilingual rows, MuRIL on 8k hi-en rows. This does not isolate encoder architecture."
+}

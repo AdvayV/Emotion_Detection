@@ -18,7 +18,8 @@ colab_ready_8000.zip
 HinglishEmotionSynthetic8000*.zip
 
 # Organised local artifacts and generated training data
-archives/
+archives/*
+!archives/README.md
 colab/colab_ready_8000/
 colab/colab_ready_8000.zip
 colab/research_source/*.zip

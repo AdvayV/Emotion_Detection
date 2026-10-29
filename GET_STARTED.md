@@ -10,6 +10,9 @@ python -m streamlit run dashboard/app.py
 ```
 
 Open http://127.0.0.1:8501. The default page is **Emotion lab**.
+Sidebar classifier, custom-path and Qwen selections are retained when switching
+workspaces. They apply when you next run analysis or evaluation. Greyed-out
+buttons explain missing inputs or checkpoints; selecting a model does not install it.
 Choose Hindi-English or English-French and a classifier. XLM-R automatically
 selects a compatible installed checkpoint: the combined XLM-R model supports
 both `hi-en` and `fr-en`, and the original Hindi-English checkpoint remains
@@ -29,7 +32,7 @@ in **Emotion lab**. This installs existing trained weights; it does not train a
 new model. See the results and evaluation limits below.
 
 For the saved model review and implementation snapshot, open the
-[23 October report](outputs/23OctReview%20AdvayV%20KaavishG%20CD.docx).
+[23 October report](Documents%20for%20review/Review%20reports/23OctReview%20AdvayV%20KaavishG%20CD.docx).
 
 ## Predict phrases or score a file
 
@@ -57,6 +60,23 @@ Small upload examples are in data/templates. Existing test data is under
 data/training/synthetic_hinglish_8000/test.csv. The new combined bootstrap is
 data/training/multilingual_bootstrap_v1/test.csv. These are synthetic examples,
 not independent proof of accuracy on natural messages.
+
+## Score all installed emotion models together
+
+Choose **Model comparison** in the sidebar, select the language and models, then
+upload a labelled CSV/XLSX or select a bundled test file. Click **Run and score
+selected models**. Hindi-English supports XLM-R, mBERT and MuRIL; English-French
+supports XLM-R and mBERT. No additional model training is triggered.
+
+The five result tabs keep the accuracy/macro-F1 table, each phrase's model outputs,
+per-emotion metrics, confusion matrices and paired mistakes together. The downloads
+include a wide prediction CSV with seven probabilities per model and a full JSON
+report. Changing data, column mappings or model versions hides stale results.
+
+Keep test-only selection and shared overlap exclusions enabled for evaluation.
+Missing/unreviewed labels and unavailable guards are reported. The supplied test
+set is synthetic, so its accuracy must not be presented as real-world accuracy.
+See [the full comparison guide](docs/MODEL_COMPARISON.md).
 
 ## Start the current mBERT comparison
 
