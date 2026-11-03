@@ -11,7 +11,7 @@ import streamlit as st
 
 from dashboard.data import dataframe_report, read_dataset, report_dict, sarcasm_rate
 from dashboard.evaluation import ModelEvaluation, evaluate_pipeline
-from dashboard.theme import apply_theme
+from dashboard.theme import apply_theme, page_intro, sidebar_brand, section_label
 from hinglish_emotion.intensity import IntensityEstimator
 from hinglish_emotion.model_catalog import ENCODERS, checkpoint_path, checkpoint_ready
 from hinglish_emotion.ollama_reviewer import DEFAULT_OLLAMA_MODEL, OllamaReviewer
@@ -54,20 +54,21 @@ MODEL_DESCRIPTIONS = {
 
 
 def page_header(title: str, description: str) -> None:
-    st.caption("HINGLISH LAB  /  LOCAL RESEARCH WORKSPACE")
-    st.title(title)
-    st.write(description)
+    page_intro(title, description)
 
 
 def style_chart(figure, height: int = 320):
     figure.update_layout(
         template="plotly_white", height=height,
-        font={"family": "Arial, sans-serif", "color": "#34475A", "size": 13},
+        font={"family": "Arial, sans-serif", "color": "#59677D", "size": 13},
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        margin={"l": 5, "r": 10, "t": 30, "b": 5}, legend_title_text="",
+        margin={"l": 8, "r": 20, "t": 28, "b": 12}, legend_title_text="",
+        colorway=["#6759DD", "#168A83", "#D1943E", "#5579BD", "#BB637D", "#8695A9"],
+        hoverlabel={"bgcolor": "#FFFFFF", "font_color": "#19243B", "bordercolor": "#E1E6EF"},
+        legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "x": 0},
     )
-    figure.update_xaxes(gridcolor="#E2E9EC")
-    figure.update_yaxes(gridcolor="#E2E9EC")
+    figure.update_xaxes(gridcolor="#EDF0F6", zeroline=False, automargin=True)
+    figure.update_yaxes(gridcolor="#EDF0F6", zeroline=False, automargin=True)
     return figure
 
 
@@ -128,16 +129,16 @@ def build_pipeline(model_path: str, use_reviewer: bool, ollama_model: str) -> tu
 
 def render_sidebar() -> tuple[str, str, bool, str]:
     with st.sidebar:
-        st.title("💬 Hinglish Lab")
-        st.caption("A local workspace for model exploration")
+        sidebar_brand()
+        st.caption("YOUR WORKSPACES")
         page = st.radio("Workspace", PAGES, key="workspace")
         if page in {"Emotion lab", "Model comparison", "Model disagreement"}:
             st.divider()
-            st.info("Seven emotions for Hindi–English and English–French. The selected language determines which trained checkpoint is available.")
+            st.caption("Hindi–English / English–French · Seven emotions. Select the language and model in the workspace.")
             if page != "Model comparison":
                 st.button("Compare all emotion models", on_click=navigate_to, args=("Model comparison",), key="sidebar_model_comparison")
             st.subheader("Seven-emotion settings")
-            st.caption("Choose the language mix and emotion checkpoint in the workspace. Sentiment checkpoints use a different label set; Qwen review supports both tasks.")
+            st.caption("Phrase scores describe one prediction. Use Model comparison with labelled data to measure accuracy.")
             return page, "", False, DEFAULT_OLLAMA_MODEL
         if page not in {"Analyze text", "Model effectiveness"}:
             st.divider()
@@ -386,9 +387,20 @@ def render_overview() -> None:
     columns[2].metric("Contextual review","Optional Qwen",help="Ollama and qwen3:0.6b must be running; this is inference, not training.",border=True)
     st.dataframe(pd.DataFrame(readiness['models']),hide_index=True,width="stretch")
     st.caption("Readiness comes from installed files and checkpoint metadata without loading neural weights. Installed does not mean independently validated on natural messages.")
-    first,second=st.columns(2)
-    first.button("Open seven-emotion prediction and file evaluation",on_click=navigate_to,args=("Emotion lab",),key="overview_to_emotions",type="primary",width="stretch")
-    second.button("Compare all emotion models",on_click=navigate_to,args=("Model comparison",),key="overview_to_comparison",width="stretch")
+    st.subheader("Choose where to begin")
+    predict,compare,data=st.columns(3)
+    with predict,st.container(border=True,key="overview_predict"):
+        section_label("01", "Explore a phrase", "Start with a message or example.")
+        st.write("See seven emotion scores, spelling cues and optional review signals.")
+        st.button("Open seven-emotion prediction and file evaluation",on_click=navigate_to,args=("Emotion lab",),key="overview_to_emotions",type="primary",width="stretch")
+    with compare,st.container(border=True,key="overview_compare"):
+        section_label("02", "Compare the models", "Keep the evaluation data identical.")
+        st.write("Score compatible encoders and inspect their agreements and mistakes.")
+        st.button("Compare all emotion models",on_click=navigate_to,args=("Model comparison",),key="overview_to_comparison",width="stretch")
+    with data,st.container(border=True,key="overview_data"):
+        section_label("03", "Explore your dataset", "Understand the source messages.")
+        st.write("Inspect labels, message lengths and individual examples before evaluation.")
+        st.button("Browse the dataset",on_click=navigate_to,args=("Dataset explorer",),key="overview_to_data",width="stretch")
     st.subheader("Four connected modules")
     st.write("1. Language-aware preparation and checkpoint inference. 2. Cue analysis and optional contextual review. 3. Matched evaluation and disagreement. 4. Cloud training and audited annotation handoff.")
     live,evaluation,training=st.tabs(["Live prediction","Matched evaluation","Cloud training and review"])
@@ -675,7 +687,7 @@ def render_evaluation(model_path: str, use_reviewer: bool, ollama_model: str) ->
 
 
 def main() -> None:
-    st.set_page_config(page_title="Hinglish Lab", page_icon="🧪", layout="wide", initial_sidebar_state="expanded")
+    st.set_page_config(page_title="CodeMood · Language & Emotion", page_icon="💬", layout="wide", initial_sidebar_state="expanded")
     apply_theme()
     if "history" not in st.session_state:
         st.session_state.history = []

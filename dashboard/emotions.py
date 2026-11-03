@@ -9,6 +9,7 @@ from hinglish_emotion.model_catalog import ENCODERS, checkpoint_ready
 from hinglish_emotion.tasks import EMOTION_LABELS, EMOTION_NAMES, LANGUAGE_PAIRS
 from hinglish_emotion.checkpoint_metadata import emotion_checkpoint_metadata
 from hinglish_emotion.checkpoints import checkpoint_version, emotion_checkpoint
+from dashboard.theme import EMOTION_COLORS, empty_prediction, prediction_banner, section_label, status_strip
 
 ROOT = Path(__file__).resolve().parents[1]
 DEMO = ROOT / "data/demo/emotions/mixed_emotions_demo.csv"
@@ -124,8 +125,9 @@ def render_training_status(path, metadata):
 
 def render_emotion_lab(header, chart_style):
     header("Emotion lab", "Predict seven emotions from Hindi–English and English–French phrases, then measure results against your own dataset.")
-    st.caption("Local predictions · Seven emotions · CSV and XLSX evaluation")
-    with st.container(border=True):
+    status_strip([("Task", "Seven-emotion recognition"), ("Inference", "Local"), ("File support", "CSV / XLSX")])
+    with st.container(border=True,key="emotion_setup"):
+        section_label("01", "Set up your prediction", "Choose a language mix and a compatible model.")
         c1,c2=st.columns([1,1.3])
         with c1:
             if st.session_state.get("emotion_language") not in LANGUAGE_PAIRS: st.session_state.emotion_language="hi-en"
@@ -141,50 +143,52 @@ def render_emotion_lab(header, chart_style):
             st.warning(issue)
             st.button("Use demo rules instead",on_click=use_rules)
         elif metadata:
-            st.success("Seven-emotion checkpoint found. Predictions will use the local trained weights.")
-            st.caption(f"Input preparation: {metadata['text_mode']} · token limit: {metadata['max_length']} · model folder: {path.name}")
-            if metadata.get("evaluation_scope") in {"synthetic_only","mixed_test"}: st.warning("This checkpoint was evaluated on generated phrases. Real-world accuracy is unverified; a high prediction score can still be wrong.")
+            st.caption(f"Ready · {choice} trained checkpoint · {LANGUAGE_PAIRS[pair]}")
+            with st.expander("Checkpoint details and evaluation scope"):
+                st.caption(f"Input preparation: {metadata['text_mode']} · token limit: {metadata['max_length']} · model folder: {path.name}")
+                if metadata.get("evaluation_scope") in {"synthetic_only","mixed_test"}: st.warning("This checkpoint was evaluated on generated phrases. Real-world accuracy is unverified; a high prediction score can still be wrong.")
         else: st.info("Demo lexical rules are active. They use word and emoji cues; no trained emotion checkpoint is running.")
     phrase_tab,file_tab,training_tab,results_tab,study_tab=st.tabs(["Try a phrase","Predict and evaluate a file","Training and Colab","Encoder results","XLM-R vs MuRIL"])
     with phrase_tab:
         left,right=st.columns([1,1.1],gap="large")
-        with left,st.container(border=True):
-            st.subheader("Your phrase")
+        with left,st.container(border=True,key="emotion_input"):
+            section_label("02", "Your phrase", "Type naturally. Keep the spelling and emoji you would normally use.")
             st.selectbox("Emotion example",list(EXAMPLES),key="emotion_example",on_change=example_changed)
             text=st.text_area("Phrase to analyze",key="emotion_message",height=155,placeholder="Aaj main bahut khush hoon because I passed my exam 😊",on_change=clear_result)
             version=checkpoint_version(path) if path else None
-            context=st.text_area("Optional conversation context",key="emotion_context",height=80,placeholder="What happened before this message?",on_change=clear_result)
-            qwen_enabled=st.checkbox("Use optional local Qwen review when needed",value=False,key="emotion_qwen_enabled",on_change=clear_result)
-            sarcasm_enabled=st.checkbox("Use trained sarcasm model",value=False,key="emotion_sarcasm_enabled",on_change=clear_result)
-            sarcasm_path_text=st.text_input("Sarcasm checkpoint folder",value="models/xlmr_sarcasm",key="sarcasm_checkpoint_path",on_change=clear_result) if sarcasm_enabled else "models/xlmr_sarcasm"
-            sarcasm_path=Path(sarcasm_path_text.strip()) if sarcasm_path_text.strip() else ROOT/"models"/"xlmr_sarcasm"
-            if not sarcasm_path.is_absolute(): sarcasm_path=ROOT/sarcasm_path
-            sarcasm_ready=(sarcasm_path/"config.json").is_file()
-            try: sarcasm_version=checkpoint_version(sarcasm_path) if sarcasm_ready else "missing"
-            except OSError: sarcasm_version="unreadable"
-            if sarcasm_enabled and not sarcasm_ready:
-                st.caption("No trained sarcasm weights were found here. The workbench will use its rule-based cue score.")
-            calibration_enabled=st.checkbox("Apply experimental confidence profile",value=False,key="emotion_calibration_enabled",on_change=clear_result)
-            calibration_profile=None
-            calibration_hash=None
-            calibration_issue=""
-            if calibration_enabled:
-                upload=st.file_uploader("Saved calibration profile JSON",type=["json"],key="emotion_calibration_profile",on_change=clear_result)
-                if not path: calibration_issue="A trained checkpoint is required for a calibration profile."
-                elif upload is None: calibration_issue="Upload the profile fitted for this checkpoint in Research workbench."
-                else:
-                    try:
-                        import hashlib
-                        from hinglish_emotion.calibration import validate_profile
-                        calibration_hash=hashlib.sha256(upload.getvalue()).hexdigest()
-                        calibration_profile=validate_profile(json.loads(upload.getvalue()),version)
-                        if calibration_profile.get("scope") not in {pair,"all"}:
-                            raise ValueError("Profile language scope does not match this phrase")
-                        identity=calibration_profile.get("model_identity",{})
-                        for field in ("text_mode","preparation_version"):
-                            if identity.get(field)!=metadata.get(field): raise ValueError("Profile preprocessing differs from checkpoint")
-                    except (ValueError,KeyError,TypeError) as exc: calibration_issue=str(exc)
-                if calibration_issue: st.info(calibration_issue)
+            with st.expander("Context, review and calibration"):
+                context=st.text_area("Optional conversation context",key="emotion_context",height=80,placeholder="What happened before this message?",on_change=clear_result)
+                qwen_enabled=st.checkbox("Use optional local Qwen review when needed",value=False,key="emotion_qwen_enabled",on_change=clear_result)
+                sarcasm_enabled=st.checkbox("Use trained sarcasm model",value=False,key="emotion_sarcasm_enabled",on_change=clear_result)
+                sarcasm_path_text=st.text_input("Sarcasm checkpoint folder",value="models/xlmr_sarcasm",key="sarcasm_checkpoint_path",on_change=clear_result) if sarcasm_enabled else "models/xlmr_sarcasm"
+                sarcasm_path=Path(sarcasm_path_text.strip()) if sarcasm_path_text.strip() else ROOT/"models"/"xlmr_sarcasm"
+                if not sarcasm_path.is_absolute(): sarcasm_path=ROOT/sarcasm_path
+                sarcasm_ready=(sarcasm_path/"config.json").is_file()
+                try: sarcasm_version=checkpoint_version(sarcasm_path) if sarcasm_ready else "missing"
+                except OSError: sarcasm_version="unreadable"
+                if sarcasm_enabled and not sarcasm_ready:
+                    st.caption("No trained sarcasm weights were found here. The workbench will use its rule-based cue score.")
+                calibration_enabled=st.checkbox("Apply experimental confidence profile",value=False,key="emotion_calibration_enabled",on_change=clear_result)
+                calibration_profile=None
+                calibration_hash=None
+                calibration_issue=""
+                if calibration_enabled:
+                    upload=st.file_uploader("Saved calibration profile JSON",type=["json"],key="emotion_calibration_profile",on_change=clear_result)
+                    if not path: calibration_issue="A trained checkpoint is required for a calibration profile."
+                    elif upload is None: calibration_issue="Upload the profile fitted for this checkpoint in Research workbench."
+                    else:
+                        try:
+                            import hashlib
+                            from hinglish_emotion.calibration import validate_profile
+                            calibration_hash=hashlib.sha256(upload.getvalue()).hexdigest()
+                            calibration_profile=validate_profile(json.loads(upload.getvalue()),version)
+                            if calibration_profile.get("scope") not in {pair,"all"}:
+                                raise ValueError("Profile language scope does not match this phrase")
+                            identity=calibration_profile.get("model_identity",{})
+                            for field in ("text_mode","preparation_version"):
+                                if identity.get(field)!=metadata.get(field): raise ValueError("Profile preprocessing differs from checkpoint")
+                        except (ValueError,KeyError,TypeError) as exc: calibration_issue=str(exc)
+                    if calibration_issue: st.info(calibration_issue)
             signature=(choice,str(path),version,pair,text,context,qwen_enabled,sarcasm_enabled,str(sarcasm_path),sarcasm_version,calibration_hash,calibration_enabled)
             if st.button("Detect emotion",type="primary",width="stretch",disabled=bool(issue or calibration_issue)):
                 clear_result()
@@ -210,15 +214,15 @@ def render_emotion_lab(header, chart_style):
                     history=list(st.session_state.get("emotion_history",[])); history.append(result.to_dict()); st.session_state.emotion_history=history[-100:]
                 except (ValueError,RuntimeError,OSError) as exc: st.error(f"The selected model could not predict: {exc}. You can explicitly switch to demo rules.")
             st.caption("Editing the phrase, language or model clears the previous result. Predictions do not train the model.")
-        with right,st.container(border=True):
+        with right,st.container(border=True,key="emotion_output"):
+            section_label("03", "Read the result", "A phrase score is not dataset accuracy.")
             saved=st.session_state.get("emotion_result")
             if not saved or saved["signature"]!=signature:
-                st.subheader("Your result will appear here")
-                st.write("Choose a phrase and select Detect emotion. The result shows which model actually ran.")
+                empty_prediction()
             else:
                 result=saved["workbench"]
                 primary=result.primary
-                st.subheader(f"{ICONS[result.final_emotion]} {EMOTION_NAMES[result.final_emotion]}")
+                prediction_banner(result.final_emotion, ICONS[result.final_emotion], demo=primary.source=="lexical_demo")
                 if result.final_emotion != primary.emotion:
                     st.caption(f"Base prediction: {EMOTION_NAMES[primary.emotion]} · final after review/cues: {EMOTION_NAMES[result.final_emotion]}")
                 st.write(saved["text"])
@@ -233,8 +237,11 @@ def render_emotion_lab(header, chart_style):
                 if primary.needs_context: st.warning("The scores are close, low, or the input was truncated. More context may help.")
                 for warning in primary.warnings: st.warning(warning)
                 probabilities=pd.DataFrame({"Emotion":[EMOTION_NAMES[label] for label in EMOTION_LABELS],"Score":[primary.probabilities[label] for label in EMOTION_LABELS]})
-                chart=px.bar(probabilities,y="Emotion",x="Score",orientation="h",text_auto=".1%",range_x=[0,1],color_discrete_sequence=["#5655B8"])
-                chart.update_yaxes(autorange="reversed");chart.update_xaxes(tickformat=".0%")
+                probabilities["Label"]=list(EMOTION_LABELS)
+                chart=px.bar(probabilities,y="Emotion",x="Score",orientation="h",text_auto=".1%",range_x=[0,1],color="Label",color_discrete_map=EMOTION_COLORS)
+                chart.update_traces(marker_line_width=0, textposition="outside", cliponaxis=False)
+                chart.update_layout(showlegend=False, bargap=.34)
+                chart.update_yaxes(autorange="reversed", title=None);chart.update_xaxes(tickformat=".0%", title=None, range=[0,1.16])
                 st.plotly_chart(chart_style(chart,300),width="stretch")
                 st.caption("Scores are uncalibrated. Experimental-data notices describe validation scope, not whether this score distribution is ambiguous.")
                 with st.expander("Prediction details"):

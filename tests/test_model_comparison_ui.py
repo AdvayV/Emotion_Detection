@@ -102,4 +102,4 @@ def test_workspace_navigation_exposes_the_new_page():
     app.button(key='sidebar_model_comparison').click().run()
     assert not app.exception
     assert app.radio(key='workspace').value=='Model comparison'
-    assert any(title.value=='Model comparison' for title in app.title)
+    assert any('<h1>Model comparison</h1>' in item.value for item in app.markdown)

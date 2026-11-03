@@ -10,6 +10,7 @@ import plotly.express as px
 import streamlit as st
 
 from dashboard.disagreement import available_checkpoints
+from dashboard.theme import section_label, status_strip
 from hinglish_emotion.batch import normalize_records, read_frame
 from hinglish_emotion.emotions import LocalEmotionClassifier
 from hinglish_emotion.model_comparison import comparison_rows, compare_models
@@ -29,17 +30,20 @@ def _clear_emotion_caches():
 def render_model_comparison(header, chart_style, root=None, clear_sentiment_cache=None):
     root = Path(root) if root else Path(__file__).resolve().parents[1]
     header("Model comparison", "Run the same dataset through the installed emotion models, score them against supplied labels, and inspect every prediction together.")
-    st.caption("Local CPU inference, one encoder at a time. This run compares base model outputs; Qwen and demo-rule fallback are not used.")
-    pair = st.selectbox("Comparison language", list(LANGUAGE_PAIRS), format_func=LANGUAGE_PAIRS.get, key="comparison_language")
+    status_strip([("Evaluation", "Identical phrases"), ("Runtime", "Local CPU · sequential"), ("Outputs", "Base encoders only")])
+    section_label("01", "Choose your comparison", "Every selected model receives the same eligible phrases.")
+    language_column,models_column=st.columns([1,1.5])
+    pair = language_column.selectbox("Comparison language", list(LANGUAGE_PAIRS), format_func=LANGUAGE_PAIRS.get, key="comparison_language")
     installed = {name: (name, path, version) for name, path, version in available_checkpoints(root, pair)}
     names = [name for name in ("XLM-R", "mBERT", "MuRIL") if name in installed]
-    selected_names = st.multiselect("Models to score", names, default=names, key=f"comparison_models_{pair}")
+    selected_names = models_column.multiselect("Models to score", names, default=names, key=f"comparison_models_{pair}")
     st.caption("Available for this language: " + (", ".join(names) or "no trained checkpoints"))
     if pair == "fr-en":
         st.info("English-French compares XLM-R and mBERT. MuRIL is restricted to Hindi-English; it is never given an invented French score.")
     elif len(names) < 3:
         st.info("Install the missing compatible checkpoints to compare all three encoders. Missing models are not scored as zero.")
 
+    section_label("02", "Choose a dataset", "Upload your own file, or use a bundled evaluation set.")
     upload = st.file_uploader("Comparison dataset (CSV or XLSX)", type=["csv", "xlsx"], key="comparison_upload")
     language_folder = "hindi_english" if pair == "hi-en" else "english_french"
     sources = {
@@ -70,8 +74,9 @@ def render_model_comparison(header, chart_style, root=None, clear_sentiment_cach
             languages = ["Use comparison language", *columns]
             pair_col = st.selectbox("Comparison language column", languages, index=default_index(languages, {"language_pair", "language", "language_mix"}), key=f"comparison_pair_{digest}")
         rows = normalize_records(frame.to_dict("records"), pair, text_col, "" if label_col == "No expected labels" else label_col, "" if pair_col == "Use comparison language" else pair_col)
-        test_only = st.checkbox("Compare test rows only when split metadata is present", value=True, key="comparison_test_only")
-        exclude_overlap = st.checkbox("Exclude phrases found in any selected model's training/validation data from every model's score", value=True, key="comparison_exclude_overlap")
+        with st.expander("Scoring safeguards", expanded=False):
+            test_only = st.checkbox("Compare test rows only when split metadata is present", value=True, key="comparison_test_only")
+            exclude_overlap = st.checkbox("Exclude phrases found in any selected model's training/validation data from every model's score", value=True, key="comparison_exclude_overlap")
         selected_rows, scope, skipped = comparison_rows(rows, pair, test_only)
     except (ValueError, OSError, UnicodeError) as exc:
         st.error(f"Could not prepare comparison: {exc}")
@@ -152,9 +157,14 @@ def _render_report(report, chart_style):
     score_tab, rows_tab, emotion_tab, pair_tab, details_tab = st.tabs(["Scoreboard", "All model outputs", "Per-emotion metrics", "Paired mistakes", "Run details"])
     with score_tab:
         if report["scored_rows"]:
+            cards=st.columns(len(report["models"]))
+            for card,model in zip(cards,report["models"]):
+                metrics=model["metrics"]
+                card.metric(model["name"], f"{metrics['accuracy']:.1%}" if metrics else "Not scored",
+                    help=(f"Accuracy on the common eligible rows. Seven-class macro-F1: {metrics['macro_f1']:.4f}" if metrics else "No eligible labelled rows."))
             ranked = summary.sort_values(["Macro-F1", "Accuracy"], ascending=False, kind="stable")
             st.dataframe(ranked, hide_index=True, width="stretch", column_config={"Accuracy":st.column_config.NumberColumn(format="percent"),"Macro-F1":st.column_config.NumberColumn(format="%.4f")})
-            st.caption("Compare macro-F1 across all seven classes alongside accuracy. A higher score on this file is not a claim of universal superiority; ties and small differences need independent evaluation.")
+            st.caption("Cards show accuracy; compare macro-F1 across all seven classes alongside accuracy. A higher score on this file is not a claim of universal superiority; ties and small differences need independent evaluation.")
             chart = summary.melt(id_vars="Model", value_vars=["Accuracy", "Macro-F1"], var_name="Metric", value_name="Score")
             st.plotly_chart(chart_style(px.bar(chart, x="Model", y="Score", color="Metric", barmode="group", range_y=[0,1], text_auto=".1%")), width="stretch", key="comparison_score_chart")
             missing = [label for label in EMOTION_LABELS if label not in report["label_counts"]]
