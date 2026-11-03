@@ -202,7 +202,7 @@ def apply_theme() -> None:
     .cm-emotion-icon { font-size:2rem; }
     @media (max-width: 760px) {
       [data-testid="stMainBlockContainer"], [data-testid="stAppViewContainer"] > .main .block-container {
-        padding:1.1rem 1rem 2.5rem; }
+        padding:3.5rem 1rem 2.5rem; }
       .cm-hero { padding:1.4rem; border-radius:16px; } .cm-hero h1 { font-size:1.8rem; max-width:100%; }
       .cm-hero .cm-tagline { font-size:.95rem; } .cm-orbit { opacity:.2; }
       .cm-status-strip { gap:.55rem 1rem; } .cm-status-strip > div { flex-wrap:wrap; gap:.3rem; }

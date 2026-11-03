@@ -1,0 +1,17 @@
+{
+  "date": "2026-11-03",
+  "scope": "CodeMood Streamlit interface refresh; no model or dataset changes",
+  "full_local_regression": {"passed": 261, "subtests_passed": 33},
+  "final_focused_regression": {"passed": 28, "subtests_passed": 3},
+  "committed_entrypoint": {"workspaces_checked": 8, "exceptions": 0},
+  "browser": {
+    "desktop_viewport": [1440, 1000],
+    "mobile_viewport": [390, 844],
+    "demo_prediction": true,
+    "input_change_invalidates_result": true,
+    "comparison_controls_ready": true,
+    "overview_dataset_navigation": true,
+    "mobile_horizontal_overflow": false,
+    "uncaught_page_errors": 0
+  }
+}

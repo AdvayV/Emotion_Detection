@@ -5,6 +5,24 @@ mixed-language phrases, with optional transformer checkpoints and local Qwen
 review. Training runs separately in a GPU notebook; the dashboard loads the
 resulting checkpoint for prediction.
 
+## CodeMood dashboard
+
+The Streamlit interface uses a shared light theme, an indigo page header and a
+compact navigation sidebar. Emotion lab follows three steps: select a compatible
+model, enter a phrase, and inspect the prediction beside it. Context, optional
+Qwen review and experimental calibration are grouped under an expandable section.
+Each emotion keeps the same chart color, with labels and numeric scores alongside
+the color. Demo outputs remain explicitly marked.
+
+Model comparison separates model selection, dataset selection and scoring
+safeguards, then presents per-model accuracy cards alongside the existing
+macro-F1 tables and aligned outputs. Overview provides working shortcuts to
+prediction, comparison and dataset exploration. The layout adapts to narrow
+screens; the sidebar can be reopened using Streamlit's navigation control.
+
+Start it from the repository root with `python -m streamlit run dashboard/app.py`.
+See [dashboard design and verification](docs/DASHBOARD_DESIGN.md) for details.
+
 **Review documents:** [Documents for review](Documents%20for%20review/README.md).
 
 **Start here:** [Run, file evaluation and Colab instructions](GET_STARTED.md).
