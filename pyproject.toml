@@ -15,6 +15,7 @@ dashboard = [
   "pandas>=2.2",
   "plotly>=5.24",
   "openpyxl>=3.1",
+  "graphviz>=0.19",
 ]
 model = [
   "pandas>=2.2",
@@ -30,4 +31,4 @@ model = [
 hinglish-emotion = "hinglish_emotion.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["hinglish_emotion*", "training*"]
+include = ["hinglish_emotion*", "training*", "dashboard*"]

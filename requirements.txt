@@ -1,0 +1,3 @@
+# Community Cloud installs this file from the repository root.
+# Keep dashboard dependencies in pyproject.toml as the single source of truth.
+-e .[dashboard]
