@@ -178,6 +178,22 @@ has a full-page architecture and four module diagrams. Editable Mermaid sources
 and SVG artwork are in [docs/submission](docs/submission/README.md). Saved results
 remain synthetic-only; current live inference still makes confident mistakes.
 
+## Deploy on Streamlit Community Cloud
+
+Deploy this repository's `main` branch with `dashboard/app.py` as the entrypoint
+and Python **3.12**. The root `requirements.txt` installs `.[dashboard]`, including
+Plotly, Excel support and Graphviz. It also installs the dashboard package so its
+helper imports work outside the repository's current directory.
+
+Community Cloud normally rebuilds after dependency changes are pushed. If the old
+import error remains, check **Manage app → Logs** and reboot the app. See the
+[Cloud deployment guide](docs/STREAMLIT_CLOUD.md) for setup and verification.
+
+This default environment supports the dashboard and explicit rule demonstrations.
+Trained inference additionally needs the `model` extra and separately hosted
+checkpoints; local weights and a laptop's Ollama service are not included in a
+GitHub checkout or automatically available on the Cloud host.
+
 ## Install and run
 
 Use Python 3.10 or newer and run commands from the repository root, where
