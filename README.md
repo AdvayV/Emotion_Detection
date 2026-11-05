@@ -1,5 +1,7 @@
 # Hinglish Emotion Detection
 
+**Live dashboard:** [Open CodeMood](https://emotiondetection-n9bahrqwabmosmiw6mymjv.streamlit.app/)
+
 A local Streamlit application for exploring sentiment and seven emotions in
 mixed-language phrases, with optional transformer checkpoints and local Qwen
 review. Training runs separately in a GPU notebook; the dashboard loads the
